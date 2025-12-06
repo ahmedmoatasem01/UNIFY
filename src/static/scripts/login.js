@@ -103,3 +103,142 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// ===== Login Form Handler =====
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const errorDiv = document.getElementById('login-error');
+    const loginBtn = document.getElementById('login-btn');
+    const btnText = loginBtn.querySelector('.btn-text');
+    const btnLoading = loginBtn.querySelector('.btn-loading');
+    
+    // Hide error message
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    
+    // Show loading state
+    loginBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+    
+    try {
+        const response = await fetch('/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Login successful - redirect to dashboard
+            window.location.href = '/dashboard';
+        } else {
+            // Show error message
+            errorDiv.textContent = data.error || 'Login failed. Please try again.';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        errorDiv.textContent = 'Network error. Please check your connection and try again.';
+        errorDiv.style.display = 'block';
+    } finally {
+        // Reset button state
+        loginBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+    }
+}
+
+// ===== Register Form Handler =====
+async function handleRegister(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    const role = document.getElementById('reg-role').value;
+    const errorDiv = document.getElementById('register-error');
+    const successDiv = document.getElementById('register-success');
+    const registerBtn = document.getElementById('register-btn');
+    const btnText = registerBtn.querySelector('.btn-text');
+    const btnLoading = registerBtn.querySelector('.btn-loading');
+    
+    // Hide messages
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    successDiv.textContent = '';
+    
+    // Validate password length
+    if (password.length < 8) {
+        errorDiv.textContent = 'Password must be at least 8 characters long.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Validate role
+    if (!role) {
+        errorDiv.textContent = 'Please select a role.';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Show loading state
+    registerBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+    
+    try {
+        const response = await fetch('/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                password: password,
+                role: role
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Registration successful
+            successDiv.textContent = 'Account created successfully! Redirecting to login...';
+            successDiv.style.display = 'block';
+            
+            // Clear form
+            document.getElementById('register-tab').reset();
+            
+            // Switch to login tab after 2 seconds
+            setTimeout(() => {
+                document.querySelector('[data-tab="login-tab"]').click();
+                successDiv.style.display = 'none';
+            }, 2000);
+        } else {
+            // Show error message
+            errorDiv.textContent = data.error || 'Registration failed. Please try again.';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        errorDiv.textContent = 'Network error. Please check your connection and try again.';
+        errorDiv.style.display = 'block';
+    } finally {
+        // Reset button state
+        registerBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnLoading.style.display = 'none';
+    }
+}

@@ -68,9 +68,11 @@
                 </div>
 
                 <!-- Login Form -->
-                <form class="auth-form active" id="login-tab">
+                <form class="auth-form active" id="login-tab" onsubmit="handleLogin(event)">
                     <h2>Welcome back <i class="fa-regular fa-hand feature-icon-inline"></i></h2>
                     <p class="auth-subtitle">Sign in to your Unify account</p>
+
+                    <div id="login-error" class="error-message" style="display: none;"></div>
 
                     <div class="form-group">
                         <label for="login-email">University Email</label>
@@ -90,20 +92,24 @@
 
                     <div class="form-footer">
                         <label class="checkbox-inline">
-                            <input type="checkbox"> Remember me
+                            <input type="checkbox" id="remember-me"> Remember me
                         </label>
                         <a href="#" class="link-small">Forgot password?</a>
                     </div>
 
-                    <button type="button" class="btn-primary btn-full" onclick="window.location.href='dashboard.html'">
-                        Login
+                    <button type="submit" class="btn-primary btn-full" id="login-btn">
+                        <span class="btn-text">Login</span>
+                        <span class="btn-loading" style="display: none;">Logging in...</span>
                     </button>
                 </form>
 
                 <!-- Register Form -->
-                <form class="auth-form" id="register-tab">
+                <form class="auth-form" id="register-tab" onsubmit="handleRegister(event)">
                     <h2>Create account 🧑‍🎓</h2>
                     <p class="auth-subtitle">Join Unify and organize your academic life</p>
+
+                    <div id="register-error" class="error-message" style="display: none;"></div>
+                    <div id="register-success" class="success-message" style="display: none;"></div>
 
                     <div class="form-group">
                         <label for="reg-name">Full Name</label>
@@ -128,7 +134,7 @@
 
                     <div class="form-group password-group">
                         <label for="reg-password">Password</label>
-                        <input type="password" id="reg-password" placeholder="Min. 8 characters" required>
+                        <input type="password" id="reg-password" placeholder="Min. 8 characters" required minlength="8">
                         <button type="button"
                                 class="password-toggle"
                                 data-target="reg-password"
@@ -137,8 +143,9 @@
                         </button>
                     </div>
 
-                    <button type="button" class="btn-primary btn-full" onclick="window.location.href='dashboard.html'">
-                        Create Account
+                    <button type="submit" class="btn-primary btn-full" id="register-btn">
+                        <span class="btn-text">Create Account</span>
+                        <span class="btn-loading" style="display: none;">Creating account...</span>
                     </button>
                 </form>
             </div>
