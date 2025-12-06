@@ -1,18 +1,106 @@
 from core.db_singleton import DatabaseConnection
 from models.user import User
 
+
 class UserRepository:
     def __init__(self):
-        self.db = DatabaseConnection().get_connection()
+        self.db_connection = DatabaseConnection()
 
     def get_all(self):
-        cursor = self.db.cursor(dictionary=True)
-        cursor.execute("SELECT id, name, email FROM users")
-        rows = cursor.fetchall()
-        return [User(**row) for row in rows]
+        """Get all users"""
+        conn = self.db_connection.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM [User]")
+            rows = cursor.fetchall()
+            users = []
+            for row in rows:
+                users.append(User(
+                    User_ID=row[0],
+                    Username=row[1],
+                    Email=row[2],
+                    Password_Hash=row[3],
+                    Created_At=row[4]
+                ))
+            return users
+        finally:
+            conn.close()
 
-    def get_by_id(self, id):
-        cursor = self.db.cursor(dictionary=True)
-        cursor.execute("SELECT id, name, email FROM users WHERE id=%s", (id,))
-        row = cursor.fetchone()
-        return User(**row) if row else None
+    def get_by_id(self, user_id):
+        """Get user by ID"""
+        conn = self.db_connection.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM [User] WHERE User_ID = ?", (user_id,))
+            row = cursor.fetchone()
+            if row:
+                return User(
+                    User_ID=row[0],
+                    Username=row[1],
+                    Email=row[2],
+                    Password_Hash=row[3],
+                    Created_At=row[4]
+                )
+            return None
+        finally:
+            conn.close()
+
+    def get_by_email(self, email):
+        """Get user by email"""
+        conn = self.db_connection.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM [User] WHERE Email = ?", (email,))
+            row = cursor.fetchone()
+            if row:
+                return User(
+                    User_ID=row[0],
+                    Username=row[1],
+                    Email=row[2],
+                    Password_Hash=row[3],
+                    Created_At=row[4]
+                )
+            return None
+        finally:
+            conn.close()
+
+    def create(self, user):
+        """Create a new user"""
+        conn = self.db_connection.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO [User] (Username, Email, Password_Hash) OUTPUT INSERTED.User_ID VALUES (?, ?, ?)",
+                (user.Username, user.Email, user.Password_Hash)
+            )
+            user_id = cursor.fetchone()[0]
+            conn.commit()
+            user.User_ID = user_id
+            return user
+        finally:
+            conn.close()
+
+    def update(self, user):
+        """Update an existing user"""
+        conn = self.db_connection.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE [User] SET Username = ?, Email = ?, Password_Hash = ? WHERE User_ID = ?",
+                (user.Username, user.Email, user.Password_Hash, user.User_ID)
+            )
+            conn.commit()
+            return user
+        finally:
+            conn.close()
+
+    def delete(self, user_id):
+        """Delete a user by ID"""
+        conn = self.db_connection.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM [User] WHERE User_ID = ?", (user_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        finally:
+            conn.close()
