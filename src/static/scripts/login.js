@@ -139,8 +139,8 @@ async function handleLogin(event) {
         const data = await response.json();
         
         if (response.ok) {
-            // Login successful - redirect to dashboard
-            window.location.href = '/dashboard';
+            // Login successful - redirect to overview
+            window.location.href = '/overview';
         } else {
             // Show error message
             errorDiv.textContent = data.error || 'Login failed. Please try again.';

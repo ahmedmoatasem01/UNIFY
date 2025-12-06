@@ -10,8 +10,6 @@ from controllers.message_controller import message_bp
 from controllers.enrollment_controller import enrollment_bp
 from controllers.schedule_controller import schedule_bp
 from controllers.calendar_controller import calendar_bp
-from repositories.repository_factory import RepositoryFactory
-from utils.schedule_loader import get_today_schedule
 import os
 
 # --- Setup Flask app ---
@@ -30,6 +28,7 @@ app.register_blueprint(message_bp)
 app.register_blueprint(enrollment_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(calendar_bp)
+app.register_blueprint(course_reg_bp)
 
 # --- Repository instances ---
 try:
@@ -198,58 +197,11 @@ def login_page():
 @app.route('/overview')
 @app.route('/dashboard')
 def overview():
-    """Overview/Dashboard page – requires login"""
+    """overview page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    
-    user_id = session.get('user_id', DEFAULT_USER_ID)
-    user = get_user_data(user_id)
-    stats = get_user_stats(user_id)
-    notifications = get_user_notifications(user_id)
-    
-    today_schedule = get_today_schedule()
-    
-    return render_template(
-        'overview.html',
-        user=user,
-        stats=stats,
-        today_schedule=today_schedule,
-        notifications=notifications
-    )
+    return render_template('overview.html')  # You'll need to create this template
 
-@app.route('/settings')
-def settings():
-    """Settings page"""
-    if 'user_id' not in session:
-        return redirect(url_for('login_page'))
-
-    user_id = session.get('user_id', DEFAULT_USER_ID)
-    user = get_user_data(user_id)
-
-    user_settings = {
-        'notifications': {'email': True, 'push': True, 'calendar_reminders': True, 'assignment_deadlines': True},
-        'calendar': {'sync_google': False, 'default_view': 'week', 'timezone': 'Africa/Cairo'},
-        'appearance': {'theme': 'light', 'language': 'en', 'colorblind_mode': False, 'dyslexia_font': False},
-        'privacy': {'profile_visibility': 'public', 'share_schedule': False}
-    }
-    return render_template('settings.html', user=user, settings=user_settings)
-
-@app.route('/api/settings/update', methods=['POST'])
-def update_settings():
-    """API endpoint to update user settings"""
-    data = request.json
-    return jsonify({'success': True, 'message': 'Settings updated successfully'})
-
-@app.route('/api/stats')
-def get_stats():
-    """API endpoint to get current statistics"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    user_id = session.get('user_id', DEFAULT_USER_ID)
-    stats = get_user_stats(user_id)
-    
-    return jsonify(stats)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

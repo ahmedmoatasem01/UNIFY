@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Unify | Transcript</title>
+    <title>Unify | Schedule</title>
     <link rel="stylesheet" href="../static/styles/course_registration.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="cr-body">
 <div class="cr-app-layout">
+    <!-- Sidebar (same as course registration) -->
     <aside class="cr-sidebar">
         <div class="cr-sidebar-header">
             <div class="cr-brand-logo">U</div>
@@ -22,7 +23,7 @@
                 <i class="fa-solid fa-chart-column"></i>
                 <span>Overview</span>
             </a>
-            <a class="cr-nav-item" href="/schedule">
+            <a class="cr-nav-item active" href="/schedule">
                 <i class="fa-solid fa-calendar-day"></i>
                 <span>Schedule</span>
             </a>
@@ -42,7 +43,7 @@
                 <i class="fa-solid fa-message"></i>
                 <span>Messages</span>
             </a>
-            <a class="cr-nav-item active" href="/transcript">
+            <a class="cr-nav-item" href="/transcript">
                 <i class="fa-solid fa-file-lines"></i>
                 <span>Transcript</span>
             </a>
@@ -56,38 +57,27 @@
             </a>
         </nav>
         <div class="cr-sidebar-footer">
-            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="window.location.href='/auth/logout'">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
             <p class="cr-small-text">CSAI 203 · Team 5</p>
         </div>
     </aside>
+
+    <!-- Main Content -->
     <main class="cr-main-panel">
         <div class="cr-topbar">
             <div class="cr-topbar-left">
-                <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
-                <p>View your academic transcript</p>
+                <h1><i class="fa-solid fa-calendar-day"></i> Schedule</h1>
+                <p>View your class schedule</p>
             </div>
         </div>
         <div class="cr-content" style="padding: 20px;">
-            <p>Transcript content will be displayed here.</p>
+            <p>Schedule content will be displayed here.</p>
         </div>
     </main>
 </div>
-<script>
-async function handleLogout() {
-    try {
-        const response = await fetch('/auth/logout', { method: 'POST' });
-        if (response.ok) {
-            window.location.href = '/login';
-        }
-    } catch (error) {
-        console.error('Logout error:', error);
-        window.location.href = '/login';
-    }
-}
-</script>
 </body>
 </html>
 
