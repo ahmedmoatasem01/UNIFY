@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../static/styles/course_registration.css">
-    <link rel="stylesheet" href="../static/styles/overview.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Overview</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/overview.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
 </head>
 <body class="cr-body">
 <div class="cr-app-layout">
@@ -66,12 +66,13 @@
     </aside>
 
     <main class="cr-main-panel">
-        <div class="cr-topbar">
-            <div class="cr-topbar-left">
-                <h1><i class="fa-solid fa-chart-column"></i> Overview</h1>
-                <p>Welcome back, {{ user.name if user else 'Student' }}!</p>
-            </div>
+        {% include 'components/topbar.html' %}
+        {% block topbar_title %}
+        <div class="cr-topbar-left">
+            <h1><i class="fa-solid fa-chart-column"></i> Overview</h1>
+            <p>Welcome back, {{ user_data.name if user_data else 'Student' }}!</p>
         </div>
+        {% endblock %}
 
         <div class="overview-wrapper">
             <!-- Left Column: Statistics & Notifications -->
@@ -211,7 +212,7 @@
                     </div>
                     <div class="card-body">
                         <div class="quick-actions">
-                            <a href="/courses" class="action-btn">
+                            <a href="/course-registration" class="action-btn">
                                 <i class="fas fa-plus-circle"></i>
                                 <span>Add Course</span>
                             </a>
@@ -231,7 +232,7 @@
                                 <i class="fas fa-tasks"></i>
                                 <span>New Task</span>
                             </a>
-                            <a href="/courses" class="action-btn">
+                            <a href="/course-registration" class="action-btn">
                                 <i class="fas fa-book"></i>
                                 <span>View Courses</span>
                             </a>
@@ -243,6 +244,7 @@
     </main>
 </div>
 
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
 <script>
 async function handleLogout() {
     try {

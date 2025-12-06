@@ -11,7 +11,7 @@ class StudentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM `Student`")
+            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM [Student]")
             rows = cursor.fetchall()
             students = []
             for row in rows:
@@ -32,7 +32,7 @@ class StudentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM `Student` WHERE Student_ID = %s", (student_id,))
+            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM [Student] WHERE Student_ID = ?", (student_id,))
             row = cursor.fetchone()
             if row:
                 return Student(
@@ -52,7 +52,7 @@ class StudentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM `Student` WHERE User_ID = %s", (user_id,))
+            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM [Student] WHERE User_ID = ?", (user_id,))
             row = cursor.fetchone()
             if row:
                 return Student(
@@ -73,11 +73,13 @@ class StudentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO `Student` (User_ID, Department, Year_Level, GPA) VALUES (%s, %s, %s, %s)",
+                "INSERT INTO [Student] (User_ID, Department, Year_Level, GPA) VALUES (?, ?, ?, ?)",
                 (student.User_ID, student.Department, student.Year_Level, student.GPA)
             )
             conn.commit()
-            student.Student_ID = cursor.lastrowid
+            # Get the last inserted ID for SQL Server
+            cursor.execute("SELECT SCOPE_IDENTITY()")
+            student.Student_ID = cursor.fetchone()[0]
             return student
         finally:
             cursor.close()
@@ -89,7 +91,7 @@ class StudentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE `Student` SET Department = %s, Year_Level = %s, GPA = %s WHERE Student_ID = %s",
+                "UPDATE [Student] SET Department = ?, Year_Level = ?, GPA = ? WHERE Student_ID = ?",
                 (student.Department, student.Year_Level, student.GPA, student.Student_ID)
             )
             conn.commit()
@@ -103,9 +105,10 @@ class StudentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM Student WHERE Student_ID = ?", (student_id,))
+            cursor.execute("DELETE FROM [Student] WHERE Student_ID = ?", (student_id,))
             conn.commit()
             return cursor.rowcount > 0
         finally:
+            cursor.close()
             conn.close()
 

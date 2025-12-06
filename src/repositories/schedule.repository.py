@@ -11,7 +11,7 @@ class ScheduleRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM `Schedule`")
+            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM [Schedule]")
             rows = cursor.fetchall()
             schedules = []
             for row in rows:
@@ -31,7 +31,7 @@ class ScheduleRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM `Schedule` WHERE Schedule_ID = %s", (schedule_id,))
+            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM [Schedule] WHERE Schedule_ID = ?", (schedule_id,))
             row = cursor.fetchone()
             if row:
                 return Schedule(
@@ -50,7 +50,7 @@ class ScheduleRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM `Schedule` WHERE Student_ID = %s", (student_id,))
+            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM [Schedule] WHERE Student_ID = ?", (student_id,))
             row = cursor.fetchone()
             if row:
                 return Schedule(
@@ -71,9 +71,9 @@ class ScheduleRepository:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT sch.Schedule_ID, sch.Student_ID, sch.Course_List, sch.Optimized
-                FROM `Schedule` sch
-                JOIN `Student` s ON sch.Student_ID = s.Student_ID
-                WHERE s.User_ID = %s
+                FROM [Schedule] sch
+                JOIN [Student] s ON sch.Student_ID = s.Student_ID
+                WHERE s.User_ID = ?
             """, (user_id,))
             rows = cursor.fetchall()
             schedules = []
@@ -95,11 +95,13 @@ class ScheduleRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO `Schedule` (Student_ID, Course_List, Optimized) VALUES (%s, %s, %s)",
+                "INSERT INTO [Schedule] (Student_ID, Course_List, Optimized) VALUES (?, ?, ?)",
                 (schedule.Student_ID, schedule.Course_List, 1 if schedule.Optimized else 0)
             )
             conn.commit()
-            schedule.Schedule_ID = cursor.lastrowid
+            # Get the last inserted ID for SQL Server
+            cursor.execute("SELECT SCOPE_IDENTITY()")
+            schedule.Schedule_ID = cursor.fetchone()[0]
             return schedule
         finally:
             cursor.close()
@@ -111,7 +113,7 @@ class ScheduleRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE `Schedule` SET Course_List = %s, Optimized = %s WHERE Schedule_ID = %s",
+                "UPDATE [Schedule] SET Course_List = ?, Optimized = ? WHERE Schedule_ID = ?",
                 (schedule.Course_List, 1 if schedule.Optimized else 0, schedule.Schedule_ID)
             )
             conn.commit()
@@ -125,7 +127,7 @@ class ScheduleRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM `Schedule` WHERE Schedule_ID = %s", (schedule_id,))
+            cursor.execute("DELETE FROM [Schedule] WHERE Schedule_ID = ?", (schedule_id,))
             conn.commit()
             return cursor.rowcount > 0
         finally:

@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Settings</title>
-    <link rel="stylesheet" href="../static/styles/course_registration.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href ="../static/styles/settings.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/settings.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
@@ -68,6 +68,12 @@
 
     <main class="cr-main-panel">
         {% include 'components/topbar.html' %}
+        {% block topbar_title %}
+        <div class="cr-topbar-left">
+            <h1><i class="fa-solid fa-gear"></i> Settings</h1>
+            <p>Manage your account and preferences</p>
+        </div>
+        {% endblock %}
         <div class="cr-content" style="padding: 20px;">
             <p>Settings content will be displayed here.</p>
         </div>
@@ -379,6 +385,7 @@
         }
     }
 </script>
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
 </body>
 </html>
 

@@ -11,7 +11,7 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM `Enrollment`")
+            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM [Enrollment]")
             rows = cursor.fetchall()
             enrollments = []
             for row in rows:
@@ -31,7 +31,7 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM `Enrollment` WHERE Enrollment_ID = %s", (enrollment_id,))
+            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM [Enrollment] WHERE Enrollment_ID = ?", (enrollment_id,))
             row = cursor.fetchone()
             if row:
                 return Enrollment(
@@ -50,7 +50,7 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM `Enrollment` WHERE Student_ID = %s", (student_id,))
+            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM [Enrollment] WHERE Student_ID = ?", (student_id,))
             rows = cursor.fetchall()
             enrollments = []
             for row in rows:
@@ -74,7 +74,7 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM `Enrollment` WHERE Course_ID = %s", (course_id,))
+            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM [Enrollment] WHERE Course_ID = ?", (course_id,))
             rows = cursor.fetchall()
             enrollments = []
             for row in rows:
@@ -95,11 +95,13 @@ class EnrollmentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO `Enrollment` (Student_ID, Course_ID, Status) VALUES (%s, %s, %s)",
+                "INSERT INTO [Enrollment] (Student_ID, Course_ID, Status) VALUES (?, ?, ?)",
                 (enrollment.Student_ID, enrollment.Course_ID, enrollment.Status)
             )
             conn.commit()
-            enrollment.Enrollment_ID = cursor.lastrowid
+            # Get the last inserted ID for SQL Server
+            cursor.execute("SELECT SCOPE_IDENTITY()")
+            enrollment.Enrollment_ID = cursor.fetchone()[0]
             return enrollment
         finally:
             cursor.close()
@@ -111,7 +113,7 @@ class EnrollmentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE `Enrollment` SET Status = %s WHERE Enrollment_ID = %s",
+                "UPDATE [Enrollment] SET Status = ? WHERE Enrollment_ID = ?",
                 (enrollment.Status, enrollment.Enrollment_ID)
             )
             conn.commit()
@@ -125,7 +127,7 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM `Enrollment` WHERE Enrollment_ID = %s", (enrollment_id,))
+            cursor.execute("DELETE FROM [Enrollment] WHERE Enrollment_ID = ?", (enrollment_id,))
             conn.commit()
             return cursor.rowcount > 0
         finally:

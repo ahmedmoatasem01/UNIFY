@@ -16,6 +16,21 @@
     --transition: all .18s ease;
 }
 
+/* Light mode support */
+.cr-light-mode {
+    --bg: #f3f4f6;
+    --panel: #ffffff;
+    --text-primary: #111827;
+    --text-muted: #6b7280;
+    --accent: #6366f1;
+    --accent-soft: rgba(99,102,241,0.1);
+    --primary-color: #6366f1;
+    --danger: #ef4444;
+    --warning-color: #f59e0b;
+    --border-subtle: rgba(0,0,0,0.08);
+    --shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
 .overview-container{width:100%}
 
 /* Layout: left narrow column for stats/notifications and right main column */
