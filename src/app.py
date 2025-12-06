@@ -37,12 +37,12 @@ def login_page():
     return render_template('login.html')
 
 
-@app.route('/dashboard')
-def dashboard():
-    """Dashboard page - requires authentication"""
+@app.route('/overview')
+def overview():
+    """overview page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('dashboard.html')  # You'll need to create this template
+    return render_template('overview.html')  # You'll need to create this template
 
 
 if __name__ == '__main__':
