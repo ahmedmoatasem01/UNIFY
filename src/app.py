@@ -11,7 +11,7 @@ from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
 from repositories.repository_factory import RepositoryFactory
 from utils.schedule_loader import get_today_schedule, get_sample_schedule
-from core.user_helper import get_user_data, get_user_stats, get_user_notifications
+from core.user_helper import get_user_data
 import os
 import sys
 
@@ -172,35 +172,38 @@ def get_user_notifications(user_id):
     return notifications
 
 
+# Inject `user_data` into all templates so `topbar.html` can access it
+@app.context_processor
+def inject_user_data():
+    try:
+        user_id = session.get('user_id', DEFAULT_USER_ID)
+        return {'user_data': get_user_data(user_id)}
+    except Exception:
+        return {'user_data': None}
+
+
 # --- Routes ---
 @app.route('/')
 def index():
     if 'user_id' not in session:
         session['user_id'] = DEFAULT_USER_ID
-    return redirect(url_for('login_page')
+    return redirect(url_for('overview'))
 
 
 @app.route('/login')
 def login_page():
     return render_template('login.html')
 
-@app.route('/overview')
-def overview():
-    """Overview page - requires authentication"""
-    if 'user_id' not in session:
-        return redirect(url_for('login_page'))
-
 
 @app.route('/overview')
 @app.route('/dashboard')
-@app.route('/overview')
 def overview():
     """Overview page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('overview.html')
-    user_data = get_user_data(session.get('user_id'))
-    return render_template('overview.html', user_data=user_data)
+    user_id = session.get('user_id', DEFAULT_USER_ID)
+    user = get_user_data(user_id)
+    return render_template('overview.html', user=user, user_data=user)
 
 
 @app.route('/schedule')
