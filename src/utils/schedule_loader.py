@@ -146,3 +146,23 @@ def get_week_schedule():
             'type': 'lecture'
         },
     ]
+
+
+def get_sample_schedule():
+    """Return a small sample schedule (same shape as other functions)."""
+    return [
+        {
+            'time': '09:00 - 10:30',
+            'course': 'Data Structures',
+            'instructor': 'Dr. A. Smith',
+            'location': 'Room 101',
+            'type': 'lecture'
+        },
+        {
+            'time': '13:00 - 14:30',
+            'course': 'Algorithms',
+            'instructor': 'Dr. B. Jones',
+            'location': 'Lab 3',
+            'type': 'tutorial'
+        },
+    ]

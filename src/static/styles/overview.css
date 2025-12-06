@@ -1,9 +1,38 @@
 /* ==================== OVERVIEW PAGE STYLES ==================== */
 
 /* Overview Container */
-.overview-container {
-    width: 100%;
+:root{
+    --bg:#0f1720;
+    --panel:#0b1220;
+    --text-primary:#e6eef8;
+    --text-muted:#9ca3af;
+    --accent:#6366f1;
+    --accent-soft:rgba(99,102,241,0.08);
+    --primary-color:#6366f1;
+    --danger:#ef4444;
+    --warning-color:#f59e0b;
+    --border-subtle:rgba(255,255,255,0.04);
+    --shadow:0 8px 30px rgba(2,6,23,0.6);
+    --transition: all .18s ease;
 }
+
+.overview-container{width:100%}
+
+/* Layout: left narrow column for stats/notifications and right main column */
+.overview-wrapper{
+    display:grid;
+    grid-template-columns: 360px 1fr;
+    gap: 22px;
+    align-items:start;
+}
+.left-column{display:flex;flex-direction:column;gap:18px}
+.right-column{display:flex;flex-direction:column;gap:18px}
+
+/* Generic card */
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.02)}
+.card-header h2{margin:0;font-size:1.05rem;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.card-body{padding:14px 16px}
 
 /* Statistics Grid */
 .stats-grid {
@@ -360,9 +389,7 @@
 }
 
 /* Today's Schedule */
-.schedule-card {
-    grid-column: 1 / -1;
-}
+.schedule-card{ /* placed in right column by markup */ }
 
 .date-badge {
     padding: 0.5rem 1rem;
@@ -442,9 +469,7 @@
 }
 
 /* Notifications */
-.notifications-card {
-    grid-column: 1 / -1;
-}
+.notifications-card{ /* placed in left column by markup */ }
 
 .notification-badge {
     display: inline-flex;
