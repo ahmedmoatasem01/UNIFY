@@ -27,7 +27,26 @@ def course_registration_page():
     """Render course registration page"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('course_registration.html')
+    
+    # Get user data from database
+    user_id = session.get('user_id')
+    user_repo = RepositoryFactory.get_repository("user")
+    user = user_repo.get_by_id(user_id)
+    
+    # Get student data if user is a student
+    student_repo = RepositoryFactory.get_repository("student")
+    student = student_repo.get_by_user_id(user_id)
+    
+    # Prepare user data for template
+    user_data = {
+        'name': user.Username if user else 'User',
+        'email': user.Email if user else '',
+        'role': 'Student' if student else 'User',
+        'department': student.Department if student else 'Zewail City',
+        'avatar_letter': user.Username[0].upper() if user and user.Username else 'U'
+    }
+    
+    return render_template('course_registration.html', user_data=user_data)
 
 
 @course_reg_bp.route("/api/courses", methods=["GET"])
@@ -35,29 +54,53 @@ def api_courses():
     """
     Return all courses (or filtered by ?q=) for the search panel.
     Returns courses with their schedule slot counts.
+    Fetches courses directly from Course_Schedule_Slot table.
     """
     if 'user_id' not in session:
         return jsonify({"error": "Not authenticated"}), 401
     
     q = request.args.get("q", "").strip().upper()
-    
-    # Get all courses
-    course_repo = RepositoryFactory.get_repository("course")
-    courses = course_repo.get_all()
+    academic_year = request.args.get("academic_year", 2025, type=int)
+    term = request.args.get("term", "SPRING", type=str)
     
     # Get schedule slot repository
     slot_repo = CourseScheduleSlotRepository()
     
-    results = []
-    for course in courses:
-        course_code = course.Course_Name  # Using Course_Name as code, adjust if you have a separate code field
+    # Get all unique courses from schedule slots
+    from core.db_singleton import DatabaseConnection
+    db_connection = DatabaseConnection()
+    conn = db_connection.get_connection()
+    try:
+        cursor = conn.cursor()
+        query = """
+            SELECT DISTINCT Course_Code, Course_ID
+            FROM Course_Schedule_Slot
+            WHERE Academic_Year = ? AND Term = ?
+        """
+        cursor.execute(query, (academic_year, term))
+        rows = cursor.fetchall()
         
+        # Build a map of course codes
+        course_codes_map = {}
+        for row in rows:
+            course_code = row[0]
+            course_id = row[1]
+            if course_code not in course_codes_map:
+                course_codes_map[course_code] = course_id
+    finally:
+        conn.close()
+    
+    results = []
+    for course_code, course_id in course_codes_map.items():
         # Filter by search query
-        if q and q not in course_code.upper() and q not in course.Course_Name.upper():
+        if q and q not in course_code.upper():
             continue
         
         # Get slots for this course
-        slots = slot_repo.get_by_course_code(course_code, academic_year=2025, term="SPRING")
+        slots = slot_repo.get_by_course_code(course_code, academic_year=academic_year, term=term)
+        
+        if not slots:
+            continue
         
         # Count lectures and labs
         lectures = [s for s in slots if s.get('Slot_Type', '').lower() == 'lecture' or s.get('Sub_Type', '') == 'LCTR']
@@ -81,7 +124,7 @@ def api_courses():
         results.append({
             "id": course_code,
             "code": course_code,
-            "name": course.Course_Name,
+            "name": course_code,  # Using course code as name since we don't have separate name field
             "lecture_slots": [{"section": sec, "count": len(slots)} for sec, slots in lecture_sections.items()],
             "lab_slots": [{"section": sec, "count": len(slots)} for sec, slots in lab_sections.items()],
         })
