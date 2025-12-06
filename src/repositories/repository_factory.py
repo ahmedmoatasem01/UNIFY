@@ -31,6 +31,9 @@ ReminderRepository = _import_repository('reminder.repository', 'ReminderReposito
 FocusSessionRepository = _import_repository('focus_session.repository', 'FocusSessionRepository')
 TeachingAssistantRepository = _import_repository('teaching_assistant.repository', 'TeachingAssistantRepository')
 
+# Import CourseScheduleSlotRepository
+CourseScheduleSlotRepository = _import_repository('course_schedule_slot.repository', 'CourseScheduleSlotRepository')
+
 
 class RepositoryFactory:
     @staticmethod
@@ -65,5 +68,7 @@ class RepositoryFactory:
             return FocusSessionRepository()
         elif entity_type == "teaching_assistant" or entity_type == "ta":
             return TeachingAssistantRepository()
+        elif entity_type == "course_schedule_slot" or entity_type == "schedule_slot":
+            return CourseScheduleSlotRepository()
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")

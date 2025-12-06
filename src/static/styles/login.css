@@ -4,22 +4,31 @@
 
         .password-toggle {
             position: absolute;
-            right: 10px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             border: none;
             background: transparent;
             color: var(--text-muted);
             cursor: pointer;
-            padding: 0;
+            padding: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 24px;
+            height: 24px;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: var(--text-main);
         }
 
         .password-toggle i {
             font-size: 14px;
+            line-height: 1;
         }
+
 
         .feature-icon {
             margin-right: 8px;
@@ -226,6 +235,10 @@
             font-size: 14px;
         }
 
+        .password-group input {
+            padding-right: 40px;
+        }
+
         .form-group input:focus,
         .form-group select:focus {
             border-color: var(--accent);
@@ -354,6 +367,29 @@
     background: #ff7a3c;
     border-radius: 999px 999px 40px 40px;
     transform: translateY(40px); /* lower it a bit */
+    position: relative;
+}
+
+/* Yellow pill - moved further left to be part of the group */
+.char-yellow {
+    width: 80px;
+    height: 120px;
+    background: #fbbf24;
+    border-radius: 60px;
+    transform: translate(-100px, 10px);
+    position: relative;
+    z-index: 1;
+}
+
+/* Black shadow rectangle between yellow and purple */
+.char-black {
+    width: 55px;
+    height: 130px;
+    background: #111827;
+    border-radius: 32px;
+    transform: translate(-110px, 5px);
+    z-index: 2;
+    position: relative;
 }
 
 /* Tall purple rectangle in front */
@@ -362,27 +398,9 @@
     height: 150px;
     background: #7c3aed;
     border-radius: 40px;
-    transform: translate(-70px, -20px);
-    z-index: 2;
-}
-
-/* Black shadow rectangle behind purple */
-.char-black {
-    width: 55px;
-    height: 130px;
-    background: #111827;
-    border-radius: 32px;
-    transform: translate(-110px, -10px);
-    z-index: 1;
-}
-
-/* Yellow pill on the right */
-.char-yellow {
-    width: 80px;
-    height: 120px;
-    background: #fbbf24;
-    border-radius: 60px;
-    transform: translate(-40px, 20px);
+    transform: translate(-90px, -20px);
+    z-index: 3;
+    position: relative;
 }
 
 

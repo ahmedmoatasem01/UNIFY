@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unify | Course Registration</title>
+    <link rel="stylesheet" href="../static/styles/course_registration.css">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/calendar">
+                <i class="fa-solid fa-bell"></i>
+                <span>Calendar &amp; Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Transcript</span>
+            </a>
+            <a class="cr-nav-item active" href="/course-registration">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Course Registration</span>
+            </a>
+            <a class="cr-nav-item" href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 5</p>
+        </div>
+    </aside>
+
+    <!-- ===== Main panel ===== -->
+    <div class="cr-main-panel">
+        <!-- Top navbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-graduation-cap"></i> Course Registration</h1>
+                <p>Search courses, add them to your cart, and let the AI optimizer choose a conflict-free schedule.</p>
+            </div>
+            <div class="cr-topbar-right">
+                <button id="cr-theme-toggle" class="cr-icon-btn" title="Toggle light/dark mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <div class="cr-user-chip">
+                    <div class="cr-avatar">{{ user_data.avatar_letter if user_data else 'U' }}</div>
+                    <div>
+                        <p class="cr-user-name">{{ user_data.name if user_data else 'User' }}</p>
+                        <p class="cr-user-role">{{ user_data.role if user_data else 'User' }} · {{ user_data.department if user_data else 'Zewail City' }}</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content -->
+        <main class="cr-main">
+            <!-- Top row: search + cart -->
+            <section class="cr-grid-2">
+                <!-- Search + results -->
+                <div class="cr-panel cr-panel-animated">
+                    <h2><i class="fa-solid fa-magnifying-glass"></i> Search Courses</h2>
+                    <p class="cr-muted">Search by course code or name (e.g., AIE 501, CSAI 203, Mechatronics).</p>
+
+                    <div class="cr-search-row">
+                        <input type="text" id="cr-search-input" placeholder="Type to search...">
+                        <button id="cr-search-btn" class="cr-btn-primary-outline">
+                            <i class="fa-solid fa-magnifying-glass"></i> Search
+                        </button>
+                    </div>
+
+                    <div id="cr-courses-list" class="cr-course-list">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Cart + optimizer -->
+                <div class="cr-panel cr-panel-animated">
+                    <h2><i class="fa-solid fa-cart-plus"></i> Selected Courses</h2>
+                    <p id="cr-cart-empty" class="cr-muted">
+                        No courses selected yet. Search on the left and click “Add”.
+                    </p>
+
+                    <ul id="cr-cart-list" class="cr-cart-list"></ul>
+
+                    <button id="cr-optimize-btn" class="cr-btn-primary" disabled>
+                        <i class="fa-solid fa-robot"></i> Run AI Schedule Optimizer
+                    </button>
+
+                    <p id="cr-optimize-status" class="cr-status-text"></p>
+                </div>
+            </section>
+
+            <!-- Bottom row: timetable + calendar -->
+            <section class="cr-grid-2 cr-mt">
+                <!-- List view -->
+                <div class="cr-panel cr-panel-animated">
+                    <h2><i class="fa-solid fa-list"></i> Optimized Timetable</h2>
+                    <table class="cr-table" id="cr-schedule-table">
+                        <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Type</th>
+                            <th>Sub-Type</th>
+                            <th>Section</th>
+                            <th>Day</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Weekly calendar -->
+                <div class="cr-panel cr-panel-animated">
+                    <h2><i class="fa-solid fa-calendar-week"></i> Weekly Calendar View</h2>
+                    <p class="cr-muted">Visual layout of your optimized schedule (like Google Calendar).</p>
+                    <div class="cr-calendar-wrapper cr-mt">
+                        <div id="cr-calendar-grid" class="cr-calendar-grid">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<script>
+    // =============== THEME TOGGLE (LIGHT / DARK) ===============
+    const crThemeToggle = document.getElementById('cr-theme-toggle');
+
+    function crApplySavedTheme() {
+        const saved = localStorage.getItem('unify_cr_theme') || 'dark';
+        if (saved === 'light') {
+            document.body.classList.add('cr-light-mode');
+            crThemeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        } else {
+            document.body.classList.remove('cr-light-mode');
+            crThemeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        }
+    }
+
+    crThemeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('cr-light-mode');
+        const isLight = document.body.classList.contains('cr-light-mode');
+        localStorage.setItem('unify_cr_theme', isLight ? 'light' : 'dark');
+        crThemeToggle.innerHTML = isLight
+            ? '<i class="fa-solid fa-sun"></i>'
+            : '<i class="fa-solid fa-moon"></i>';
+    });
+
+    crApplySavedTheme();
+
+    // =============== DOM ELEMENTS ===============
+    const crCoursesListEl    = document.getElementById('cr-courses-list');
+    const crSearchInput      = document.getElementById('cr-search-input');
+    const crSearchBtn        = document.getElementById('cr-search-btn');
+    const crCartListEl       = document.getElementById('cr-cart-list');
+    const crCartEmptyEl      = document.getElementById('cr-cart-empty');
+    const crOptimizeBtn      = document.getElementById('cr-optimize-btn');
+    const crOptimizeStatusEl = document.getElementById('cr-optimize-status');
+    const crScheduleTableBody= document.querySelector('#cr-schedule-table tbody');
+    const crCalendarGridEl   = document.getElementById('cr-calendar-grid');
+
+    let crCurrentCourses = [];
+    let crCartCourseIds  = [];
+
+    // =============== RENDER COURSES (SEARCH RESULTS) ===============
+    function crRenderCourses() {
+        crCoursesListEl.innerHTML = '';
+
+        if (crCurrentCourses.length === 0) {
+            crCoursesListEl.innerHTML = '<p class="cr-muted">No courses found.</p>';
+            return;
+        }
+
+        crCurrentCourses.forEach(course => {
+            const card = document.createElement('div');
+            card.className = 'cr-course-card';
+
+            const inCart = crCartCourseIds.includes(course.id);
+            const lectureCount = (course.lecture_slots || []).length;
+            const labCount     = (course.lab_slots || []).length;
+
+            card.innerHTML = `
+                <div class="cr-course-info">
+                    <h3><i class="fa-solid fa-book-open"></i> ${course.code} – ${course.name}</h3>
+                    <p class="cr-course-meta">
+                        <strong>Lectures:</strong> ${lectureCount}
+                        &nbsp;|&nbsp;
+                        <strong>Labs/Tutorials:</strong> ${labCount}
+                    </p>
+                </div>
+                <div class="cr-course-actions">
+                    <button class="cr-btn-secondary" ${inCart ? 'disabled' : ''}>
+                        ${inCart ? '<i class="fa-solid fa-check"></i> Added' : '<i class="fa-solid fa-plus"></i> Add'}
+                    </button>
+                </div>
+            `;
+
+            const btn = card.querySelector('button');
+            btn.addEventListener('click', () => {
+                crAddToCart(course.id);
+            });
+
+            crCoursesListEl.appendChild(card);
+        });
+    }
+
+    // =============== RENDER CART ===============
+    function crRenderCart() {
+        crCartListEl.innerHTML = '';
+
+        if (crCartCourseIds.length === 0) {
+            crCartEmptyEl.style.display = 'block';
+            crCartEmptyEl.textContent = 'No courses selected yet. Search and click “Add”.';
+            crOptimizeBtn.disabled = true;
+            return;
+        }
+
+        crCartEmptyEl.style.display = 'block';
+        crCartEmptyEl.textContent = 'Selected courses:';
+        crOptimizeBtn.disabled = false;
+
+        crCartCourseIds.forEach(id => {
+            const course = crCurrentCourses.find(c => c.id === id) || {code: id, name: ''};
+            const li = document.createElement('li');
+            li.className = 'cr-cart-item';
+
+            li.innerHTML = `
+                <span><i class="fa-solid fa-circle-dot"></i> ${course.code || id} ${course.name ? '– ' + course.name : ''}</span>
+                <button class="cr-btn-ghost" data-id="${id}">
+                    <i class="fa-solid fa-xmark"></i> Remove
+                </button>
+            `;
+
+            li.querySelector('button').addEventListener('click', () => crRemoveFromCart(id));
+            crCartListEl.appendChild(li);
+        });
+    }
+
+    function crAddToCart(courseId) {
+        if (!crCartCourseIds.includes(courseId)) {
+            crCartCourseIds.push(courseId);
+            crRenderCart();
+            crRenderCourses();
+        }
+    }
+
+    function crRemoveFromCart(courseId) {
+        crCartCourseIds = crCartCourseIds.filter(id => id !== courseId);
+        crRenderCart();
+        crRenderCourses();
+    }
+
+    // =============== SEARCH COURSES (CALL BACKEND) ===============
+    async function crSearchCourses() {
+        const q = crSearchInput.value.trim();
+        const url = q ? `/course-registration/api/courses?q=${encodeURIComponent(q)}` : '/course-registration/api/courses';
+
+        try {
+            const res = await fetch(url);
+            crCurrentCourses = await res.json();
+        } catch (err) {
+            console.error(err);
+            crCurrentCourses = [];
+        }
+
+        crRenderCourses();
+        crRenderCart();
+    }
+
+    crSearchBtn.addEventListener('click', crSearchCourses);
+    crSearchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') crSearchCourses();
+    });
+
+    // =============== WEEKLY CALENDAR VIEW ===============
+    function crRenderCalendar(schedule) {
+        crCalendarGridEl.innerHTML = '';
+
+        if (!schedule || schedule.length === 0) {
+            crCalendarGridEl.innerHTML = '<p class="cr-muted cr-calendar-empty">No timetable yet. Run the optimizer first.</p>';
+            return;
+        }
+
+        const days = ['SAT', 'SUN', 'MON', 'TUES', 'WED', 'THURS'];
+        const dayLabels = {
+            'SAT': 'Sat',
+            'SUN': 'Sun',
+            'SUNDAY': 'Sun',
+            'MON': 'Mon',
+            'MONDAY': 'Mon',
+            'TUES': 'Tue',
+            'TUESDAY': 'Tue',
+            'WED': 'Wed',
+            'WEDNESDAY': 'Wed',
+            'THURS': 'Thu',
+            'THURSDAY': 'Thu'
+        };
+
+        const startHourBase = 8;
+        const endHourBase   = 20;
+
+        // day headers
+        days.forEach((day, idx) => {
+            const header = document.createElement('div');
+            header.className = 'cr-day-header';
+            header.style.gridColumn = (idx + 2).toString();
+            header.style.gridRow = '1';
+            header.textContent = dayLabels[day] || day;
+            crCalendarGridEl.appendChild(header);
+        });
+
+        // time labels
+        for (let hour = startHourBase; hour <= endHourBase; hour++) {
+            const rowIndex = (hour - startHourBase) + 2;
+            const timeLabel = document.createElement('div');
+            timeLabel.className = 'cr-time-label';
+            timeLabel.style.gridColumn = '1';
+            timeLabel.style.gridRow = rowIndex.toString();
+            timeLabel.textContent = `${hour.toString().padStart(2, '0')}:00`;
+            crCalendarGridEl.appendChild(timeLabel);
+        }
+
+        function getDayIndex(dayStr) {
+            const upper = String(dayStr || '').toUpperCase();
+            const map = {
+                'SAT': 0,
+                'SUN': 1,
+                'SUNDAY': 1,
+                'MON': 2,
+                'MONDAY': 2,
+                'TUES': 3,
+                'TUESDAY': 3,
+                'WED': 4,
+                'WEDNESDAY': 4,
+                'THURS': 5,
+                'THURSDAY': 5
+            };
+            return map[upper] ?? -1;
+        }
+
+        schedule.forEach(slot => {
+            const dayIndex = getDayIndex(slot.day);
+            if (dayIndex < 0) return;
+
+            const [sh] = slot.start.split(':').map(Number);
+            const [eh] = slot.end.split(':').map(Number);
+
+            const startRow = Math.max(2, (sh - startHourBase) + 2);
+            const endRow   = Math.min((endHourBase - startHourBase) + 2, (eh - startHourBase) + 2);
+
+            const event = document.createElement('div');
+            event.className = 'cr-calendar-event ' + (slot.type === 'lecture' ? 'cr-lecture' : 'cr-lab');
+
+            event.style.gridColumn = (dayIndex + 2).toString();
+            event.style.gridRow = `${startRow} / ${Math.max(startRow + 1, endRow)}`;
+
+            const typeLabel = slot.type === 'lecture' ? 'Lec' : 'Lab/Tut';
+
+            event.innerHTML = `
+                <div class="cr-event-title">${slot.course_code}</div>
+                <div class="cr-event-sub">${typeLabel} · ${slot.sub_type} · Sec ${slot.section}</div>
+                <div class="cr-event-time">${slot.start}–${slot.end}</div>
+            `;
+
+            crCalendarGridEl.appendChild(event);
+        });
+    }
+
+    // =============== RUN OPTIMIZER (CALL BACKEND) ===============
+    async function crRunOptimization() {
+        crOptimizeStatusEl.textContent = 'Running optimizer...';
+        crScheduleTableBody.innerHTML = '';
+        crRenderCalendar([]);
+
+        try {
+            const res = await fetch('/course-registration/api/optimize', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ course_ids: crCartCourseIds })
+            });
+
+            const data = await res.json();
+
+            if (data.status === 'ok') {
+                crOptimizeStatusEl.textContent = '✅ Conflict-free schedule found.';
+                crScheduleTableBody.innerHTML = '';
+
+                data.schedule.forEach(slot => {
+                    const tr = document.createElement('tr');
+                    tr.classList.add('cr-row-fade-in');
+                    tr.innerHTML = `
+                        <td>${slot.course_code} – ${slot.course_name}</td>
+                        <td>${slot.type}</td>
+                        <td>${slot.sub_type}</td>
+                        <td>${slot.section}</td>
+                        <td>${slot.day}</td>
+                        <td>${slot.start}</td>
+                        <td>${slot.end}</td>
+                    `;
+                    crScheduleTableBody.appendChild(tr);
+                });
+
+                crRenderCalendar(data.schedule);
+            } else if (data.status === 'no_solution') {
+                crOptimizeStatusEl.textContent = '❌ ' + (data.message || 'No conflict-free schedule found.');
+            } else {
+                crOptimizeStatusEl.textContent = '⚠ ' + (data.message || 'Unknown error from optimizer.');
+            }
+        } catch (err) {
+            console.error(err);
+            crOptimizeStatusEl.textContent = '⚠ Error calling optimizer.';
+        }
+    }
+
+    crOptimizeBtn.addEventListener('click', crRunOptimization);
+
+    // Initial load (fills list with all courses)
+    crSearchCourses();
+
+    // Logout handler
+    async function handleLogout() {
+        try {
+            const response = await fetch('/auth/logout', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = '/login';
+        }
+    }
+</script>
+</body>
+</html>
