@@ -389,14 +389,14 @@
 }
 
 /* Today's Schedule */
-.schedule-card{ /* placed in right column by markup */ }
+.schedule-card{ 
 
 .date-badge {
     padding: 0.5rem 1rem;
     background: var(--bg-color);
     border-radius: 1rem;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 200;
     color: var(--text-secondary);
 }
 
@@ -467,9 +467,10 @@
     background: #d1fae5;
     color: #065f46;
 }
+}
 
 /* Notifications */
-.notifications-card{ /* placed in left column by markup */ }
+.notifications-card{ /* placed in left column by markup */ 
 
 .notification-badge {
     display: inline-flex;
@@ -482,7 +483,7 @@
     color: white;
     border-radius: 12px;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 300;
 }
 
 .notifications-list {
@@ -588,10 +589,8 @@
     gap: 0.75rem;
     text-decoration: underline;
 }
+}
 
-/* ==================== ANIMATIONS ==================== */
-
-/* Fade-in animation for cards */
 @keyframes fadeIn {
     from {
         opacity: 0;
