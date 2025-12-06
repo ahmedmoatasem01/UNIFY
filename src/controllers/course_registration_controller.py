@@ -188,25 +188,34 @@ def api_enroll():
     if not schedule:
         return jsonify({"error": "No schedule provided"}), 400
     
-    # Get unique course codes from schedule
-    course_codes = list(set([slot.get("course_code") for slot in schedule]))
+    # Get unique course codes with their sections from the optimized schedule
+    # Group by course_code and track which sections were selected
+    course_sections_map = {}
+    for slot in schedule:
+        course_code = slot.get("course_code")
+        section = slot.get("section")
+        if course_code:
+            if course_code not in course_sections_map:
+                course_sections_map[course_code] = set()
+            course_sections_map[course_code].add(section)
     
     # Get repositories
     enrollment_repo = RepositoryFactory.get_repository("enrollment")
-    slot_repo = CourseScheduleSlotRepository()
+    schedule_repo = RepositoryFactory.get_repository("schedule")
     
     enrollments = []
     errors = []
     
-    # Get database connection to find Course_ID from Course_Schedule_Slot
+    # Get database connection
     from core.db_singleton import DatabaseConnection
+    import json
     db_connection = DatabaseConnection()
     conn = db_connection.get_connection()
     
     try:
         cursor = conn.cursor()
         
-        for course_code in course_codes:
+        for course_code, sections in course_sections_map.items():
             # Get Course_ID from Course_Schedule_Slot table
             cursor.execute("""
                 SELECT DISTINCT Course_ID 
@@ -223,17 +232,44 @@ def api_enroll():
             
             # Check if already enrolled
             existing = enrollment_repo.get_by_student(student_id)
-            already_enrolled = any(e.Course_ID == course_id for e in existing)
+            already_enrolled = any(e.Course_ID == course_id and e.Status == "enrolled" for e in existing)
             
-            if not already_enrolled:
-                from models.enrollment import Enrollment
-                enrollment = Enrollment(
-                    Student_ID=student_id,
-                    Course_ID=course_id,
-                    Status="enrolled"
-                )
-                created = enrollment_repo.create(enrollment)
-                enrollments.append(created.to_dict())
+            if already_enrolled:
+                errors.append(f"Course {course_code} is already enrolled")
+                continue
+            
+            # Create enrollment
+            from models.enrollment import Enrollment
+            enrollment = Enrollment(
+                Student_ID=student_id,
+                Course_ID=course_id,
+                Status="enrolled"
+            )
+            created = enrollment_repo.create(enrollment)
+            enrollments.append(created.to_dict())
+        
+        # Save the optimized schedule with specific sections to Schedule table
+        # This allows us to filter which sections to show later
+        import json
+        schedule_json = json.dumps(schedule)
+        
+        # Check if student already has a schedule
+        existing_schedule = schedule_repo.get_by_student(student_id)
+        if existing_schedule:
+            # Update existing schedule
+            existing_schedule.Course_List = schedule_json
+            existing_schedule.Optimized = True
+            schedule_repo.update(existing_schedule)
+        else:
+            # Create new schedule
+            from models.schedule import Schedule
+            new_schedule = Schedule(
+                Student_ID=student_id,
+                Course_List=schedule_json,
+                Optimized=True
+            )
+            schedule_repo.create(new_schedule)
+            
     finally:
         conn.close()
     
@@ -241,14 +277,84 @@ def api_enroll():
         return jsonify({
             "status": "partial",
             "enrollments": enrollments,
-            "errors": errors
+            "errors": errors,
+            "message": f"Enrolled in {len(enrollments)} course(s). Errors: {', '.join(errors)}"
         }), 200
     
     return jsonify({
         "status": "success",
         "enrollments": enrollments,
-        "message": f"Successfully enrolled in {len(enrollments)} course(s)"
+        "message": f"Successfully enrolled in {len(enrollments)} course(s) with optimized sections"
     }), 201
+
+
+@course_reg_bp.route("/api/drop", methods=["POST"])
+def api_drop_course():
+    """
+    Drop a course (delete enrollment from database).
+    
+    Request JSON:
+    {
+        "course_code": "CSAI 201" or "course_id": 123
+    }
+    """
+    if 'user_id' not in session:
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    data = request.get_json(silent=True) or {}
+    course_code = data.get("course_code")
+    course_id = data.get("course_id")
+    
+    # Get student_id from session
+    user_id = session.get('user_id')
+    student_repo = RepositoryFactory.get_repository("student")
+    student = student_repo.get_by_user_id(user_id)
+    if not student:
+        return jsonify({"error": "Student record not found"}), 404
+    
+    student_id = student.Student_ID
+    
+    # Get repositories
+    enrollment_repo = RepositoryFactory.get_repository("enrollment")
+    from core.db_singleton import DatabaseConnection
+    db_connection = DatabaseConnection()
+    conn = db_connection.get_connection()
+    
+    try:
+        cursor = conn.cursor()
+        
+        # If course_code provided, find course_id
+        if course_code and not course_id:
+            cursor.execute("""
+                SELECT DISTINCT Course_ID 
+                FROM Course_Schedule_Slot 
+                WHERE Course_Code = ?
+            """, (course_code,))
+            row = cursor.fetchone()
+            if not row:
+                return jsonify({"error": f"Course {course_code} not found"}), 404
+            course_id = row[0]
+        
+        if not course_id:
+            return jsonify({"error": "Course code or ID required"}), 400
+        
+        # Find enrollment
+        existing = enrollment_repo.get_by_student(student_id)
+        enrollment = next((e for e in existing if e.Course_ID == course_id), None)
+        
+        if not enrollment:
+            return jsonify({"error": "Course not enrolled"}), 404
+        
+        # Delete enrollment
+        enrollment_repo.delete(enrollment.Enrollment_ID)
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Successfully dropped course"
+        }), 200
+        
+    finally:
+        conn.close()
 
 
 @course_reg_bp.route("/api/my-schedule", methods=["GET"])
@@ -282,6 +388,24 @@ def api_my_schedule():
     if not course_ids:
         return jsonify({"status": "ok", "schedule": []})
     
+    # Get the saved optimized schedule to filter by specific sections
+    schedule_repo = RepositoryFactory.get_repository("schedule")
+    saved_schedule = schedule_repo.get_by_student(student_id)
+    
+    # Build a set of (course_code, section) tuples from the saved optimized schedule
+    enrolled_sections = set()
+    if saved_schedule and saved_schedule.Course_List:
+        import json
+        try:
+            optimized_slots = json.loads(saved_schedule.Course_List)
+            for slot in optimized_slots:
+                course_code = slot.get("course_code")
+                section = slot.get("section")
+                if course_code and section is not None:
+                    enrolled_sections.add((course_code, section))
+        except (json.JSONDecodeError, TypeError):
+            pass  # If JSON parsing fails, fall back to showing all sections
+    
     # Get schedule slots for enrolled courses
     from core.db_singleton import DatabaseConnection
     db_connection = DatabaseConnection()
@@ -314,6 +438,12 @@ def api_my_schedule():
             end_time = row[4]
             slot_type = row[5]
             sub_type = row[6]
+            
+            # Filter: Only include slots that match the enrolled sections
+            # If we have saved optimized schedule, use it to filter
+            # Otherwise, show all sections (for backward compatibility)
+            if enrolled_sections and (course_code, section) not in enrolled_sections:
+                continue
             
             # Convert time objects to HH:MM strings
             if isinstance(start_time, time):
