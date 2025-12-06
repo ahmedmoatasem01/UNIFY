@@ -13,7 +13,6 @@
         <p class="subtitle">Here's your academic overview for today</p>
     </div>
 
-    <!-- Dashboard Widgets - Statistics Cards -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -60,9 +59,7 @@
         </div>
     </div>
 
-    <!-- Main Content Grid -->
     <div class="content-grid">
-        <!-- Today's Schedule -->
         <div class="card schedule-card">
             <div class="card-header">
                 <h2><i class="fas fa-calendar-day"></i> Today's Schedule</h2>
@@ -77,8 +74,10 @@
                             <span class="time">{{ item.time }}</span>
                         </div>
                         <div class="schedule-details">
-                            <h4>{{ item.event }}</h4>
-                            <span class="schedule-type type-lecture">Event</span>
+                            <h4>{{ item.course or item.event or 'Event' }}</h4>
+                            {% if item.instructor %}<p><i class="fas fa-chalkboard-teacher"></i> {{ item.instructor }}</p>{% endif %}
+                            {% if item.location %}<p><i class="fas fa-map-marker-alt"></i> {{ item.location }}</p>{% endif %}
+                            <span class="schedule-type type-{{ item.type or 'lecture' }}">{{ (item.type or 'lecture')|title }}</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -92,7 +91,6 @@
             </div>
         </div>
 
-        <!-- Notifications -->
         <div class="card notifications-card">
             <div class="card-header">
                 <h2><i class="fas fa-bell"></i> Notifications</h2>
@@ -135,7 +133,6 @@
             </div>
         </div>
 
-        <!-- Quick Actions -->
         <div class="card">
             <div class="card-header">
                 <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
@@ -170,7 +167,6 @@
             </div>
         </div>
 
-        <!-- Academic Progress Widget -->
         <div class="card">
             <div class="card-header">
                 <h2><i class="fas fa-chart-line"></i> Academic Progress</h2>
@@ -194,7 +190,6 @@
             </div>
         </div>
 
-        <!-- System Information Widget -->
         <div class="card">
             <div class="card-header">
                 <h2><i class="fas fa-info-circle"></i> System Information</h2>
@@ -234,5 +229,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='scripts/overview.js') }}"></script>
 {% endblock %}
 

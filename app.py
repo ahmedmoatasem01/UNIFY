@@ -9,5 +9,10 @@ import os
 if __name__ == '__main__':
     # Ensure we run from repository root so relative paths in src/app.py still work
     repo_root = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(repo_root)
-    runpy.run_path(os.path.join('src', 'app.py'), run_name='__main__')
+    src_path = os.path.join(repo_root, 'src')
+    
+    # Add src to Python path so imports work
+    sys.path.insert(0, src_path)
+    
+    os.chdir(src_path)  # Change to src directory for app to find templates/static
+    runpy.run_path(os.path.join(src_path, 'app.py'), run_name='__main__')

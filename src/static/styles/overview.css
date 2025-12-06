@@ -88,7 +88,141 @@
     overflow: hidden;
 }
 
-/* Progress Section */
+/* Schedule Styles */
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.schedule-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.schedule-item:hover {
+    background: rgba(79, 70, 229, 0.08);
+}
+
+.schedule-time {
+    min-width: 120px;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 0.9rem;
+}
+
+.schedule-details {
+    flex: 1;
+}
+
+.schedule-details h4 {
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.schedule-details p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0.25rem 0;
+}
+
+.schedule-type {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+/* Notifications */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.notification-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 4px solid var(--border-subtle);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.notification-item.unread {
+    border-left-color: var(--accent);
+    background: rgba(79, 70, 229, 0.08);
+}
+
+.notification-item.priority-high {
+    border-left-color: var(--danger);
+}
+
+.notification-item.priority-medium {
+    border-left-color: var(--warning-color);
+}
+
+.notification-icon {
+    font-size: 1.5rem;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.notification-content h4 {
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.notification-content p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.notification-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+    display: block;
+}
+
+.empty-state p {
+    font-size: 0.95rem;
+}
 .progress-section {
     display: flex;
     flex-direction: column;
@@ -428,6 +562,130 @@
 .view-all-link:hover {
     gap: 0.75rem;
     text-decoration: underline;
+}
+
+/* ==================== ANIMATIONS ==================== */
+
+/* Fade-in animation for cards */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card.fade-in,
+.stat-card.fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Slide out animation for notifications */
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Ripple effect for buttons */
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(0);
+    animation: ripple 0.6s ease-out;
+    pointer-events: none;
+}
+
+/* Bounce animation for action buttons */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.action-btn {
+    animation: bounce 0.6s ease-out;
+}
+
+/* Pulse animation for notification badge */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.notification-badge {
+    animation: pulse 2s infinite;
+}
+
+/* Scale animation for stat cards */
+@keyframes scaleUp {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.stat-card {
+    animation: scaleUp 0.5s ease-out;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Slide up animation for quick actions */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quick-actions .action-btn {
+    animation: slideUp 0.5s ease-out forwards;
 }
 
 /* Responsive Design for Overview */
