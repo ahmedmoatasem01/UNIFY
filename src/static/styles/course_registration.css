@@ -544,16 +544,18 @@
     border-radius: 14px;
     border: 1px solid var(--cr-border);
     background: var(--cr-bg-soft);
-    overflow: hidden;
-    max-height: 430px;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 500px;
 }
 
 .cr-calendar-grid {
     display: grid;
-    grid-template-columns: 60px repeat(6, 1fr);
-    grid-auto-rows: 34px;
+    grid-template-columns: 60px repeat(5, 1fr);
+    grid-auto-rows: minmax(40px, 1fr);
     font-size: 0.75rem;
     position: relative;
+    min-height: 400px;
 }
 
 .cr-day-header {
@@ -577,6 +579,14 @@
     align-items: center;
     justify-content: center;
     color: var(--cr-text-muted);
+    background: var(--cr-bg-soft);
+}
+
+.cr-calendar-cell {
+    border-top: 1px solid var(--cr-border);
+    border-right: 1px solid var(--cr-border);
+    min-height: 40px;
+    position: relative;
 }
 
 .cr-calendar-empty {
@@ -585,37 +595,84 @@
 
 .cr-calendar-event {
     border-radius: 8px;
-    padding: 3px 5px;
+    padding: 6px 8px;
     margin: 2px;
-    border: 1px solid var(--cr-border);
+    border: 1.5px solid var(--cr-border);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 1px;
+    justify-content: flex-start;
+    gap: 3px;
     color: var(--cr-text-main);
     animation: crEventFade 0.25s ease-out;
+    overflow: hidden;
+    min-height: 50px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cr-calendar-event:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .cr-calendar-event.cr-lecture {
     background: var(--cr-event-lecture);
+    border-color: rgba(59, 130, 246, 0.4);
 }
 
 .cr-calendar-event.cr-lab {
     background: var(--cr-event-lab);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.cr-event-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.cr-event-icon {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cr-calendar-event.cr-lecture .cr-event-icon {
+    color: #3b82f6;
+}
+
+.cr-calendar-event.cr-lab .cr-event-icon {
+    color: #22c55e;
 }
 
 .cr-event-title {
     font-weight: 600;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    word-break: break-word;
+    flex: 1;
 }
 
 .cr-event-sub {
     font-size: 0.7rem;
     color: var(--cr-text-muted);
+    line-height: 1.2;
+    word-break: break-word;
 }
 
 .cr-event-time {
     font-size: 0.68rem;
+    font-weight: 500;
+    margin-top: auto;
+    color: var(--cr-text-main);
+    opacity: 0.9;
 }
 
 @keyframes crEventFade {
