@@ -86,10 +86,335 @@
             </div>
         </header>
         <div class="cr-content" style="padding: 20px;">
-            <p>Schedule content will be displayed here.</p>
+            <!-- Schedule Table and Calendar -->
+            <section class="cr-grid-2">
+                <!-- Schedule Table -->
+                <div class="cr-panel cr-panel-animated">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2><i class="fa-solid fa-list"></i> My Schedule</h2>
+                        <button id="schedule-refresh-btn" class="cr-btn-secondary" title="Refresh enrolled courses">
+                            <i class="fa-solid fa-rotate"></i> Refresh
+                        </button>
+                    </div>
+                    <table class="cr-table" id="schedule-table">
+                        <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Type</th>
+                            <th>Sub-Type</th>
+                            <th>Section</th>
+                            <th>Day</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Weekly Calendar View -->
+                <div class="cr-panel cr-panel-animated">
+                    <h2><i class="fa-solid fa-calendar-week"></i> Weekly Calendar View</h2>
+                    <p class="cr-muted">Visual layout of your enrolled schedule (like Google Calendar).</p>
+                    <div class="cr-calendar-wrapper cr-mt">
+                        <div id="schedule-calendar-grid" class="cr-calendar-grid">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 </div>
+
+<script>
+    // =============== DOM ELEMENTS ===============
+    const scheduleTableBody = document.querySelector('#schedule-table tbody');
+    const scheduleCalendarGrid = document.getElementById('schedule-calendar-grid');
+    const scheduleRefreshBtn = document.getElementById('schedule-refresh-btn');
+
+    // =============== WEEKLY CALENDAR VIEW ===============
+    function renderScheduleCalendar(schedule) {
+        scheduleCalendarGrid.innerHTML = '';
+
+        if (!schedule || schedule.length === 0) {
+            scheduleCalendarGrid.innerHTML = '<p class="cr-muted cr-calendar-empty">No enrolled courses yet. Go to Course Registration to enroll.</p>';
+            return;
+        }
+
+        const days = ['SUN', 'MON', 'TUES', 'WED', 'THURS'];
+        const dayLabels = {
+            'SUN': 'Sun',
+            'SUNDAY': 'Sun',
+            'MON': 'Mon',
+            'MONDAY': 'Mon',
+            'TUES': 'Tue',
+            'TUESDAY': 'Tue',
+            'WED': 'Wed',
+            'WEDNESDAY': 'Wed',
+            'THURS': 'Thu',
+            'THURSDAY': 'Thu'
+        };
+
+        const startHourBase = 8;
+        const endHourBase = 16;
+
+        // Day headers
+        days.forEach((day, idx) => {
+            const header = document.createElement('div');
+            header.className = 'cr-day-header';
+            header.style.gridColumn = (idx + 2).toString();
+            header.style.gridRow = '1';
+            header.textContent = dayLabels[day] || day;
+            scheduleCalendarGrid.appendChild(header);
+        });
+
+        // Time labels
+        for (let hour = startHourBase; hour <= endHourBase; hour++) {
+            const rowIndex = (hour - startHourBase) + 2;
+            const timeLabel = document.createElement('div');
+            timeLabel.className = 'cr-time-label';
+            timeLabel.style.gridColumn = '1';
+            timeLabel.style.gridRow = rowIndex.toString();
+            timeLabel.textContent = `${hour.toString().padStart(2, '0')}:00`;
+            scheduleCalendarGrid.appendChild(timeLabel);
+        }
+
+        function getDayIndex(dayStr) {
+            const upper = String(dayStr || '').toUpperCase().trim();
+            const map = {
+                'SUN': 0,
+                'SUNDAY': 0,
+                'MON': 1,
+                'MONDAY': 1,
+                'TUES': 2,
+                'TUESDAY': 2,
+                'TUE': 2,
+                'WED': 3,
+                'WEDNESDAY': 3,
+                'THURS': 4,
+                'THURSDAY': 4,
+                'THUR': 4,
+                'THU': 4
+            };
+            return map[upper] ?? -1;
+        }
+
+        // Helper function to check if two time ranges overlap
+        function timeRangesOverlap(start1, end1, start2, end2) {
+            const [h1, m1 = 0] = start1.split(':').map(Number);
+            const [h2, m2 = 0] = end1.split(':').map(Number);
+            const [h3, m3 = 0] = start2.split(':').map(Number);
+            const [h4, m4 = 0] = end2.split(':').map(Number);
+            
+            const time1Start = h1 * 60 + m1;
+            const time1End = h2 * 60 + m2;
+            const time2Start = h3 * 60 + m3;
+            const time2End = h4 * 60 + m4;
+            
+            return time1Start < time2End && time2Start < time1End;
+        }
+
+        // Group events by day
+        const eventsByDay = {};
+        schedule.forEach(slot => {
+            const dayIndex = getDayIndex(slot.day);
+            if (dayIndex < 0) {
+                console.warn('Skipping event with invalid day:', slot);
+                return;
+            }
+            
+            if (!eventsByDay[dayIndex]) {
+                eventsByDay[dayIndex] = [];
+            }
+            eventsByDay[dayIndex].push(slot);
+        });
+
+        // Render events for each day
+        Object.keys(eventsByDay).forEach(dayIndex => {
+            const dayEvents = eventsByDay[dayIndex];
+            const dayNum = parseInt(dayIndex);
+            
+            // Sort events by start time
+            dayEvents.sort((a, b) => {
+                const [ah, am = 0] = a.start.split(':').map(Number);
+                const [bh, bm = 0] = b.start.split(':').map(Number);
+                return (ah * 60 + am) - (bh * 60 + bm);
+            });
+
+            // Group overlapping events
+            const eventGroups = [];
+            dayEvents.forEach(slot => {
+                let addedToGroup = false;
+                for (let group of eventGroups) {
+                    const overlaps = group.some(existingSlot => 
+                        timeRangesOverlap(slot.start, slot.end, existingSlot.start, existingSlot.end)
+                    );
+                    if (overlaps) {
+                        group.push(slot);
+                        addedToGroup = true;
+                        break;
+                    }
+                }
+                if (!addedToGroup) {
+                    eventGroups.push([slot]);
+                }
+            });
+
+            // Render each group
+            eventGroups.forEach((group, groupIndex) => {
+                const maxEventsPerRow = 3;
+                const shouldStackVertically = group.length > maxEventsPerRow;
+
+                group.forEach((slot, eventIndex) => {
+                    const [sh, sm = 0] = slot.start.split(':').map(Number);
+                    const [eh, em = 0] = slot.end.split(':').map(Number);
+                    
+                    const startRow = Math.max(2, (sh - startHourBase) + 2);
+                    let endRow = (eh - startHourBase) + 2;
+                    if (em > 0) endRow += 1;
+                    
+                    const maxRow = (endHourBase - startHourBase) + 2;
+                    endRow = Math.min(maxRow + 1, endRow);
+                    
+                    let rowSpan = Math.max(1, endRow - startRow);
+                    if (shouldStackVertically) {
+                        rowSpan = Math.max(1, Math.floor((endRow - startRow) / group.length));
+                    }
+
+                    const event = document.createElement('div');
+                    event.className = 'cr-calendar-event ' + (slot.type === 'lecture' ? 'cr-lecture' : 'cr-lab');
+                    if (shouldStackVertically) {
+                        event.classList.add('cr-event-stacked');
+                    }
+                    event.setAttribute('data-course', slot.course_code);
+                    event.setAttribute('data-day', slot.day);
+                    event.setAttribute('data-time', `${slot.start}-${slot.end}`);
+
+                    // Set grid position
+                    event.style.gridColumn = (dayNum + 2).toString();
+                    if (shouldStackVertically) {
+                        const stackedStartRow = startRow + (eventIndex * rowSpan);
+                        event.style.gridRow = `${stackedStartRow} / span ${rowSpan}`;
+                    } else {
+                        event.style.gridRow = `${startRow} / span ${rowSpan}`;
+                    }
+
+                    const typeLabel = slot.type === 'lecture' ? 'Lec' : 'Lab/Tut';
+                    const typeIcon = slot.type === 'lecture' 
+                        ? '<i class="fa-solid fa-chalkboard-teacher"></i>' 
+                        : '<i class="fa-solid fa-flask"></i>';
+
+                    event.innerHTML = `
+                        <div class="cr-event-header">
+                            <span class="cr-event-icon">${typeIcon}</span>
+                            <div class="cr-event-title">${slot.course_code}</div>
+                        </div>
+                        <div class="cr-event-sub">${typeLabel} · ${slot.sub_type}</div>
+                        <div class="cr-event-sec">Sec ${slot.section}</div>
+                        <div class="cr-event-time">${slot.start}–${slot.end}</div>
+                    `;
+
+                    scheduleCalendarGrid.appendChild(event);
+                });
+            });
+        });
+    }
+
+    // =============== LOAD ENROLLED SCHEDULE ===============
+    async function loadEnrolledSchedule() {
+        try {
+            const res = await fetch('/course-registration/api/my-schedule');
+            const data = await res.json();
+
+            if (data.status === 'ok' && data.schedule && data.schedule.length > 0) {
+                // Update table
+                scheduleTableBody.innerHTML = '';
+                const coursesByCode = {};
+                data.schedule.forEach(slot => {
+                    if (!coursesByCode[slot.course_code]) {
+                        coursesByCode[slot.course_code] = [];
+                    }
+                    coursesByCode[slot.course_code].push(slot);
+                });
+                
+                Object.keys(coursesByCode).forEach(courseCode => {
+                    const slots = coursesByCode[courseCode];
+                    slots.forEach((slot, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${slot.course_code} – ${slot.course_name}</td>
+                            <td>${slot.type}</td>
+                            <td>${slot.sub_type}</td>
+                            <td>${slot.section}</td>
+                            <td>${slot.day}</td>
+                            <td>${slot.start}</td>
+                            <td>${slot.end}</td>
+                            <td>${index === 0 ? `<button class="cr-btn-danger cr-drop-btn" data-course="${slot.course_code}" title="Drop this course">
+                                <i class="fa-solid fa-trash"></i> Drop
+                            </button>` : ''}</td>
+                        `;
+                        if (index === 0) {
+                            const dropBtn = tr.querySelector('.cr-drop-btn');
+                            dropBtn.addEventListener('click', () => dropCourse(slot.course_code));
+                        }
+                        scheduleTableBody.appendChild(tr);
+                    });
+                });
+
+                // Update calendar
+                renderScheduleCalendar(data.schedule);
+            } else {
+                scheduleTableBody.innerHTML = '<tr><td colspan="8" class="cr-muted" style="text-align: center; padding: 20px;">No enrolled courses yet. Go to Course Registration to enroll in courses.</td></tr>';
+                renderScheduleCalendar([]);
+            }
+        } catch (err) {
+            console.error('Error loading enrolled schedule:', err);
+            scheduleTableBody.innerHTML = '<tr><td colspan="8" class="cr-muted" style="text-align: center; padding: 20px;">Error loading schedule. Please try again.</td></tr>';
+        }
+    }
+
+    // =============== DROP COURSE ===============
+    async function dropCourse(courseCode) {
+        if (!confirm(`Are you sure you want to drop ${courseCode}? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/course-registration/api/drop', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ course_code: courseCode })
+            });
+
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                await loadEnrolledSchedule();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to drop course.'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error dropping course.');
+        }
+    }
+
+    // Refresh button
+    scheduleRefreshBtn.addEventListener('click', async () => {
+        scheduleRefreshBtn.disabled = true;
+        scheduleRefreshBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+        await loadEnrolledSchedule();
+        scheduleRefreshBtn.disabled = false;
+        scheduleRefreshBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> Refresh';
+    });
+
+    // Initial load
+    loadEnrolledSchedule();
+</script>
 </body>
 </html>
 
