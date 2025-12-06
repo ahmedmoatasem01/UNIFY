@@ -11,7 +11,7 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM Enrollment")
+            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM `Enrollment`")
             rows = cursor.fetchall()
             enrollments = []
             for row in rows:
@@ -23,6 +23,7 @@ class EnrollmentRepository:
                 ))
             return enrollments
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_id(self, enrollment_id):
@@ -30,7 +31,7 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM Enrollment WHERE Enrollment_ID = ?", (enrollment_id,))
+            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM `Enrollment` WHERE Enrollment_ID = %s", (enrollment_id,))
             row = cursor.fetchone()
             if row:
                 return Enrollment(
@@ -41,6 +42,7 @@ class EnrollmentRepository:
                 )
             return None
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_student(self, student_id):
@@ -48,7 +50,7 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM Enrollment WHERE Student_ID = ?", (student_id,))
+            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM `Enrollment` WHERE Student_ID = %s", (student_id,))
             rows = cursor.fetchall()
             enrollments = []
             for row in rows:
@@ -60,14 +62,19 @@ class EnrollmentRepository:
                 ))
             return enrollments
         finally:
+            cursor.close()
             conn.close()
+    
+    def get_by_student_id(self, student_id):
+        """Get all enrollments for a student (alias for get_by_student)"""
+        return self.get_by_student(student_id)
 
     def get_by_course(self, course_id):
         """Get all enrollments for a course"""
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM Enrollment WHERE Course_ID = ?", (course_id,))
+            cursor.execute("SELECT Enrollment_ID, Student_ID, Course_ID, Status FROM `Enrollment` WHERE Course_ID = %s", (course_id,))
             rows = cursor.fetchall()
             enrollments = []
             for row in rows:
@@ -79,6 +86,7 @@ class EnrollmentRepository:
                 ))
             return enrollments
         finally:
+            cursor.close()
             conn.close()
 
     def create(self, enrollment):
@@ -87,14 +95,14 @@ class EnrollmentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO Enrollment (Student_ID, Course_ID, Status) OUTPUT INSERTED.Enrollment_ID VALUES (?, ?, ?)",
+                "INSERT INTO `Enrollment` (Student_ID, Course_ID, Status) VALUES (%s, %s, %s)",
                 (enrollment.Student_ID, enrollment.Course_ID, enrollment.Status)
             )
-            enrollment_id = cursor.fetchone()[0]
             conn.commit()
-            enrollment.Enrollment_ID = enrollment_id
+            enrollment.Enrollment_ID = cursor.lastrowid
             return enrollment
         finally:
+            cursor.close()
             conn.close()
 
     def update(self, enrollment):
@@ -103,12 +111,13 @@ class EnrollmentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE Enrollment SET Status = ? WHERE Enrollment_ID = ?",
+                "UPDATE `Enrollment` SET Status = %s WHERE Enrollment_ID = %s",
                 (enrollment.Status, enrollment.Enrollment_ID)
             )
             conn.commit()
             return enrollment
         finally:
+            cursor.close()
             conn.close()
 
     def delete(self, enrollment_id):
@@ -116,9 +125,10 @@ class EnrollmentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM Enrollment WHERE Enrollment_ID = ?", (enrollment_id,))
+            cursor.execute("DELETE FROM `Enrollment` WHERE Enrollment_ID = %s", (enrollment_id,))
             conn.commit()
             return cursor.rowcount > 0
         finally:
+            cursor.close()
             conn.close()
 

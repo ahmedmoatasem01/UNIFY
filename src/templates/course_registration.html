@@ -76,25 +76,7 @@
 
     <!-- ===== Main panel ===== -->
     <div class="cr-main-panel">
-        <!-- Top navbar -->
-        <header class="cr-topbar">
-            <div class="cr-topbar-left">
-                <h1><i class="fa-solid fa-graduation-cap"></i> Course Registration</h1>
-                <p>Search courses, add them to your cart, and let the AI optimizer choose a conflict-free schedule.</p>
-            </div>
-            <div class="cr-topbar-right">
-                <button id="cr-theme-toggle" class="cr-icon-btn" title="Toggle light/dark mode">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <div class="cr-user-chip">
-                    <div class="cr-avatar">{{ user_data.avatar_letter if user_data else 'U' }}</div>
-                    <div>
-                        <p class="cr-user-name">{{ user_data.name if user_data else 'User' }}</p>
-                        <p class="cr-user-role">{{ user_data.role if user_data else 'User' }} · {{ user_data.department if user_data else 'Zewail City' }}</p>
-                    </div>
-                </div>
-            </div>
-        </header>
+        {% include 'components/topbar.html' %}
 
         <!-- Main content -->
         <main class="cr-main">
@@ -130,6 +112,10 @@
                         <i class="fa-solid fa-robot"></i> Run AI Schedule Optimizer
                     </button>
 
+                    <button id="cr-enroll-btn" class="cr-btn-primary" style="display: none; margin-top: 10px;">
+                        <i class="fa-solid fa-save"></i> Save & Enroll in Selected Courses
+                    </button>
+
                     <p id="cr-optimize-status" class="cr-status-text"></p>
                 </div>
             </section>
@@ -138,7 +124,12 @@
             <section class="cr-grid-2 cr-mt">
                 <!-- List view -->
                 <div class="cr-panel cr-panel-animated">
-                    <h2><i class="fa-solid fa-list"></i> Optimized Timetable</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2><i class="fa-solid fa-list"></i> My Schedule</h2>
+                        <button id="cr-refresh-schedule-btn" class="cr-btn-secondary" title="Refresh enrolled courses">
+                            <i class="fa-solid fa-rotate"></i> Refresh
+                        </button>
+                    </div>
                     <table class="cr-table" id="cr-schedule-table">
                         <thead>
                         <tr>
@@ -149,6 +140,7 @@
                             <th>Day</th>
                             <th>Start</th>
                             <th>End</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -205,12 +197,15 @@
     const crCartListEl       = document.getElementById('cr-cart-list');
     const crCartEmptyEl      = document.getElementById('cr-cart-empty');
     const crOptimizeBtn      = document.getElementById('cr-optimize-btn');
+    const crEnrollBtn        = document.getElementById('cr-enroll-btn');
+    const crRefreshScheduleBtn = document.getElementById('cr-refresh-schedule-btn');
     const crOptimizeStatusEl = document.getElementById('cr-optimize-status');
     const crScheduleTableBody= document.querySelector('#cr-schedule-table tbody');
     const crCalendarGridEl   = document.getElementById('cr-calendar-grid');
 
     let crCurrentCourses = [];
     let crCartCourseIds  = [];
+    let crCurrentSchedule = [];  // Store current optimized schedule
 
     // =============== RENDER COURSES (SEARCH RESULTS) ===============
     function crRenderCourses() {
@@ -226,6 +221,7 @@
             card.className = 'cr-course-card';
 
             const inCart = crCartCourseIds.includes(course.id);
+            const isEnrolled = crEnrolledCourses.includes(course.code);
             const lectureCount = (course.lecture_slots || []).length;
             const labCount     = (course.lab_slots || []).length;
 
@@ -236,19 +232,25 @@
                         <strong>Lectures:</strong> ${lectureCount}
                         &nbsp;|&nbsp;
                         <strong>Labs/Tutorials:</strong> ${labCount}
+                        ${isEnrolled ? '&nbsp;|&nbsp;<span style="color: #22c55e;"><i class="fa-solid fa-check-circle"></i> Enrolled</span>' : ''}
                     </p>
                 </div>
                 <div class="cr-course-actions">
-                    <button class="cr-btn-secondary" ${inCart ? 'disabled' : ''}>
-                        ${inCart ? '<i class="fa-solid fa-check"></i> Added' : '<i class="fa-solid fa-plus"></i> Add'}
-                    </button>
+                    ${isEnrolled 
+                        ? '<button class="cr-btn-secondary" disabled><i class="fa-solid fa-check"></i> Enrolled</button>'
+                        : `<button class="cr-btn-secondary" ${inCart ? 'disabled' : ''}>
+                            ${inCart ? '<i class="fa-solid fa-check"></i> Added' : '<i class="fa-solid fa-plus"></i> Add'}
+                           </button>`
+                    }
                 </div>
             `;
 
             const btn = card.querySelector('button');
-            btn.addEventListener('click', () => {
-                crAddToCart(course.id);
-            });
+            if (!isEnrolled) {
+                btn.addEventListener('click', () => {
+                    crAddToCart(course.id);
+                });
+            }
 
             crCoursesListEl.appendChild(card);
         });
@@ -308,6 +310,8 @@
         try {
             const res = await fetch(url);
             crCurrentCourses = await res.json();
+            // Load enrolled courses to check which are already enrolled
+            await crLoadEnrolledCourseCodes();
         } catch (err) {
             console.error(err);
             crCurrentCourses = [];
@@ -315,6 +319,24 @@
 
         crRenderCourses();
         crRenderCart();
+    }
+    
+    // =============== LOAD ENROLLED COURSE CODES ===============
+    async function crLoadEnrolledCourseCodes() {
+        try {
+            const res = await fetch('/course-registration/api/my-schedule');
+            const data = await res.json();
+            
+            if (data.status === 'ok' && data.schedule && data.schedule.length > 0) {
+                // Extract unique course codes
+                crEnrolledCourses = [...new Set(data.schedule.map(slot => slot.course_code))];
+            } else {
+                crEnrolledCourses = [];
+            }
+        } catch (err) {
+            console.error('Error loading enrolled courses:', err);
+            crEnrolledCourses = [];
+        }
     }
 
     crSearchBtn.addEventListener('click', crSearchCourses);
@@ -331,9 +353,11 @@
             return;
         }
 
-        const days = ['SAT', 'SUN', 'MON', 'TUES', 'WED', 'THURS'];
+        // Debug: Log all schedule items to verify all events are included
+        console.log('Rendering calendar with', schedule.length, 'events:', schedule);
+
+        const days = ['SUN', 'MON', 'TUES', 'WED', 'THURS'];
         const dayLabels = {
-            'SAT': 'Sat',
             'SUN': 'Sun',
             'SUNDAY': 'Sun',
             'MON': 'Mon',
@@ -347,7 +371,7 @@
         };
 
         const startHourBase = 8;
-        const endHourBase   = 20;
+        const endHourBase   = 16;  // Changed from 20 to 16 (8 AM to 4 PM)
 
         // day headers
         days.forEach((day, idx) => {
@@ -371,49 +395,157 @@
         }
 
         function getDayIndex(dayStr) {
-            const upper = String(dayStr || '').toUpperCase();
+            const upper = String(dayStr || '').toUpperCase().trim();
             const map = {
-                'SAT': 0,
-                'SUN': 1,
-                'SUNDAY': 1,
-                'MON': 2,
-                'MONDAY': 2,
-                'TUES': 3,
-                'TUESDAY': 3,
-                'WED': 4,
-                'WEDNESDAY': 4,
-                'THURS': 5,
-                'THURSDAY': 5
+                'SUN': 0,
+                'SUNDAY': 0,
+                'MON': 1,
+                'MONDAY': 1,
+                'TUES': 2,
+                'TUESDAY': 2,
+                'TUE': 2,
+                'WED': 3,
+                'WEDNESDAY': 3,
+                'THURS': 4,
+                'THURSDAY': 4,
+                'THUR': 4,  // Handle abbreviated form
+                'THU': 4
             };
-            return map[upper] ?? -1;
+            const index = map[upper] ?? -1;
+            if (index < 0) {
+                console.warn('Unknown day:', dayStr, 'mapped to index:', index);
+            }
+            return index;
         }
 
+        // Group events by day and time to handle overlaps
+        const eventsByDay = {};
         schedule.forEach(slot => {
             const dayIndex = getDayIndex(slot.day);
-            if (dayIndex < 0) return;
-
-            const [sh] = slot.start.split(':').map(Number);
-            const [eh] = slot.end.split(':').map(Number);
-
-            const startRow = Math.max(2, (sh - startHourBase) + 2);
-            const endRow   = Math.min((endHourBase - startHourBase) + 2, (eh - startHourBase) + 2);
-
-            const event = document.createElement('div');
-            event.className = 'cr-calendar-event ' + (slot.type === 'lecture' ? 'cr-lecture' : 'cr-lab');
-
-            event.style.gridColumn = (dayIndex + 2).toString();
-            event.style.gridRow = `${startRow} / ${Math.max(startRow + 1, endRow)}`;
-
-            const typeLabel = slot.type === 'lecture' ? 'Lec' : 'Lab/Tut';
-
-            event.innerHTML = `
-                <div class="cr-event-title">${slot.course_code}</div>
-                <div class="cr-event-sub">${typeLabel} · ${slot.sub_type} · Sec ${slot.section}</div>
-                <div class="cr-event-time">${slot.start}–${slot.end}</div>
-            `;
-
-            crCalendarGridEl.appendChild(event);
+            if (dayIndex < 0) {
+                console.warn('Skipping event with invalid day:', slot);
+                return;
+            }
+            
+            if (!eventsByDay[dayIndex]) {
+                eventsByDay[dayIndex] = [];
+            }
+            eventsByDay[dayIndex].push(slot);
         });
+
+        // Helper function to check if two time ranges overlap
+        function timeRangesOverlap(start1, end1, start2, end2) {
+            const [h1, m1 = 0] = start1.split(':').map(Number);
+            const [h2, m2 = 0] = end1.split(':').map(Number);
+            const [h3, m3 = 0] = start2.split(':').map(Number);
+            const [h4, m4 = 0] = end2.split(':').map(Number);
+            
+            const time1Start = h1 * 60 + m1;
+            const time1End = h2 * 60 + m2;
+            const time2Start = h3 * 60 + m3;
+            const time2End = h4 * 60 + m4;
+            
+            return time1Start < time2End && time2Start < time1End;
+        }
+
+        // Render events for each day
+        Object.keys(eventsByDay).forEach(dayIndex => {
+            const dayEvents = eventsByDay[dayIndex];
+            const dayNum = parseInt(dayIndex);
+            
+            // Sort events by start time
+            dayEvents.sort((a, b) => {
+                const [ah, am = 0] = a.start.split(':').map(Number);
+                const [bh, bm = 0] = b.start.split(':').map(Number);
+                return (ah * 60 + am) - (bh * 60 + bm);
+            });
+
+            // Group overlapping events
+            const eventGroups = [];
+            dayEvents.forEach(slot => {
+                let addedToGroup = false;
+                for (let group of eventGroups) {
+                    // Check if this event overlaps with any event in the group
+                    const overlaps = group.some(existingSlot => 
+                        timeRangesOverlap(slot.start, slot.end, existingSlot.start, existingSlot.end)
+                    );
+                    if (overlaps) {
+                        group.push(slot);
+                        addedToGroup = true;
+                        break;
+                    }
+                }
+                if (!addedToGroup) {
+                    eventGroups.push([slot]);
+                }
+            });
+
+            // Render each group
+            eventGroups.forEach((group, groupIndex) => {
+                // Maximum 3 events side-by-side before stacking vertically
+                const maxEventsPerRow = 3;
+                
+                // If too many events, stack them vertically
+                const shouldStackVertically = group.length > maxEventsPerRow;
+
+                group.forEach((slot, eventIndex) => {
+                    const [sh, sm = 0] = slot.start.split(':').map(Number);
+                    const [eh, em = 0] = slot.end.split(':').map(Number);
+                    
+                    const startRow = Math.max(2, (sh - startHourBase) + 2);
+                    let endRow = (eh - startHourBase) + 2;
+                    if (em > 0) endRow += 1;
+                    
+                    const maxRow = (endHourBase - startHourBase) + 2;
+                    endRow = Math.min(maxRow + 1, endRow);
+                    
+                    let rowSpan = Math.max(1, endRow - startRow);
+                    // If stacking vertically, give each event equal height inside that time window
+                    if (shouldStackVertically) {
+                        rowSpan = Math.max(1, Math.floor((endRow - startRow) / group.length));
+                    }
+
+                    const event = document.createElement('div');
+                    event.className = 'cr-calendar-event ' + (slot.type === 'lecture' ? 'cr-lecture' : 'cr-lab');
+                    if (shouldStackVertically) {
+                        event.classList.add('cr-event-stacked');
+                    }
+                    event.setAttribute('data-course', slot.course_code);
+                    event.setAttribute('data-day', slot.day);
+                    event.setAttribute('data-time', `${slot.start}-${slot.end}`);
+
+                    // ⬇️ ONLY use grid row/column – no manual left/width
+                    event.style.gridColumn = (dayNum + 2).toString();
+                    if (shouldStackVertically) {
+                        // Stack vertically: each event starts at a different row
+                        const stackedStartRow = startRow + (eventIndex * rowSpan);
+                        event.style.gridRow = `${stackedStartRow} / span ${rowSpan}`;
+                    } else {
+                        event.style.gridRow = `${startRow} / span ${rowSpan}`;
+                    }
+
+                    const typeLabel = slot.type === 'lecture' ? 'Lec' : 'Lab/Tut';
+                    const typeIcon = slot.type === 'lecture' 
+                        ? '<i class="fa-solid fa-chalkboard-teacher"></i>' 
+                        : '<i class="fa-solid fa-flask"></i>';
+
+                    event.innerHTML = `
+                        <div class="cr-event-header">
+                            <span class="cr-event-icon">${typeIcon}</span>
+                            <div class="cr-event-title">${slot.course_code}</div>
+                        </div>
+                        <div class="cr-event-sub">${typeLabel} · ${slot.sub_type}</div>
+                        <div class="cr-event-sec">Sec ${slot.section}</div>
+                        <div class="cr-event-time">${slot.start}–${slot.end}</div>
+                    `;
+
+                    crCalendarGridEl.appendChild(event);
+                    console.log('Rendered event:', slot.course_code, slot.day, slot.start, '-', slot.end, 'at row', startRow, 'span', rowSpan, 'group size:', group.length);
+                });
+            });
+        });
+        
+        console.log('Total events rendered:', crCalendarGridEl.querySelectorAll('.cr-calendar-event').length, 'out of', schedule.length);
     }
 
     // =============== RUN OPTIMIZER (CALL BACKEND) ===============
@@ -434,27 +566,50 @@
             if (data.status === 'ok') {
                 crOptimizeStatusEl.textContent = '✅ Conflict-free schedule found.';
                 crScheduleTableBody.innerHTML = '';
+                crCurrentSchedule = data.schedule;  // Store schedule for enrollment
 
+                // Group by course code to show drop button once per course
+                const coursesByCode = {};
                 data.schedule.forEach(slot => {
-                    const tr = document.createElement('tr');
-                    tr.classList.add('cr-row-fade-in');
-                    tr.innerHTML = `
-                        <td>${slot.course_code} – ${slot.course_name}</td>
-                        <td>${slot.type}</td>
-                        <td>${slot.sub_type}</td>
-                        <td>${slot.section}</td>
-                        <td>${slot.day}</td>
-                        <td>${slot.start}</td>
-                        <td>${slot.end}</td>
-                    `;
-                    crScheduleTableBody.appendChild(tr);
+                    if (!coursesByCode[slot.course_code]) {
+                        coursesByCode[slot.course_code] = [];
+                    }
+                    coursesByCode[slot.course_code].push(slot);
+                });
+                
+                Object.keys(coursesByCode).forEach(courseCode => {
+                    const slots = coursesByCode[courseCode];
+                    slots.forEach((slot, index) => {
+                        const tr = document.createElement('tr');
+                        tr.classList.add('cr-row-fade-in');
+                        tr.innerHTML = `
+                            <td>${slot.course_code} – ${slot.course_name}</td>
+                            <td>${slot.type}</td>
+                            <td>${slot.sub_type}</td>
+                            <td>${slot.section}</td>
+                            <td>${slot.day}</td>
+                            <td>${slot.start}</td>
+                            <td>${slot.end}</td>
+                            <td>${index === 0 ? `<button class="cr-btn-danger cr-drop-btn" data-course="${slot.course_code}" title="Drop this course">
+                                <i class="fa-solid fa-trash"></i> Drop
+                            </button>` : ''}</td>
+                        `;
+                        if (index === 0) {
+                            const dropBtn = tr.querySelector('.cr-drop-btn');
+                            dropBtn.addEventListener('click', () => crDropCourse(slot.course_code));
+                        }
+                        crScheduleTableBody.appendChild(tr);
+                    });
                 });
 
                 crRenderCalendar(data.schedule);
+                crEnrollBtn.style.display = 'block';  // Show enroll button
             } else if (data.status === 'no_solution') {
                 crOptimizeStatusEl.textContent = '❌ ' + (data.message || 'No conflict-free schedule found.');
+                crEnrollBtn.style.display = 'none';
             } else {
                 crOptimizeStatusEl.textContent = '⚠ ' + (data.message || 'Unknown error from optimizer.');
+                crEnrollBtn.style.display = 'none';
             }
         } catch (err) {
             console.error(err);
@@ -464,8 +619,149 @@
 
     crOptimizeBtn.addEventListener('click', crRunOptimization);
 
-    // Initial load (fills list with all courses)
+    // =============== ENROLL IN COURSES ===============
+    async function crEnrollInCourses() {
+        if (!crCurrentSchedule || crCurrentSchedule.length === 0) {
+            crOptimizeStatusEl.textContent = '⚠ No schedule to enroll. Run optimizer first.';
+            return;
+        }
+
+        crEnrollBtn.disabled = true;
+        crOptimizeStatusEl.textContent = 'Enrolling in courses...';
+
+        try {
+            const res = await fetch('/course-registration/api/enroll', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ schedule: crCurrentSchedule })
+            });
+
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                crOptimizeStatusEl.textContent = `✅ ${data.message || 'Successfully enrolled!'}`;
+                // Reload enrolled schedule from database
+                await crLoadEnrolledSchedule();
+            } else if (data.status === 'partial') {
+                crOptimizeStatusEl.textContent = `⚠ Partial enrollment: ${data.message || 'Some courses enrolled, but there were errors.'}`;
+                if (data.errors && data.errors.length > 0) {
+                    console.error('Enrollment errors:', data.errors);
+                }
+                // Reload enrolled schedule from database
+                await crLoadEnrolledSchedule();
+            } else {
+                crOptimizeStatusEl.textContent = '⚠ ' + (data.error || 'Failed to enroll in courses.');
+            }
+        } catch (err) {
+            console.error(err);
+            crOptimizeStatusEl.textContent = '⚠ Error enrolling in courses.';
+        } finally {
+            crEnrollBtn.disabled = false;
+        }
+    }
+
+    crEnrollBtn.addEventListener('click', crEnrollInCourses);
+
+    // =============== LOAD ENROLLED SCHEDULE FROM DATABASE ===============
+    async function crLoadEnrolledSchedule() {
+        try {
+            const res = await fetch('/course-registration/api/my-schedule');
+            const data = await res.json();
+
+            if (data.status === 'ok' && data.schedule && data.schedule.length > 0) {
+                // Update table
+                crScheduleTableBody.innerHTML = '';
+                // Group by course code to show drop button once per course
+                const coursesByCode = {};
+                data.schedule.forEach(slot => {
+                    if (!coursesByCode[slot.course_code]) {
+                        coursesByCode[slot.course_code] = [];
+                    }
+                    coursesByCode[slot.course_code].push(slot);
+                });
+                
+                Object.keys(coursesByCode).forEach(courseCode => {
+                    const slots = coursesByCode[courseCode];
+                    slots.forEach((slot, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${slot.course_code} – ${slot.course_name}</td>
+                            <td>${slot.type}</td>
+                            <td>${slot.sub_type}</td>
+                            <td>${slot.section}</td>
+                            <td>${slot.day}</td>
+                            <td>${slot.start}</td>
+                            <td>${slot.end}</td>
+                            <td>${index === 0 ? `<button class="cr-btn-danger cr-drop-btn" data-course="${slot.course_code}" title="Drop this course">
+                                <i class="fa-solid fa-trash"></i> Drop
+                            </button>` : ''}</td>
+                        `;
+                        if (index === 0) {
+                            const dropBtn = tr.querySelector('.cr-drop-btn');
+                            dropBtn.addEventListener('click', () => crDropCourse(slot.course_code));
+                        }
+                        crScheduleTableBody.appendChild(tr);
+                    });
+                });
+
+                // Update calendar
+                crRenderCalendar(data.schedule);
+                crOptimizeStatusEl.textContent = `📅 Showing ${data.schedule.length} enrolled course slot(s) from database.`;
+            } else {
+                // No enrolled courses yet
+                crScheduleTableBody.innerHTML = '<tr><td colspan="8" class="cr-muted" style="text-align: center; padding: 20px;">No enrolled courses yet. Search courses, run optimizer, and enroll to see your schedule here.</td></tr>';
+                crRenderCalendar([]);
+                crOptimizeStatusEl.textContent = '📅 No enrolled courses. Your schedule will appear here after enrollment.';
+            }
+        } catch (err) {
+            console.error('Error loading enrolled schedule:', err);
+        }
+    }
+
+    // =============== DROP COURSE ===============
+    async function crDropCourse(courseCode) {
+        if (!confirm(`Are you sure you want to drop ${courseCode}? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch('/course-registration/api/drop', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ course_code: courseCode })
+            });
+
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                crOptimizeStatusEl.textContent = `✅ Successfully dropped ${courseCode}`;
+                // Reload enrolled schedule and courses
+                await crLoadEnrolledSchedule();
+                await crLoadEnrolledCourseCodes();
+                crRenderCourses();
+            } else {
+                crOptimizeStatusEl.textContent = '⚠ ' + (data.error || 'Failed to drop course.');
+            }
+        } catch (err) {
+            console.error(err);
+            crOptimizeStatusEl.textContent = '⚠ Error dropping course.';
+        }
+    }
+
+    // Refresh schedule button
+    crRefreshScheduleBtn.addEventListener('click', async () => {
+        crRefreshScheduleBtn.disabled = true;
+        crRefreshScheduleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+        await crLoadEnrolledSchedule();
+        await crLoadEnrolledCourseCodes();
+        crRenderCourses();
+        crRefreshScheduleBtn.disabled = false;
+        crRefreshScheduleBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> Refresh';
+    });
+
+    // Initial load (fills list with all courses and enrolled schedule)
     crSearchCourses();
+    crLoadEnrolledSchedule();
 
     // Logout handler
     async function handleLogout() {
