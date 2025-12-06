@@ -11,13 +11,12 @@ from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
 from repositories.repository_factory import RepositoryFactory
 from utils.schedule_loader import get_today_schedule, get_sample_schedule
+from core.user_helper import get_user_data, get_user_stats, get_user_notifications
 import os
 import sys
 
-# Add src to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# --- Setup Flask app ---
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
@@ -178,31 +177,39 @@ def get_user_notifications(user_id):
 def index():
     if 'user_id' not in session:
         session['user_id'] = DEFAULT_USER_ID
-    return redirect(url_for('overview'))
+    return redirect(url_for('login_page')
 
 
 @app.route('/login')
 def login_page():
     return render_template('login.html')
 
+@app.route('/overview')
+def overview():
+    """Overview page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+
 
 @app.route('/overview')
 @app.route('/dashboard')
+@app.route('/overview')
 def overview():
+    """Overview page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    user_id = session.get('user_id', DEFAULT_USER_ID)
-    user = get_user_data(user_id)
-    stats = get_user_stats(user_id)
-    notifications = get_user_notifications(user_id)
-    today_schedule = get_today_schedule() if 'get_today_schedule' in globals() else get_sample_schedule()
-    return render_template(
-        'overview.html',
-        user=user,
-        stats=stats,
-        today_schedule=today_schedule,
-        notifications=notifications
-    )
+    return render_template('overview.html')
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('overview.html', user_data=user_data)
+
+
+@app.route('/schedule')
+def schedule_page():
+    """Schedule page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('schedule.html', user_data=user_data)
 
 
 @app.route('/settings')
