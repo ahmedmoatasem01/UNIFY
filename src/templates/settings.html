@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Unify | Transcript</title>
+    <title>Unify | Settings</title>
     <link rel="stylesheet" href="../static/styles/course_registration.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,7 +42,7 @@
                 <i class="fa-solid fa-message"></i>
                 <span>Messages</span>
             </a>
-            <a class="cr-nav-item active" href="/transcript">
+            <a class="cr-nav-item" href="/transcript">
                 <i class="fa-solid fa-file-lines"></i>
                 <span>Transcript</span>
             </a>
@@ -50,13 +50,13 @@
                 <i class="fa-solid fa-book-open"></i>
                 <span>Course Registration</span>
             </a>
-            <a class="cr-nav-item" href="/settings">
+            <a class="cr-nav-item active" href="/settings">
                 <i class="fa-solid fa-gear"></i>
                 <span>Settings</span>
             </a>
         </nav>
         <div class="cr-sidebar-footer">
-            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="window.location.href='/auth/logout'">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
@@ -66,28 +66,15 @@
     <main class="cr-main-panel">
         <div class="cr-topbar">
             <div class="cr-topbar-left">
-                <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
-                <p>View your academic transcript</p>
+                <h1><i class="fa-solid fa-gear"></i> Settings</h1>
+                <p>Manage your account settings</p>
             </div>
         </div>
         <div class="cr-content" style="padding: 20px;">
-            <p>Transcript content will be displayed here.</p>
+            <p>Settings content will be displayed here.</p>
         </div>
     </main>
 </div>
-<script>
-async function handleLogout() {
-    try {
-        const response = await fetch('/auth/logout', { method: 'POST' });
-        if (response.ok) {
-            window.location.href = '/login';
-        }
-    } catch (error) {
-        console.error('Logout error:', error);
-        window.location.href = '/login';
-    }
-}
-</script>
 </body>
 </html>
 
