@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ===== Cartoon characters & eyes =====
     const characters = document.querySelector('.characters');
     const eyes = document.querySelectorAll('.eye');
     const loginPasswordInput = document.getElementById('login-password');

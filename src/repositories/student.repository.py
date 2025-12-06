@@ -11,7 +11,7 @@ class StudentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM Student")
+            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM `Student`")
             rows = cursor.fetchall()
             students = []
             for row in rows:
@@ -24,6 +24,7 @@ class StudentRepository:
                 ))
             return students
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_id(self, student_id):
@@ -31,7 +32,7 @@ class StudentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM Student WHERE Student_ID = ?", (student_id,))
+            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM `Student` WHERE Student_ID = %s", (student_id,))
             row = cursor.fetchone()
             if row:
                 return Student(
@@ -43,6 +44,7 @@ class StudentRepository:
                 )
             return None
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_user_id(self, user_id):
@@ -50,7 +52,7 @@ class StudentRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM Student WHERE User_ID = ?", (user_id,))
+            cursor.execute("SELECT Student_ID, User_ID, Department, Year_Level, GPA FROM `Student` WHERE User_ID = %s", (user_id,))
             row = cursor.fetchone()
             if row:
                 return Student(
@@ -62,6 +64,7 @@ class StudentRepository:
                 )
             return None
         finally:
+            cursor.close()
             conn.close()
 
     def create(self, student):
@@ -70,14 +73,14 @@ class StudentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO Student (User_ID, Department, Year_Level, GPA) OUTPUT INSERTED.Student_ID VALUES (?, ?, ?, ?)",
+                "INSERT INTO `Student` (User_ID, Department, Year_Level, GPA) VALUES (%s, %s, %s, %s)",
                 (student.User_ID, student.Department, student.Year_Level, student.GPA)
             )
-            student_id = cursor.fetchone()[0]
             conn.commit()
-            student.Student_ID = student_id
+            student.Student_ID = cursor.lastrowid
             return student
         finally:
+            cursor.close()
             conn.close()
 
     def update(self, student):
@@ -86,12 +89,13 @@ class StudentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE Student SET Department = ?, Year_Level = ?, GPA = ? WHERE Student_ID = ?",
+                "UPDATE `Student` SET Department = %s, Year_Level = %s, GPA = %s WHERE Student_ID = %s",
                 (student.Department, student.Year_Level, student.GPA, student.Student_ID)
             )
             conn.commit()
             return student
         finally:
+            cursor.close()
             conn.close()
 
     def delete(self, student_id):

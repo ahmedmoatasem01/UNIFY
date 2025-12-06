@@ -3,9 +3,7 @@
 
 USE unify;
 
--- =========================================
--- Table: User
--- =========================================
+
 CREATE TABLE IF NOT EXISTS `User` (
     User_ID INT AUTO_INCREMENT PRIMARY KEY,
     Username VARCHAR(100) NOT NULL UNIQUE,
