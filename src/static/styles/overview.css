@@ -1,0 +1,448 @@
+/* ==================== OVERVIEW PAGE STYLES ==================== */
+
+/* Overview Container */
+.overview-container {
+    width: 100%;
+}
+
+/* Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.stat-content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-change {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.stat-change.positive {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+/* Content Grid */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Progress Section */
+.progress-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.progress-info {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.gpa-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gpa-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.gpa-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.credits-info {
+    flex: 1;
+}
+
+.credits-info p {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Info List */
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.info-item i {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.info-item strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.info-item p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    background: var(--bg-color);
+    border-radius: 0.75rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.action-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--primary-color);
+}
+
+.action-btn i {
+    font-size: 2rem;
+}
+
+.action-btn span {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Today's Schedule */
+.schedule-card {
+    grid-column: 1 / -1;
+}
+
+.date-badge {
+    padding: 0.5rem 1rem;
+    background: var(--bg-color);
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.schedule-item {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    background: var(--bg-color);
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--primary-color);
+    transition: var(--transition);
+}
+
+.schedule-item:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow);
+}
+
+.schedule-time {
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+}
+
+.schedule-time .time {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+}
+
+.schedule-details {
+    flex: 1;
+}
+
+.schedule-details h4 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.schedule-type {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+}
+
+.schedule-type.type-lecture {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.schedule-type.type-lab {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.schedule-type.type-office {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* Notifications */
+.notifications-card {
+    grid-column: 1 / -1;
+}
+
+.notification-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 0.5rem;
+    background: var(--accent-color);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-color);
+    border-radius: 0.75rem;
+    border-left: 4px solid transparent;
+    transition: var(--transition);
+    position: relative;
+}
+
+.notification-item:hover {
+    background: #f1f5f9;
+    transform: translateX(4px);
+}
+
+.notification-item.unread {
+    background: #eff6ff;
+    border-left-color: var(--primary-color);
+}
+
+.notification-item.priority-high {
+    border-left-color: var(--danger-color);
+}
+
+.notification-item.priority-medium {
+    border-left-color: var(--warning-color);
+}
+
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.5rem;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.notification-item.priority-high .notification-icon {
+    background: var(--danger-color);
+}
+
+.notification-item.priority-medium .notification-icon {
+    background: var(--warning-color);
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content h4 {
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.notification-content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.notification-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.view-all-link:hover {
+    gap: 0.75rem;
+    text-decoration: underline;
+}
+
+/* Responsive Design for Overview */
+@media (max-width: 768px) {
+    .stats-grid,
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .schedule-item {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .schedule-time {
+        min-width: auto;
+    }
+
+    .progress-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+

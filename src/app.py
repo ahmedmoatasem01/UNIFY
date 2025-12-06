@@ -134,7 +134,19 @@ def update_settings():
 @app.route('/api/stats')
 def get_stats():
     """API endpoint to get current statistics"""
-    return jsonify(SAMPLE_STATS)
+    try:
+        user_id = session.get('user_id', DEFAULT_USER_ID)
+        user = student_repo.get_user_with_student(user_id)
+        
+        if user and user.get('student_id'):
+            stats = student_repo.get_stats(user['student_id'])
+            if stats:
+                return jsonify(stats)
+        
+        return jsonify(SAMPLE_STATS)
+    except Exception as e:
+        print(f"Error getting stats: {e}")
+        return jsonify(SAMPLE_STATS)
 
 
 

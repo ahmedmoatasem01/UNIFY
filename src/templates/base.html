@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Unify - Student Portal{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Unify</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('overview') }}" class="nav-link {% if request.endpoint == 'overview' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Overview
+                </a></li>
+                <li><a href="{{ url_for('settings') }}" class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+            </ul>
+            <div class="nav-user">
+                <div class="user-dropdown">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="user-name">{{ user.name if user else 'User' }}</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/accessibility.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+
