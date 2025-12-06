@@ -8,7 +8,6 @@ from controllers.message_controller import message_bp
 from controllers.enrollment_controller import enrollment_bp
 from controllers.schedule_controller import schedule_bp
 from controllers.calendar_controller import calendar_bp
-from controllers.ai_note_controller import ai_note_bp
 import os
 
 app = Flask(__name__)
@@ -23,9 +22,7 @@ app.register_blueprint(task_bp)
 app.register_blueprint(message_bp)
 app.register_blueprint(enrollment_bp)
 app.register_blueprint(schedule_bp)
-
 app.register_blueprint(calendar_bp)
-app.register_blueprint(ai_note_bp)
 
 
 @app.route('/')
