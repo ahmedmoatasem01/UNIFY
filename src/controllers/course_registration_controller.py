@@ -7,6 +7,7 @@ import os
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from repositories.repository_factory import RepositoryFactory
 from services.course_optimization_service import CourseOptimizationService
+from core.user_helper import get_user_data
 
 # Import CourseScheduleSlotRepository using importlib to handle dots in filename
 _repo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'repositories')
@@ -29,23 +30,7 @@ def course_registration_page():
         return redirect(url_for('login_page'))
     
     # Get user data from database
-    user_id = session.get('user_id')
-    user_repo = RepositoryFactory.get_repository("user")
-    user = user_repo.get_by_id(user_id)
-    
-    # Get student data if user is a student
-    student_repo = RepositoryFactory.get_repository("student")
-    student = student_repo.get_by_user_id(user_id)
-    
-    # Prepare user data for template
-    user_data = {
-        'name': user.Username if user else 'User',
-        'email': user.Email if user else '',
-        'role': 'Student' if student else 'User',
-        'department': student.Department if student else 'Zewail City',
-        'avatar_letter': user.Username[0].upper() if user and user.Username else 'U'
-    }
-    
+    user_data = get_user_data(session.get('user_id'))
     return render_template('course_registration.html', user_data=user_data)
 
 
