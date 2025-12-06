@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #5494fc 0%, #1f2fbb 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -14,7 +14,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    background: white;
+    background: rgba(56,189,248,0.16);
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     padding: 30px;
@@ -31,7 +31,7 @@ body {
 }
 
 .header h1 {
-    color: #333;
+    color: #e4e4e4;
     font-size: 28px;
 }
 
@@ -43,7 +43,7 @@ body {
 
 button {
     padding: 10px 20px;
-    background: #667eea;
+    background: #38bdf8;
     color: white;
     border: none;
     border-radius: 6px;
@@ -53,7 +53,7 @@ button {
 }
 
 button:hover {
-    background: #764ba2;
+    background: #38bdf8;
 }
 
 button:disabled {
@@ -78,7 +78,7 @@ button:disabled {
 .day-header {
     text-align: center;
     font-weight: bold;
-    color: #667eea;
+    color: #38bdf8;
     padding: 10px;
     background: #f5f5f5;
     border-radius: 6px;
@@ -96,7 +96,7 @@ button:disabled {
 }
 
 .day-cell:hover {
-    border-color: #667eea;
+    border-color: #66bcea;
     background: #f0f0ff;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
