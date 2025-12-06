@@ -9,6 +9,7 @@ from controllers.enrollment_controller import enrollment_bp
 from controllers.schedule_controller import schedule_bp
 from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
+from core.user_helper import get_user_data
 import os
 
 app = Flask(__name__)
@@ -44,7 +45,8 @@ def overview():
     """Overview page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('overview.html')
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('overview.html', user_data=user_data)
 
 
 @app.route('/schedule')
@@ -52,7 +54,8 @@ def schedule_page():
     """Schedule page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('schedule.html')
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('schedule.html', user_data=user_data)
 
 
 @app.route('/tasks')
@@ -60,7 +63,8 @@ def tasks_page():
     """Tasks page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('tasks.html')
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('tasks.html', user_data=user_data)
 
 
 @app.route('/notes')
@@ -68,7 +72,8 @@ def notes_page():
     """Notes & Summaries page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('notes.html')
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('notes.html', user_data=user_data)
 
 
 @app.route('/calendar')
@@ -76,7 +81,8 @@ def calendar_page():
     """Calendar & Reminders page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('Calendar.html')  # Keep existing filename
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('Calendar.html', user_data=user_data)  # Keep existing filename
 
 
 @app.route('/messages')
@@ -84,7 +90,8 @@ def messages_page():
     """Messages page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('messages.html')
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('messages.html', user_data=user_data)
 
 
 @app.route('/transcript')
@@ -92,7 +99,8 @@ def transcript_page():
     """Transcript page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('Transcript.html')  # Keep existing filename
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('Transcript.html', user_data=user_data)  # Keep existing filename
 
 
 @app.route('/settings')
@@ -100,7 +108,8 @@ def settings_page():
     """Settings page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('settings.html')
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('settings.html', user_data=user_data)
 
 
 @app.route('/course-registration')
