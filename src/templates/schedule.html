@@ -67,24 +67,7 @@
 
     <!-- Main Content -->
     <main class="cr-main-panel">
-        <header class="cr-topbar">
-            <div class="cr-topbar-left">
-                <h1><i class="fa-solid fa-calendar-day"></i> Schedule</h1>
-                <p>View your class schedule</p>
-            </div>
-            <div class="cr-topbar-right">
-                <button id="cr-theme-toggle" class="cr-icon-btn" title="Toggle light/dark mode">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <div class="cr-user-chip">
-                    <div class="cr-avatar">{{ user_data.avatar_letter if user_data else 'U' }}</div>
-                    <div>
-                        <p class="cr-user-name">{{ user_data.name if user_data else 'User' }}</p>
-                        <p class="cr-user-role">{{ user_data.role if user_data else 'User' }} · {{ user_data.department if user_data else 'Zewail City' }}</p>
-                    </div>
-                </div>
-            </div>
-        </header>
+        {% include 'components/topbar.html' %}
         <div class="cr-content" style="padding: 20px;">
             <!-- Schedule Table and Calendar -->
             <section class="cr-grid-2">

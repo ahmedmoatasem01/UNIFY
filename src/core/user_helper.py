@@ -62,3 +62,4 @@ def get_user_data(user_id):
         'avatar_letter': user.Username[0].upper() if user.Username else 'U'
     }
 
+

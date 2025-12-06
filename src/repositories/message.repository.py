@@ -11,7 +11,7 @@ class MessageRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Message_ID, Sender_ID, Receiver_ID, Message_Text, Timestamp FROM Message")
+            cursor.execute("SELECT Message_ID, Sender_ID, Receiver_ID, Message_Text, Timestamp FROM `Message`")
             rows = cursor.fetchall()
             messages = []
             for row in rows:
@@ -24,6 +24,7 @@ class MessageRepository:
                 ))
             return messages
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_id(self, message_id):
@@ -31,7 +32,7 @@ class MessageRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Message_ID, Sender_ID, Receiver_ID, Message_Text, Timestamp FROM Message WHERE Message_ID = ?", (message_id,))
+            cursor.execute("SELECT Message_ID, Sender_ID, Receiver_ID, Message_Text, Timestamp FROM `Message` WHERE Message_ID = %s", (message_id,))
             row = cursor.fetchone()
             if row:
                 return Message(
@@ -43,6 +44,7 @@ class MessageRepository:
                 )
             return None
         finally:
+            cursor.close()
             conn.close()
 
     def get_conversation(self, user1_id, user2_id):
@@ -52,8 +54,8 @@ class MessageRepository:
             cursor = conn.cursor()
             cursor.execute(
                 """SELECT Message_ID, Sender_ID, Receiver_ID, Message_Text, Timestamp 
-                   FROM Message 
-                   WHERE (Sender_ID = ? AND Receiver_ID = ?) OR (Sender_ID = ? AND Receiver_ID = ?)
+                   FROM `Message` 
+                   WHERE (Sender_ID = %s AND Receiver_ID = %s) OR (Sender_ID = %s AND Receiver_ID = %s)
                    ORDER BY Timestamp""",
                 (user1_id, user2_id, user2_id, user1_id)
             )
@@ -69,6 +71,7 @@ class MessageRepository:
                 ))
             return messages
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_receiver(self, receiver_id):
@@ -76,7 +79,7 @@ class MessageRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Message_ID, Sender_ID, Receiver_ID, Message_Text, Timestamp FROM Message WHERE Receiver_ID = ? ORDER BY Timestamp DESC", (receiver_id,))
+            cursor.execute("SELECT Message_ID, Sender_ID, Receiver_ID, Message_Text, Timestamp FROM `Message` WHERE Receiver_ID = %s ORDER BY Timestamp DESC", (receiver_id,))
             rows = cursor.fetchall()
             messages = []
             for row in rows:
@@ -89,7 +92,12 @@ class MessageRepository:
                 ))
             return messages
         finally:
+            cursor.close()
             conn.close()
+    
+    def get_by_recipient_id(self, recipient_id):
+        """Get all messages for a recipient (alias for get_by_receiver)"""
+        return self.get_by_receiver(recipient_id)
 
     def create(self, message):
         """Create a new message"""
@@ -97,14 +105,14 @@ class MessageRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO Message (Sender_ID, Receiver_ID, Message_Text, Timestamp) OUTPUT INSERTED.Message_ID VALUES (?, ?, ?, ?)",
+                "INSERT INTO `Message` (Sender_ID, Receiver_ID, Message_Text, Timestamp) VALUES (%s, %s, %s, %s)",
                 (message.Sender_ID, message.Receiver_ID, message.Message_Text, message.Timestamp)
             )
-            message_id = cursor.fetchone()[0]
             conn.commit()
-            message.Message_ID = message_id
+            message.Message_ID = cursor.lastrowid
             return message
         finally:
+            cursor.close()
             conn.close()
 
     def delete(self, message_id):
@@ -112,9 +120,10 @@ class MessageRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM Message WHERE Message_ID = ?", (message_id,))
+            cursor.execute("DELETE FROM `Message` WHERE Message_ID = %s", (message_id,))
             conn.commit()
             return cursor.rowcount > 0
         finally:
+            cursor.close()
             conn.close()
 
