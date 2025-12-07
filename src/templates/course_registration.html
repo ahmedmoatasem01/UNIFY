@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Course Registration</title>
-    <link rel="stylesheet" href="../static/styles/course_registration.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet"
@@ -77,6 +77,12 @@
     <!-- ===== Main panel ===== -->
     <div class="cr-main-panel">
         {% include 'components/topbar.html' %}
+        {% block topbar_title %}
+        <div class="cr-topbar-left">
+            <h1><i class="fa-solid fa-graduation-cap"></i> Course Registration</h1>
+            <p>Search courses, add them to your cart, and let the AI optimizer choose a conflict-free schedule.</p>
+        </div>
+        {% endblock %}
 
         <!-- Main content -->
         <main class="cr-main">
@@ -165,30 +171,7 @@
 </div>
 
 <script>
-    // =============== THEME TOGGLE (LIGHT / DARK) ===============
-    const crThemeToggle = document.getElementById('cr-theme-toggle');
-
-    function crApplySavedTheme() {
-        const saved = localStorage.getItem('unify_cr_theme') || 'dark';
-        if (saved === 'light') {
-            document.body.classList.add('cr-light-mode');
-            crThemeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
-        } else {
-            document.body.classList.remove('cr-light-mode');
-            crThemeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
-        }
-    }
-
-    crThemeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('cr-light-mode');
-        const isLight = document.body.classList.contains('cr-light-mode');
-        localStorage.setItem('unify_cr_theme', isLight ? 'light' : 'dark');
-        crThemeToggle.innerHTML = isLight
-            ? '<i class="fa-solid fa-sun"></i>'
-            : '<i class="fa-solid fa-moon"></i>';
-    });
-
-    crApplySavedTheme();
+    // Theme toggle is handled by global theme-toggle.js script
 
     // =============== DOM ELEMENTS ===============
     const crCoursesListEl    = document.getElementById('cr-courses-list');
@@ -776,5 +759,6 @@
         }
     }
 </script>
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
 </body>
 </html>

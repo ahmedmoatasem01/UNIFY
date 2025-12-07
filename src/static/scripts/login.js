@@ -135,9 +135,25 @@ async function handleLogin(event) {
             })
         });
         
+        // Check if response is ok before trying to parse JSON
+        if (!response.ok) {
+            // Try to get error message from response
+            let errorMessage = 'Login failed. Please try again.';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorMessage;
+            } catch (e) {
+                // If JSON parsing fails, use status text
+                errorMessage = `Server error: ${response.status} ${response.statusText}`;
+            }
+            errorDiv.textContent = errorMessage;
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
         const data = await response.json();
         
-        if (response.ok) {
+        if (data.message === 'Login successful' || response.ok) {
             // Login successful - redirect to overview
             window.location.href = '/overview';
         } else {
@@ -147,7 +163,12 @@ async function handleLogin(event) {
         }
     } catch (error) {
         console.error('Login error:', error);
-        errorDiv.textContent = 'Network error. Please check your connection and try again.';
+        // More specific error messages
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorDiv.textContent = 'Cannot connect to server. Please make sure the Flask server is running on http://localhost:5000';
+        } else {
+            errorDiv.textContent = 'Network error. Please check your connection and try again.';
+        }
         errorDiv.style.display = 'block';
     } finally {
         // Reset button state

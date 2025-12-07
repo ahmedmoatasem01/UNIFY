@@ -187,7 +187,7 @@ def inject_user_data():
 def index():
     if 'user_id' not in session:
         session['user_id'] = DEFAULT_USER_ID
-    return redirect(url_for('overview'))
+    return render_template('login.html')
 
 
 @app.route('/login')
@@ -215,19 +215,65 @@ def schedule_page():
     return render_template('schedule.html', user_data=user_data)
 
 
+@app.route('/tasks')
+def tasks_page():
+    """Tasks page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('tasks.html', user_data=user_data)
+
+
+@app.route('/notes')
+def notes_page():
+    """Notes page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('notes.html', user_data=user_data)
+
+
+@app.route('/calendar')
+def calendar_page():
+    """Calendar page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('Calendar.html', user_data=user_data)
+
+
+@app.route('/messages')
+def messages_page():
+    """Messages page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('messages.html', user_data=user_data)
+
+
+@app.route('/transcript')
+def transcript_page():
+    """Transcript page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('Transcript.html', user_data=user_data)
+
+
 @app.route('/settings')
 def settings():
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
     user_id = session.get('user_id', DEFAULT_USER_ID)
     user = get_user_data(user_id)
+    user_data = get_user_data(user_id)
     user_settings = {
         'notifications': {'email': True, 'push': True, 'calendar_reminders': True, 'assignment_deadlines': True},
         'calendar': {'sync_google': False, 'default_view': 'week', 'timezone': 'Africa/Cairo'},
         'appearance': {'theme': 'light', 'language': 'en', 'colorblind_mode': False, 'dyslexia_font': False},
         'privacy': {'profile_visibility': 'public', 'share_schedule': False}
     }
-    return render_template('settings.html', user=user, settings=user_settings)
+    return render_template('settings.html', user=user_data, user_data=user_data, settings=user_settings)
 
 
 @app.route('/api/settings/update', methods=['POST'])
