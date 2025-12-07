@@ -27,12 +27,13 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(student_bp)
 app.register_blueprint(course_bp)
-app.register_blueprint(task_bp)
+# Note: task_bp registered after routes to avoid conflicts
 app.register_blueprint(message_bp)
 app.register_blueprint(enrollment_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(calendar_bp)
 app.register_blueprint(course_reg_bp)
+app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
 
 # --- Repository instances ---
 try:
@@ -215,7 +216,7 @@ def schedule_page():
     return render_template('schedule.html', user_data=user_data)
 
 
-@app.route('/tasks')
+@app.route('/tasks', strict_slashes=False)
 def tasks_page():
     """Tasks page - requires authentication"""
     if 'user_id' not in session:
