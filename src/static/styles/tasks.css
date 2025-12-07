@@ -1,0 +1,173 @@
+/* ===== TASK TRACKER STYLES ===== */
+.task-tracker-wrapper {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ---- Header ---- */
+.task-tracker-wrapper .title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.task-tracker-wrapper .subtitle {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* ---- Input Section ---- */
+.task-tracker-wrapper .input-section {
+    margin-bottom: 20px;
+}
+
+.task-tracker-wrapper .input-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.task-tracker-wrapper input[type="text"],
+.task-tracker-wrapper input[type="datetime-local"],
+.task-tracker-wrapper select {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    flex: 1;
+    font-size: 1rem;
+}
+
+.task-tracker-wrapper .add-btn {
+    padding: 8px 15px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.task-tracker-wrapper .add-btn:hover {
+    background-color: #0056b3;
+}
+
+/* ---- Tasks Section ---- */
+.task-tracker-wrapper .tasks-section {
+    margin-top: 20px;
+}
+
+.task-tracker-wrapper .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+/* ---- Task Card ---- */
+.task-tracker-wrapper .task-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.task-tracker-wrapper .task-card:hover {
+    background-color: #f1f1f1;
+    transform: translateY(-1px);
+}
+
+/* ---- Checkbox Button ---- */
+.task-tracker-wrapper .checkbox-btn {
+    font-size: 1.3rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* ---- Task Text ---- */
+.task-tracker-wrapper .text-group {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.task-tracker-wrapper .task-text {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* ---- Priority Dots ---- */
+.task-tracker-wrapper .priority-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.task-tracker-wrapper .priority-low { background-color: green; }
+.task-tracker-wrapper .priority-medium { background-color: orange; }
+.task-tracker-wrapper .priority-high { background-color: red; }
+
+/* ---- Due Date ---- */
+.task-tracker-wrapper .due-date {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.task-tracker-wrapper .due-overdue {
+    color: red;
+    font-weight: bold;
+}
+
+/* ---- Completed Task ---- */
+.task-tracker-wrapper .completed .task-text {
+    text-decoration: line-through;
+    color: #999;
+}
+
+/* ---- Delete Button ---- */
+.task-tracker-wrapper .delete-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #ff4d4d;
+    transition: color 0.2s;
+}
+
+.task-tracker-wrapper .delete-btn:hover {
+    color: #d60000;
+}
+
+/* ---- Clear All Button ---- */
+.task-tracker-wrapper .clear-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #dc3545;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.task-tracker-wrapper .clear-btn:hover {
+    background-color: #a71d2a;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+    .task-tracker-wrapper .input-container {
+        flex-direction: column;
+    }
+    .task-tracker-wrapper .text-group {
+        margin-left: 5px;
+    }
+}
