@@ -9,12 +9,14 @@ from controllers.enrollment_controller import enrollment_bp
 from controllers.schedule_controller import schedule_bp
 from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
+from controllers.AI_Note_controller import ai_note_bp
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_folder=os.path.join(os.path.dirname(__file__), 'static'),
+            template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
 
-# Register blueprints
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(student_bp)
@@ -25,6 +27,7 @@ app.register_blueprint(enrollment_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(calendar_bp)
 app.register_blueprint(course_reg_bp)
+app.register_blueprint(ai_note_bp)
 
 
 @app.route('/')

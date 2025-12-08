@@ -14,12 +14,10 @@ class DatabaseConnection:
         if not hasattr(self, 'initialized'):
             # Configure your SQL Server connection string
             self.connection_string = (
-                "DRIVER={ODBC Driver 17 for SQL Server};"  # or "ODBC Driver 18 for SQL Server"
-                "SERVER=DESKTOP-V6DPJFP\\SQLEXPRESS;"       # Use your server (e.g., localhost, .\\SQLEXPRESS)
+                "DRIVER={ODBC Driver 17 for SQL Server};"
+                "SERVER=localhost;"
                 "DATABASE=unify;"
-                "Trusted_Connection=yes;"                   # Windows Authentication (no password)
-                # For SQL Server Authentication (username/password), use:
-                # "UID=sa;PWD=YourStrongPassword123;"
+                "Trusted_Connection=yes;"
             )
             self.initialized = True
 
