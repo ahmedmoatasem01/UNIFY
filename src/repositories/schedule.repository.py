@@ -11,7 +11,7 @@ class ScheduleRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM Schedule")
+            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM [Schedule]")
             rows = cursor.fetchall()
             schedules = []
             for row in rows:
@@ -23,6 +23,7 @@ class ScheduleRepository:
                 ))
             return schedules
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_id(self, schedule_id):
@@ -30,7 +31,7 @@ class ScheduleRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM Schedule WHERE Schedule_ID = ?", (schedule_id,))
+            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM [Schedule] WHERE Schedule_ID = ?", (schedule_id,))
             row = cursor.fetchone()
             if row:
                 return Schedule(
@@ -41,6 +42,7 @@ class ScheduleRepository:
                 )
             return None
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_student(self, student_id):
@@ -48,7 +50,7 @@ class ScheduleRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM Schedule WHERE Student_ID = ?", (student_id,))
+            cursor.execute("SELECT Schedule_ID, Student_ID, Course_List, Optimized FROM [Schedule] WHERE Student_ID = ?", (student_id,))
             row = cursor.fetchone()
             if row:
                 return Schedule(
@@ -59,6 +61,32 @@ class ScheduleRepository:
                 )
             return None
         finally:
+            cursor.close()
+            conn.close()
+    
+    def get_by_user_id(self, user_id):
+        """Get schedules for a user (requires join with Student table)"""
+        conn = self.db_connection.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT sch.Schedule_ID, sch.Student_ID, sch.Course_List, sch.Optimized
+                FROM [Schedule] sch
+                JOIN [Student] s ON sch.Student_ID = s.Student_ID
+                WHERE s.User_ID = ?
+            """, (user_id,))
+            rows = cursor.fetchall()
+            schedules = []
+            for row in rows:
+                schedules.append(Schedule(
+                    Schedule_ID=row[0],
+                    Student_ID=row[1],
+                    Course_List=row[2],
+                    Optimized=bool(row[3])
+                ))
+            return schedules
+        finally:
+            cursor.close()
             conn.close()
 
     def create(self, schedule):
@@ -67,14 +95,16 @@ class ScheduleRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO Schedule (Student_ID, Course_List, Optimized) OUTPUT INSERTED.Schedule_ID VALUES (?, ?, ?)",
+                "INSERT INTO [Schedule] (Student_ID, Course_List, Optimized) VALUES (?, ?, ?)",
                 (schedule.Student_ID, schedule.Course_List, 1 if schedule.Optimized else 0)
             )
-            schedule_id = cursor.fetchone()[0]
             conn.commit()
-            schedule.Schedule_ID = schedule_id
+            # Get the last inserted ID for SQL Server
+            cursor.execute("SELECT SCOPE_IDENTITY()")
+            schedule.Schedule_ID = cursor.fetchone()[0]
             return schedule
         finally:
+            cursor.close()
             conn.close()
 
     def update(self, schedule):
@@ -83,12 +113,13 @@ class ScheduleRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE Schedule SET Course_List = ?, Optimized = ? WHERE Schedule_ID = ?",
+                "UPDATE [Schedule] SET Course_List = ?, Optimized = ? WHERE Schedule_ID = ?",
                 (schedule.Course_List, 1 if schedule.Optimized else 0, schedule.Schedule_ID)
             )
             conn.commit()
             return schedule
         finally:
+            cursor.close()
             conn.close()
 
     def delete(self, schedule_id):
@@ -96,9 +127,11 @@ class ScheduleRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM Schedule WHERE Schedule_ID = ?", (schedule_id,))
+            cursor.execute("DELETE FROM [Schedule] WHERE Schedule_ID = ?", (schedule_id,))
             conn.commit()
             return cursor.rowcount > 0
         finally:
+            cursor.close()
             conn.close()
+
 

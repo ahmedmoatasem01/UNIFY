@@ -8,40 +8,49 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 @auth_bp.route("/login", methods=["POST"])
 def login():
     """Handle user login"""
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
-    
-    if not email or not password:
-        return jsonify({"error": "Email and password are required"}), 400
-    
-    # Get user by email
-    user_repo = RepositoryFactory.get_repository("user")
-    user = user_repo.get_by_email(email)
-    
-    if not user:
-        return jsonify({"error": "Invalid email or password"}), 401
-    
-    # Hash the provided password (in production, use proper password hashing like bcrypt)
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    
-    # Compare password hashes
-    if user.Password_Hash != password_hash:
-        return jsonify({"error": "Invalid email or password"}), 401
-    
-    # Set session
-    session['user_id'] = user.User_ID
-    session['email'] = user.Email
-    session['username'] = user.Username
-    
-    return jsonify({
-        "message": "Login successful",
-        "user": {
-            "User_ID": user.User_ID,
-            "Username": user.Username,
-            "Email": user.Email
-        }
-    }), 200
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid request data"}), 400
+            
+        email = data.get("email")
+        password = data.get("password")
+        
+        if not email or not password:
+            return jsonify({"error": "Email and password are required"}), 400
+        
+        # Get user by email
+        user_repo = RepositoryFactory.get_repository("user")
+        user = user_repo.get_by_email(email)
+        
+        if not user:
+            return jsonify({"error": "Invalid email or password"}), 401
+        
+        # Hash the provided password (in production, use proper password hashing like bcrypt)
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        
+        # Compare password hashes
+        if user.Password_Hash != password_hash:
+            return jsonify({"error": "Invalid email or password"}), 401
+        
+        # Set session
+        session['user_id'] = user.User_ID
+        session['email'] = user.Email
+        session['username'] = user.Username
+        
+        return jsonify({
+            "message": "Login successful",
+            "user": {
+                "User_ID": user.User_ID,
+                "Username": user.Username,
+                "Email": user.Email
+            }
+        }), 200
+    except Exception as e:
+        print(f"Login error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 
 @auth_bp.route("/register", methods=["POST"])
