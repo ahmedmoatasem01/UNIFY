@@ -3,12 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Messages</title>
+
+    <!-- Corrected CSS Paths -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/messages.css') }}">
+
+    <!-- Icons -->
+    <link rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        /* Ensure message container layout overrides base layout */
+        .cr-content.messages-container {
+            padding: 0 !important;
+            margin: 0 !important;
+            height: calc(100vh - 140px) !important;
+        }
+    </style>
 </head>
+
 <body class="cr-body">
+
 <div class="cr-app-layout">
+
+    <!-- Sidebar -->
     <aside class="cr-sidebar">
         <div class="cr-sidebar-header">
             <div class="cr-brand-logo">U</div>
@@ -17,6 +37,7 @@
                 <p class="cr-brand-subtitle">Student Assistant</p>
             </div>
         </div>
+
         <nav class="cr-sidebar-nav">
             <a class="cr-nav-item" href="/overview">
                 <i class="fa-solid fa-chart-column"></i>
@@ -55,28 +76,148 @@
                 <span>Settings</span>
             </a>
         </nav>
+
         <div class="cr-sidebar-footer">
-            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span>Log out</span>
+            <button onclick="handleLogout()" class="cr-btn-ghost cr-logout-btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Log out</span>
             </button>
             <p class="cr-small-text">CSAI 203 · Team 27</p>
         </div>
     </aside>
+
+    <!-- Main Content -->
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-message"></i> Messages</h1>
-            <p>Communicate with instructors and TAs</p>
-        </div>
-        {% endblock %}
-        <div class="cr-content" style="padding: 20px;">
-            <p>Messages content will be displayed here.</p>
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-message"></i> Messages</h1>
+                <p>Communicate with instructors and TAs</p>
+            </div>
+            <div class="cr-topbar-right">
+                <div class="cr-user-menu">
+                    <div class="cr-user-avatar">
+                        <span>{{ user_data.avatar_letter if user_data else 'U' }}</span>
+                    </div>
+                    <div class="cr-user-info">
+                        <span class="cr-user-name">{{ user_data.name if user_data else 'User' }}</span>
+                        <span class="cr-user-role">{{ user_data.role if user_data else 'Student' }}</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Messages Interface -->
+        <div class="cr-content messages-container">
+            <div class="messages-layout">
+                <!-- Conversations Panel -->
+                <div class="conversations-panel">
+                    <div class="conversations-header">
+                        <h2>Conversations</h2>
+                        <button class="btn-new-message" id="newMessageBtn" title="New Message">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                    </div>
+                    <div class="conversations-search">
+                        <input type="text" id="searchConversations" placeholder="Search conversations..." class="search-input">
+                        <i class="fa-solid fa-search search-icon"></i>
+                    </div>
+                    <div class="conversations-list" id="conversationsList">
+                        <!-- Conversations will be loaded here -->
+                        <div class="loading-spinner">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <p>Loading conversations...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Panel -->
+                <div class="chat-panel">
+                    <!-- Empty State -->
+                    <div class="chat-empty" id="chatEmpty">
+                        <i class="fa-solid fa-comments"></i>
+                        <h3>Select a conversation</h3>
+                        <p>Choose a conversation from the list or start a new one</p>
+                    </div>
+
+                    <!-- Chat Window -->
+                    <div class="chat-window" id="chatWindow" style="display: none;">
+                        <div class="chat-header">
+                            <div class="chat-user-info">
+                                <div class="chat-user-avatar">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <div>
+                                    <h3 id="chatUserName">User Name</h3>
+                                    <p class="chat-user-status">Active</p>
+                                </div>
+                            </div>
+                            <div class="chat-actions">
+                                <button class="btn-icon" title="Refresh">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages" id="chatMessages">
+                            <!-- Messages will be loaded here -->
+                        </div>
+
+                        <div class="chat-input-area">
+                            <form id="messageForm" class="message-form">
+                                <textarea 
+                                    id="messageInput" 
+                                    placeholder="Type your message..." 
+                                    rows="1"
+                                    class="message-textarea"
+                                ></textarea>
+                                <button type="submit" class="btn-send" title="Send">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
+
+<!-- New Message Modal -->
+<div class="modal" id="newMessageModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>New Message</h3>
+            <button class="btn-close" id="closeModalBtn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="recipientSelect">To:</label>
+                <select id="recipientSelect" class="form-control">
+                    <option value="">Select recipient...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="newMessageText">Message:</label>
+                <textarea 
+                    id="newMessageText" 
+                    rows="4" 
+                    placeholder="Type your message..."
+                    class="form-control"
+                ></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="cancelModalBtn">Cancel</button>
+            <button class="btn-primary" id="sendNewMessageBtn">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
 <script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/messages.js') }}"></script>
 <script>
 async function handleLogout() {
     try {
@@ -90,6 +231,15 @@ async function handleLogout() {
     }
 }
 </script>
+
 </body>
 </html>
+        </nav>
 
+        <div class="cr-sidebar-footer">
+            <button onclick="handleLogout()" class="cr-btn-ghost cr-logout-btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 5</p>
+        </div>
+    </aside>
