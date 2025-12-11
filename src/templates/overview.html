@@ -66,13 +66,14 @@
     </aside>
 
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-chart-column"></i> Overview</h1>
-            <p>Welcome back, {{ user_data.name if user_data else 'Student' }}!</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-chart-column"></i> Overview</h1>
+                <p>Welcome back, {{ user_data.name if user_data else 'Student' }}!</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
 
         <div class="overview-wrapper">
             <!-- Left Column: Statistics & Notifications -->

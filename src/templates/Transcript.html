@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Transcript</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/Transcript.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/Transcript.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -69,13 +69,14 @@
 
     <!-- Main Panel -->
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
-            <p>View your academic transcript</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
+                <p>View your academic transcript</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
         
         <div class="cr-content" style="padding: 20px;">
             <!-- Loading State -->

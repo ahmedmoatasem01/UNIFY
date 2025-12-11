@@ -31,6 +31,7 @@ CalendarRepository = _import_repository('calendar.repository', 'CalendarReposito
 ReminderRepository = _import_repository('reminder.repository', 'ReminderRepository')
 FocusSessionRepository = _import_repository('focus_session.repository', 'FocusSessionRepository')
 TeachingAssistantRepository = _import_repository('teaching_assistant.repository', 'TeachingAssistantRepository')
+UserSettingsRepository = _import_repository('user_settings.repository', 'UserSettingsRepository')
 
 
 # Import CourseScheduleSlotRepository
@@ -74,5 +75,7 @@ class RepositoryFactory:
             return TeachingAssistantRepository()
         elif entity_type == "course_schedule_slot" or entity_type == "schedule_slot":
             return CourseScheduleSlotRepository()
+        elif entity_type == "user_settings" or entity_type == "settings":
+            return UserSettingsRepository()
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")

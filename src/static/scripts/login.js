@@ -77,8 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show password
                 input.type = 'text';
                 if (icon) {
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
+                    icon.classList.remove('fa-solid', 'fa-eye');
+                    icon.classList.add('fa-solid', 'fa-eye-slash');
                 }
                 btn.setAttribute('aria-label', 'Hide password');
 
@@ -90,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Hide password
                 input.type = 'password';
                 if (icon) {
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
+                    icon.classList.remove('fa-solid', 'fa-eye-slash');
+                    icon.classList.add('fa-solid', 'fa-eye');
                 }
                 btn.setAttribute('aria-label', 'Show password');
 

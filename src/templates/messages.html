@@ -5,8 +5,8 @@
     <title>Unify | Messages</title>
 
     <!-- Corrected CSS Paths -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/messages.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
 
     <!-- Icons -->
     <link rel="stylesheet" 
@@ -93,17 +93,7 @@
                 <h1><i class="fa-solid fa-message"></i> Messages</h1>
                 <p>Communicate with instructors and TAs</p>
             </div>
-            <div class="cr-topbar-right">
-                <div class="cr-user-menu">
-                    <div class="cr-user-avatar">
-                        <span>{{ user_data.avatar_letter if user_data else 'U' }}</span>
-                    </div>
-                    <div class="cr-user-info">
-                        <span class="cr-user-name">{{ user_data.name if user_data else 'User' }}</span>
-                        <span class="cr-user-role">{{ user_data.role if user_data else 'Student' }}</span>
-                    </div>
-                </div>
-            </div>
+            {% include 'components/topbar_right.html' %}
         </header>
 
         <!-- Messages Interface -->
@@ -234,12 +224,3 @@ async function handleLogout() {
 
 </body>
 </html>
-        </nav>
-
-        <div class="cr-sidebar-footer">
-            <button onclick="handleLogout()" class="cr-btn-ghost cr-logout-btn">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Log out</span>
-            </button>
-            <p class="cr-small-text">CSAI 203 · Team 5</p>
-        </div>
-    </aside>

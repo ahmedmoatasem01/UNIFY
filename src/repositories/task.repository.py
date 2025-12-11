@@ -150,13 +150,15 @@ class TaskRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO [Task] (Student_ID, Task_Title, Due_Date, Priority, Status) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO [Task] (Student_ID, Task_Title, Due_Date, Priority, Status) "
+                "OUTPUT INSERTED.Task_ID "
+                "VALUES (?, ?, ?, ?, ?)",
                 (task.Student_ID, task.Task_Title, task.Due_Date, task.Priority, task.Status)
             )
+            row = cursor.fetchone()
+            if row:
+                task.Task_ID = row[0]
             conn.commit()
-            # Get the last inserted ID for SQL Server
-            cursor.execute("SELECT SCOPE_IDENTITY()")
-            task.Task_ID = cursor.fetchone()[0]
             return task
         finally:
             cursor.close()

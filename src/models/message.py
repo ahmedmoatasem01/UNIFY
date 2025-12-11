@@ -29,7 +29,7 @@ class Message:
     def __repr__(self):
         return f"<Message(Message_ID={self.Message_ID}, Sender_ID={self.Sender_ID}, Receiver_ID={self.Receiver_ID})>"
     
-    def to_dict(self):
+    def to_dict(self, current_user_id=None):
         """Convert message to dictionary"""
         result = {
             'Message_ID': self.Message_ID,
@@ -39,6 +39,10 @@ class Message:
             'Timestamp': self.Timestamp.isoformat() if self.Timestamp else None,
             'Is_Read': self.Is_Read
         }
+        
+        # Add Is_Sent if current_user_id is provided
+        if current_user_id is not None:
+            result['Is_Sent'] = self.Sender_ID == current_user_id
         
         # Add optional display fields if present
         if hasattr(self, 'Sender_Name') and self.Sender_Name:

@@ -66,14 +66,15 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-calendar-day"></i> Schedule</h1>
-            <p>View your enrolled courses and weekly schedule</p>
-        </div>
-        {% endblock %}
+    <div class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-calendar-day"></i> Schedule</h1>
+                <p>View your enrolled courses and weekly schedule</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
         <div class="cr-content" style="padding: 20px;">
             <!-- Schedule Table and Calendar -->
             <section class="cr-grid-2">
@@ -116,7 +117,7 @@
                 </div>
             </section>
         </div>
-    </main>
+    </div>
 </div>
 
 <script>

@@ -1,7 +1,35 @@
 /* ===== TASK TRACKER STYLES ===== */
+
+/* CSS Variables for Dark/Light Mode */
+:root {
+    --cr-bg: #0f172a;
+    --cr-bg-soft: #020617;
+    --cr-bg-panel: #020617;
+    --cr-border: #1f2937;
+    --cr-text-main: #e5e7eb;
+    --cr-text-muted: #9ca3af;
+    --cr-accent: #667eea;
+    --cr-success: #10b981;
+    --cr-warning: #f59e0b;
+    --cr-danger: #ef4444;
+}
+
+.cr-light-mode {
+    --cr-bg: #f3f4f6;
+    --cr-bg-soft: #e5e7eb;
+    --cr-bg-panel: #ffffff;
+    --cr-border: #d1d5db;
+    --cr-text-main: #111827;
+    --cr-text-muted: #6b7280;
+    --cr-accent: #667eea;
+    --cr-success: #10b981;
+    --cr-warning: #f59e0b;
+    --cr-danger: #ef4444;
+}
+
 .task-tracker-wrapper {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
+    color: var(--cr-text-main);
     max-width: 800px;
     margin: 0 auto;
 }
@@ -15,7 +43,7 @@
 
 .task-tracker-wrapper .subtitle {
     font-size: 1rem;
-    color: #666;
+    color: var(--cr-text-muted);
     margin-bottom: 20px;
 }
 
@@ -35,7 +63,9 @@
 .task-tracker-wrapper select {
     padding: 8px 10px;
     border-radius: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--cr-border);
+    background: var(--cr-bg-panel);
+    color: var(--cr-text-main);
     flex: 1;
     font-size: 1rem;
 }
@@ -43,7 +73,7 @@
 .task-tracker-wrapper .add-btn {
     padding: 8px 15px;
     border: none;
-    background-color: #007bff;
+    background-color: var(--cr-accent);
     color: white;
     font-weight: bold;
     border-radius: 5px;
@@ -52,7 +82,7 @@
 }
 
 .task-tracker-wrapper .add-btn:hover {
-    background-color: #0056b3;
+    opacity: 0.9;
 }
 
 /* ---- Tasks Section ---- */
@@ -73,13 +103,13 @@
     padding: 12px 15px;
     margin-bottom: 10px;
     border-radius: 8px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
+    border: 1px solid var(--cr-border);
+    background-color: var(--cr-bg-soft);
     transition: background 0.3s, transform 0.2s;
 }
 
 .task-tracker-wrapper .task-card:hover {
-    background-color: #f1f1f1;
+    background-color: var(--cr-bg-panel);
     transform: translateY(-1px);
 }
 
@@ -118,18 +148,19 @@
 .task-tracker-wrapper .due-date {
     display: block;
     font-size: 0.85rem;
-    color: #666;
+    color: var(--cr-text-muted);
 }
 
 .task-tracker-wrapper .due-overdue {
-    color: red;
+    color: var(--cr-danger);
     font-weight: bold;
 }
 
 /* ---- Completed Task ---- */
 .task-tracker-wrapper .completed .task-text {
     text-decoration: line-through;
-    color: #999;
+    color: var(--cr-text-muted);
+    opacity: 0.6;
 }
 
 /* ---- Delete Button ---- */
@@ -138,12 +169,12 @@
     border: none;
     font-size: 1.2rem;
     cursor: pointer;
-    color: #ff4d4d;
+    color: var(--cr-danger);
     transition: color 0.2s;
 }
 
 .task-tracker-wrapper .delete-btn:hover {
-    color: #d60000;
+    opacity: 0.8;
 }
 
 /* ---- Clear All Button ---- */
@@ -151,7 +182,7 @@
     padding: 8px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #dc3545;
+    background-color: var(--cr-danger);
     color: white;
     font-weight: bold;
     cursor: pointer;
@@ -159,7 +190,7 @@
 }
 
 .task-tracker-wrapper .clear-btn:hover {
-    background-color: #a71d2a;
+    opacity: 0.9;
 }
 
 /* ---- Responsive ---- */

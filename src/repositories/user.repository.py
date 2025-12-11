@@ -73,13 +73,15 @@ class UserRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO [User] (Username, Email, Password_Hash) VALUES (?, ?, ?)",
+                "INSERT INTO [User] (Username, Email, Password_Hash) "
+                "OUTPUT INSERTED.User_ID "
+                "VALUES (?, ?, ?)",
                 (user.Username, user.Email, user.Password_Hash)
             )
+            row = cursor.fetchone()
+            if row:
+                user.User_ID = row[0]
             conn.commit()
-            # Get the last inserted ID for SQL Server
-            cursor.execute("SELECT SCOPE_IDENTITY()")
-            user.User_ID = cursor.fetchone()[0]
             return user
         finally:
             cursor.close()

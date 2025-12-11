@@ -557,13 +557,14 @@
         </div>
     </aside>
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-list-check"></i> Tasks</h1>
-            <p>Stay organized. Stay ahead.</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-list-check"></i> Tasks</h1>
+                <p>Stay organized. Stay ahead.</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
         
         <div class="cr-content">
             <div class="tasks-container">

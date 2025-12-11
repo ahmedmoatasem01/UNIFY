@@ -76,13 +76,14 @@
 
     <!-- ===== Main panel ===== -->
     <div class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-graduation-cap"></i> Course Registration</h1>
-            <p>Search courses, add them to your cart, and let the AI optimizer choose a conflict-free schedule.</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-graduation-cap"></i> Course Registration</h1>
+                <p>Search courses, add them to your cart, and let the AI optimizer choose a conflict-free schedule.</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
 
         <!-- Main content -->
         <main class="cr-main">

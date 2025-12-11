@@ -95,13 +95,15 @@ class ScheduleRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO [Schedule] (Student_ID, Course_List, Optimized) VALUES (?, ?, ?)",
+                "INSERT INTO [Schedule] (Student_ID, Course_List, Optimized) "
+                "OUTPUT INSERTED.Schedule_ID "
+                "VALUES (?, ?, ?)",
                 (schedule.Student_ID, schedule.Course_List, 1 if schedule.Optimized else 0)
             )
+            row = cursor.fetchone()
+            if row:
+                schedule.Schedule_ID = row[0]
             conn.commit()
-            # Get the last inserted ID for SQL Server
-            cursor.execute("SELECT SCOPE_IDENTITY()")
-            schedule.Schedule_ID = cursor.fetchone()[0]
             return schedule
         finally:
             cursor.close()

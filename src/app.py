@@ -282,24 +282,64 @@ def transcript_page():
 
 @app.route('/settings')
 def settings():
+    """Settings page - loads user settings from database"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
+    
     user_id = session.get('user_id', DEFAULT_USER_ID)
-    user = get_user_data(user_id)
     user_data = get_user_data(user_id)
-    user_settings = {
-        'notifications': {'email': True, 'push': True, 'calendar_reminders': True, 'assignment_deadlines': True},
-        'calendar': {'sync_google': False, 'default_view': 'week', 'timezone': 'Africa/Cairo'},
-        'appearance': {'theme': 'light', 'language': 'en', 'colorblind_mode': False, 'dyslexia_font': False},
-        'privacy': {'profile_visibility': 'public', 'share_schedule': False}
-    }
+    
+    # Get settings from database (or create default if doesn't exist)
+    settings_repo = RepositoryFactory.get_repository("user_settings")
+    user_settings_obj = settings_repo.get_or_create(user_id)
+    user_settings = user_settings_obj.to_dict()
+    
     return render_template('settings.html', user=user_data, user_data=user_data, settings=user_settings)
 
 
 @app.route('/api/settings/update', methods=['POST'])
 def update_settings():
-    data = request.json
-    return jsonify({'success': True, 'message': 'Settings updated successfully'})
+    """API endpoint to update user settings"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        user_id = session.get('user_id')
+        data = request.json
+        
+        # Get current settings
+        settings_repo = RepositoryFactory.get_repository("user_settings")
+        user_settings = settings_repo.get_or_create(user_id)
+        
+        # Update settings from request data
+        if 'notifications' in data:
+            user_settings.email_notifications = data['notifications'].get('email', True)
+            user_settings.push_notifications = data['notifications'].get('push', True)
+            user_settings.calendar_reminders = data['notifications'].get('calendar_reminders', True)
+            user_settings.assignment_deadlines = data['notifications'].get('assignment_deadlines', True)
+        
+        if 'calendar' in data:
+            user_settings.sync_google_calendar = data['calendar'].get('sync_google', False)
+            user_settings.calendar_default_view = data['calendar'].get('default_view', 'week')
+            user_settings.timezone = data['calendar'].get('timezone', 'Africa/Cairo')
+        
+        if 'appearance' in data:
+            user_settings.theme = data['appearance'].get('theme', 'dark')
+            user_settings.language = data['appearance'].get('language', 'en')
+            user_settings.colorblind_mode = data['appearance'].get('colorblind_mode', False)
+            user_settings.dyslexia_font = data['appearance'].get('dyslexia_font', False)
+        
+        if 'privacy' in data:
+            user_settings.profile_visibility = data['privacy'].get('profile_visibility', 'public')
+            user_settings.share_schedule = data['privacy'].get('share_schedule', False)
+        
+        # Save to database
+        settings_repo.update(user_settings)
+        
+        return jsonify({'success': True, 'message': 'Settings updated successfully'})
+    except Exception as e:
+        print(f"Error updating settings: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/stats')

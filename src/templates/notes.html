@@ -449,13 +449,14 @@
         </div>
     </aside>
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-note-sticky"></i> Notes & Summaries</h1>
-            <p>Your lecture notes and AI-generated summaries</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-note-sticky"></i> Notes & Summaries</h1>
+                <p>Your lecture notes and AI-generated summaries</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
         <div class="cr-content" style="padding: 20px;">
             <!-- AI Note Summarizer -->
             <div class="summarizer-container">
