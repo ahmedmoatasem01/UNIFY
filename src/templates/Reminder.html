@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Smart Reminders</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/SmartReminders.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/SmartReminders.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="cr-body">
@@ -68,13 +68,14 @@
 
     <!-- Main Panel -->
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-bell"></i> Smart Reminders</h1>
-            <p>Your command center for staying on top of everything</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-bell"></i> Smart Reminders</h1>
+                <p>Your command center for staying on top of everything</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
         
         <div class="cr-content" style="padding: 20px;">
             <!-- Stats Row -->

@@ -103,13 +103,15 @@ class EnrollmentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO [Enrollment] (Student_ID, Course_ID, Status, Grade, Semester) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO [Enrollment] (Student_ID, Course_ID, Status, Grade, Semester) "
+                "OUTPUT INSERTED.Enrollment_ID "
+                "VALUES (?, ?, ?, ?, ?)",
                 (enrollment.Student_ID, enrollment.Course_ID, enrollment.Status, enrollment.Grade, enrollment.Semester)
             )
+            row = cursor.fetchone()
+            if row:
+                enrollment.Enrollment_ID = row[0]
             conn.commit()
-            # Get the last inserted ID for SQL Server
-            cursor.execute("SELECT SCOPE_IDENTITY()")
-            enrollment.Enrollment_ID = cursor.fetchone()[0]
             return enrollment
         finally:
             cursor.close()

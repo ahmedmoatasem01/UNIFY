@@ -21,7 +21,10 @@ def require_login(f):
 @require_login
 def messages_page():
     """Render the messages page"""
-    return render_template("messages.html")
+    from core.user_helper import get_user_data
+    user_id = session.get('user_id')
+    user_data = get_user_data(user_id)
+    return render_template("messages.html", user_data=user_data)
 
 
 @message_bp.route("/api/conversations", methods=["GET"])
@@ -51,38 +54,83 @@ def api_get_conversation(other_user_id):
     # Mark messages as read
     repo.mark_conversation_as_read(user_id, other_user_id)
     
-    return jsonify([message.to_dict() for message in messages])
+    return jsonify([message.to_dict(current_user_id=user_id) for message in messages])
 
 
 @message_bp.route("/api/send", methods=["POST"])
 @require_login
 def api_send_message():
     """API endpoint to send a new message"""
-    user_id = session.get('user_id')
-    data = request.get_json()
-    
-    receiver_id = data.get("receiver_id")
-    message_text = data.get("message_text")
-    
-    if not receiver_id or not message_text:
-        return jsonify({"error": "receiver_id and message_text are required"}), 400
-    
-    # Validate message text is not empty
-    if not message_text.strip():
-        return jsonify({"error": "Message cannot be empty"}), 400
-    
-    message = Message(
-        Sender_ID=user_id,
-        Receiver_ID=receiver_id,
-        Message_Text=message_text.strip(),
-        Timestamp=datetime.now(),
-        Is_Read=False
-    )
-    
-    repo = RepositoryFactory.get_repository("message")
-    created_message = repo.create(message)
-    
-    return jsonify(created_message.to_dict()), 201
+    try:
+        user_id = session.get('user_id')
+        print(f"\n{'='*60}")
+        print(f"[Messages] ▶ Sending message from user_id: {user_id}")
+        
+        data = request.get_json()
+        print(f"[Messages] ▶ Raw request data: {data}")
+        print(f"[Messages] ▶ Data type: {type(data)}")
+        
+        receiver_id = data.get("receiver_id") if data else None
+        message_text = data.get("message_text") if data else None
+        
+        print(f"[Messages] ▶ Extracted - receiver_id: {receiver_id} (type: {type(receiver_id)})")
+        print(f"[Messages] ▶ Extracted - message_text: {message_text} (type: {type(message_text)})")
+        
+        # Convert receiver_id to int and validate
+        try:
+            if receiver_id is None or receiver_id == '':
+                print(f"[Messages] ❌ receiver_id is empty/None")
+                receiver_id = None
+            else:
+                receiver_id = int(receiver_id)
+                print(f"[Messages] ✅ Converted receiver_id to int: {receiver_id}")
+        except (ValueError, TypeError) as e:
+            print(f"[Messages] ❌ Error converting receiver_id: {e}")
+            receiver_id = None
+        
+        if not receiver_id or not message_text:
+            print(f"[Messages] ❌ Validation failed - receiver_id: {receiver_id}, message_text: {message_text}")
+            print(f"{'='*60}\n")
+            return jsonify({"error": "receiver_id and message_text are required"}), 400
+        
+        # Validate message text is not empty
+        if not message_text.strip():
+            print("[Messages] ❌ Empty message text")
+            print(f"{'='*60}\n")
+            return jsonify({"error": "Message cannot be empty"}), 400
+        
+        print(f"[Messages] ✅ Validation passed!")
+        print(f"[Messages] ▶ Creating message:")
+        print(f"[Messages]    Sender ID: {user_id}")
+        print(f"[Messages]    Receiver ID: {receiver_id}")
+        print(f"[Messages]    Text: '{message_text[:50]}...'")
+        
+        message = Message(
+            Sender_ID=user_id,
+            Receiver_ID=receiver_id,
+            Message_Text=message_text.strip(),
+            Timestamp=datetime.now(),
+            Is_Read=False
+        )
+        
+        print(f"[Messages] ▶ Message object created, calling repository...")
+        repo = RepositoryFactory.get_repository("message")
+        created_message = repo.create(message)
+        
+        print(f"[Messages] ✅ SUCCESS! Message created with ID: {created_message.Message_ID}")
+        print(f"{'='*60}\n")
+        
+        return jsonify(created_message.to_dict()), 201
+        
+    except Exception as e:
+        print(f"\n[Messages] ❌❌❌ EXCEPTION OCCURRED ❌❌❌")
+        print(f"[Messages] Error type: {type(e).__name__}")
+        print(f"[Messages] Error message: {str(e)}")
+        print(f"[Messages] Full traceback:")
+        import traceback
+        traceback.print_exc()
+        print(f"{'='*60}\n")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 
 @message_bp.route("/api/unread-count", methods=["GET"])

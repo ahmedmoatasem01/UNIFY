@@ -1,51 +1,59 @@
 /**
- * Messages Application - Handles in-app messaging functionality
+ * Messages Page - JavaScript
+ * Handles real-time messaging with database integration
  */
 
-let currentConversationUserId = null;
-let conversations = [];
-let pollInterval = null;
+// ============================================================================
+// STATE
+// ============================================================================
 
-// Initialize the messaging app
-document.addEventListener('DOMContentLoaded', function() {
-    loadConversations();
-    loadUsers();
-    setupEventListeners();
-    startPolling();
+let currentUserId = null;
+let currentConversationUserId = null;
+let allConversations = [];
+let allUsers = [];
+let refreshInterval = null;
+
+// ============================================================================
+// DOM ELEMENTS
+// ============================================================================
+
+const conversationsList = document.getElementById('conversationsList');
+const chatEmpty = document.getElementById('chatEmpty');
+const chatWindow = document.getElementById('chatWindow');
+const chatMessages = document.getElementById('chatMessages');
+const chatUserName = document.getElementById('chatUserName');
+const messageForm = document.getElementById('messageForm');
+const messageInput = document.getElementById('messageInput');
+const searchInput = document.getElementById('searchConversations');
+
+// Modal elements
+const newMessageBtn = document.getElementById('newMessageBtn');
+const newMessageModal = document.getElementById('newMessageModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const cancelModalBtn = document.getElementById('cancelModalBtn');
+const sendNewMessageBtn = document.getElementById('sendNewMessageBtn');
+const recipientSelect = document.getElementById('recipientSelect');
+const newMessageText = document.getElementById('newMessageText');
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    init();
 });
 
-// Setup event listeners
-function setupEventListeners() {
-    // Search conversations
-    document.getElementById('searchConversations').addEventListener('input', handleSearchConversations);
-    
-    // New message button
-    document.getElementById('newMessageBtn').addEventListener('click', openNewMessageModal);
-    
-    // Modal controls
-    document.getElementById('closeModalBtn').addEventListener('click', closeNewMessageModal);
-    document.getElementById('cancelModalBtn').addEventListener('click', closeNewMessageModal);
-    document.getElementById('sendNewMessageBtn').addEventListener('click', sendNewMessage);
-    
-    // Message form
-    document.getElementById('messageForm').addEventListener('submit', handleSendMessage);
-    
-    // Auto-resize textarea
-    const textarea = document.getElementById('messageInput');
-    textarea.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-    
-    // Close modal on outside click
-    document.getElementById('newMessageModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeNewMessageModal();
-        }
-    });
+async function init() {
+    await loadConversations();
+    await loadUsers();
+    setupEventListeners();
+    startAutoRefresh();
 }
 
-// Load conversations list
+// ============================================================================
+// API CALLS
+// ============================================================================
+
 async function loadConversations() {
     try {
         const response = await fetch('/messages/api/conversations');
@@ -56,301 +64,386 @@ async function loadConversations() {
             }
             throw new Error('Failed to load conversations');
         }
-        
-        conversations = await response.json();
-        renderConversations(conversations);
+
+        allConversations = await response.json();
+        renderConversations(allConversations);
     } catch (error) {
         console.error('Error loading conversations:', error);
-        showError('Failed to load conversations');
+        conversationsList.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                <p>Failed to load conversations</p>
+            </div>
+        `;
     }
 }
 
-// Render conversations list
-function renderConversations(conversationsToRender) {
-    const container = document.getElementById('conversationsList');
-    
-    if (conversationsToRender.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
+async function loadConversation(otherUserId) {
+    try {
+        const response = await fetch(`/messages/api/conversation/${otherUserId}`);
+        if (!response.ok) {
+            throw new Error('Failed to load conversation');
+        }
+
+        const messages = await response.json();
+        currentConversationUserId = otherUserId;
+        renderMessages(messages);
+        showChatWindow();
+
+        // Update conversation name
+        const conversation = allConversations.find(c => c.Other_User_ID === otherUserId);
+        if (conversation) {
+            chatUserName.textContent = conversation.Other_Username;
+        }
+
+        // Mark as active
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.classList.remove('active');
+            if (parseInt(item.dataset.userId) === otherUserId) {
+                item.classList.add('active');
+            }
+        });
+
+        // Scroll to bottom
+        scrollToBottom();
+    } catch (error) {
+        console.error('Error loading conversation:', error);
+        alert('Failed to load conversation');
+    }
+}
+
+async function sendMessage() {
+    const messageText = messageInput.value.trim();
+
+    if (!messageText) {
+        return;
+    }
+
+    if (!currentConversationUserId) {
+        console.error('No conversation selected');
+        return;
+    }
+
+    console.log('Sending message:', {
+        receiver_id: parseInt(currentConversationUserId),
+        message_text: messageText
+    });
+
+    try {
+        const response = await fetch('/messages/api/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                receiver_id: parseInt(currentConversationUserId),
+                message_text: messageText
+            })
+        });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Server error:', errorData);
+            alert('Failed to send message: ' + (errorData.error || 'Unknown error'));
+            return;
+        }
+
+        const result = await response.json();
+        console.log('Message sent successfully:', result);
+
+        // Clear input
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+
+        // Reload conversation
+        await loadConversation(currentConversationUserId);
+
+        // Reload conversations list
+        await loadConversations();
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Failed to send message: ' + error.message);
+    }
+}
+
+async function loadUsers() {
+    try {
+        const response = await fetch('/messages/api/users');
+        if (!response.ok) {
+            throw new Error('Failed to load users');
+        }
+
+        allUsers = await response.json();
+        populateRecipientSelect();
+    } catch (error) {
+        console.error('Error loading users:', error);
+    }
+}
+
+async function sendNewMessage() {
+    const receiverId = recipientSelect.value;
+    const messageText = newMessageText.value.trim();
+
+    console.log('sendNewMessage called - receiverId:', receiverId, 'messageText:', messageText);
+
+    if (!receiverId || receiverId === '') {
+        alert('Please select a recipient');
+        return;
+    }
+
+    if (!messageText) {
+        alert('Please enter a message');
+        return;
+    }
+
+    const payload = {
+        receiver_id: parseInt(receiverId),
+        message_text: messageText
+    };
+
+    console.log('Sending new message with payload:', payload);
+
+    try {
+        const response = await fetch('/messages/api/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Server error:', errorData);
+            alert('Failed to send message: ' + (errorData.error || 'Unknown error'));
+            return;
+        }
+
+        const result = await response.json();
+        console.log('Message sent successfully:', result);
+
+        // Close modal
+        closeModal();
+
+        // Reload conversations
+        await loadConversations();
+
+        // Open the new conversation
+        await loadConversation(parseInt(receiverId));
+    } catch (error) {
+        console.error('Error sending new message:', error);
+        alert('Failed to send message: ' + error.message);
+    }
+}
+
+// ============================================================================
+// RENDERING
+// ============================================================================
+
+function renderConversations(conversations) {
+    if (!conversations || conversations.length === 0) {
+        conversationsList.innerHTML = `
+            <div class="loading-spinner">
                 <i class="fa-solid fa-inbox"></i>
                 <p>No conversations yet</p>
-                <button class="btn-primary" onclick="openNewMessageModal()">Start a conversation</button>
+                <small>Start a new conversation!</small>
             </div>
         `;
         return;
     }
-    
-    container.innerHTML = conversationsToRender.map(conv => `
-        <div class="conversation-item ${conv.User_ID === currentConversationUserId ? 'active' : ''}" 
-             data-user-id="${conv.User_ID}"
-             onclick="loadConversation(${conv.User_ID}, '${escapeHtml(conv.Username)}')">
+
+    conversationsList.innerHTML = conversations.map(conv => `
+        <div class="conversation-item" data-user-id="${conv.Other_User_ID}" onclick="loadConversation(${conv.Other_User_ID})">
             <div class="conversation-avatar">
-                <i class="fa-solid fa-user"></i>
+                ${conv.Other_Username ? conv.Other_Username.charAt(0).toUpperCase() : 'U'}
             </div>
-            <div class="conversation-content">
+            <div class="conversation-info">
                 <div class="conversation-header">
-                    <h4 class="conversation-name">${escapeHtml(conv.Username)}</h4>
+                    <span class="conversation-name">${conv.Other_Username || 'Unknown User'}</span>
                     <span class="conversation-time">${formatTime(conv.Last_Message_Time)}</span>
                 </div>
-                <div class="conversation-preview">
-                    <p class="last-message">${escapeHtml(conv.Last_Message || 'No messages')}</p>
-                    ${conv.Unread_Count > 0 ? `<span class="unread-badge">${conv.Unread_Count}</span>` : ''}
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p class="conversation-preview">${conv.Last_Message_Text || 'No messages'}</p>
+                    ${conv.Unread_Count > 0 ? `<span class="conversation-badge">${conv.Unread_Count}</span>` : ''}
                 </div>
             </div>
         </div>
     `).join('');
 }
 
-// Search conversations
-function handleSearchConversations(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const filtered = conversations.filter(conv => 
-        conv.Username.toLowerCase().includes(searchTerm) ||
-        (conv.Last_Message && conv.Last_Message.toLowerCase().includes(searchTerm))
-    );
-    renderConversations(filtered);
-}
-
-// Load conversation with a specific user
-async function loadConversation(userId, username) {
-    currentConversationUserId = userId;
-    
-    // Update UI
-    document.getElementById('chatEmpty').style.display = 'none';
-    document.getElementById('chatWindow').style.display = 'flex';
-    document.getElementById('chatUserName').textContent = username;
-    
-    // Mark conversation as active
-    document.querySelectorAll('.conversation-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.userId == userId);
-    });
-    
-    try {
-        const response = await fetch(`/messages/api/conversation/${userId}`);
-        if (!response.ok) throw new Error('Failed to load conversation');
-        
-        const messages = await response.json();
-        renderMessages(messages);
-        
-        // Reload conversations to update unread counts
-        loadConversations();
-    } catch (error) {
-        console.error('Error loading conversation:', error);
-        showError('Failed to load messages');
-    }
-}
-
-// Render messages in chat window
 function renderMessages(messages) {
-    const container = document.getElementById('chatMessages');
-    
-    if (messages.length === 0) {
-        container.innerHTML = `
-            <div class="empty-messages">
-                <i class="fa-solid fa-comment-dots"></i>
+    if (!messages || messages.length === 0) {
+        chatMessages.innerHTML = `
+            <div style="text-align: center; color: var(--cr-text-muted); padding: 40px 20px;">
+                <i class="fa-solid fa-comments" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
                 <p>No messages yet. Start the conversation!</p>
             </div>
         `;
         return;
     }
-    
-    container.innerHTML = messages.map(msg => {
-        const isSent = msg.Sender_ID !== currentConversationUserId;
-        const messageClass = isSent ? 'message-sent' : 'message-received';
-        
+
+    chatMessages.innerHTML = messages.map(msg => {
+        const isSent = msg.Is_Sent; // This should be set based on current user
         return `
-            <div class="message ${messageClass}">
-                <div class="message-bubble">
-                    <p class="message-text">${escapeHtml(msg.Message_Text)}</p>
-                    <span class="message-time">${formatMessageTime(msg.Timestamp)}</span>
-                </div>
+            <div class="message-bubble ${isSent ? 'sent' : 'received'}">
+                <p class="message-text">${escapeHtml(msg.Message_Text)}</p>
+                <span class="message-time">${formatTime(msg.Timestamp)}</span>
             </div>
         `;
     }).join('');
-    
-    // Scroll to bottom
-    container.scrollTop = container.scrollHeight;
 }
 
-// Handle sending message from chat window
-async function handleSendMessage(e) {
-    e.preventDefault();
-    
-    const messageInput = document.getElementById('messageInput');
-    const messageText = messageInput.value.trim();
-    
-    if (!messageText || !currentConversationUserId) return;
-    
-    try {
-        const response = await fetch('/messages/api/send', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                receiver_id: currentConversationUserId,
-                message_text: messageText
-            })
-        });
-        
-        if (!response.ok) throw new Error('Failed to send message');
-        
-        // Clear input
-        messageInput.value = '';
+function populateRecipientSelect() {
+    recipientSelect.innerHTML = '<option value="">Select recipient...</option>' +
+        allUsers.map(user => `
+            <option value="${user.User_ID}">${user.Username} (${user.Email})</option>
+        `).join('');
+}
+
+// ============================================================================
+// UI HELPERS
+// ============================================================================
+
+function showChatWindow() {
+    chatEmpty.style.display = 'none';
+    chatWindow.style.display = 'flex';
+}
+
+function hideChatWindow() {
+    chatEmpty.style.display = 'flex';
+    chatWindow.style.display = 'none';
+}
+
+function scrollToBottom() {
+    setTimeout(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 100);
+}
+
+function openModal() {
+    newMessageModal.classList.add('active');
+}
+
+function closeModal() {
+    newMessageModal.classList.remove('active');
+    recipientSelect.value = '';
+    newMessageText.value = '';
+}
+
+// ============================================================================
+// EVENT LISTENERS
+// ============================================================================
+
+function setupEventListeners() {
+    // Message form
+    messageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        sendMessage();
+    });
+
+    // Auto-resize textarea
+    messageInput.addEventListener('input', () => {
         messageInput.style.height = 'auto';
-        
-        // Reload conversation
-        const username = document.getElementById('chatUserName').textContent;
-        await loadConversation(currentConversationUserId, username);
-        await loadConversations();
-    } catch (error) {
-        console.error('Error sending message:', error);
-        showError('Failed to send message');
-    }
-}
+        messageInput.style.height = messageInput.scrollHeight + 'px';
+    });
 
-// Load users for new message modal
-async function loadUsers() {
-    try {
-        const response = await fetch('/messages/api/users');
-        if (!response.ok) throw new Error('Failed to load users');
-        
-        const users = await response.json();
-        const select = document.getElementById('recipientSelect');
-        
-        select.innerHTML = '<option value="">Select recipient...</option>' + 
-            users.map(user => `
-                <option value="${user.User_ID}">${escapeHtml(user.Username)} (${escapeHtml(user.Email)})</option>
-            `).join('');
-    } catch (error) {
-        console.error('Error loading users:', error);
-    }
-}
+    // Search conversations
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = allConversations.filter(conv =>
+            conv.Other_Username && conv.Other_Username.toLowerCase().includes(query)
+        );
+        renderConversations(filtered);
+    });
 
-// Open new message modal
-function openNewMessageModal() {
-    document.getElementById('newMessageModal').classList.add('show');
-    document.getElementById('recipientSelect').value = '';
-    document.getElementById('newMessageText').value = '';
-}
+    // New message modal
+    newMessageBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+    sendNewMessageBtn.addEventListener('click', sendNewMessage);
 
-// Close new message modal
-function closeNewMessageModal() {
-    document.getElementById('newMessageModal').classList.remove('show');
-}
-
-// Send new message from modal
-async function sendNewMessage() {
-    const recipientId = document.getElementById('recipientSelect').value;
-    const messageText = document.getElementById('newMessageText').value.trim();
-    
-    if (!recipientId || !messageText) {
-        showError('Please select a recipient and enter a message');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/messages/api/send', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                receiver_id: parseInt(recipientId),
-                message_text: messageText
-            })
-        });
-        
-        if (!response.ok) throw new Error('Failed to send message');
-        
-        closeNewMessageModal();
-        
-        // Load the new conversation
-        const select = document.getElementById('recipientSelect');
-        const username = select.options[select.selectedIndex].text.split(' (')[0];
-        await loadConversation(parseInt(recipientId), username);
-        await loadConversations();
-        
-        showSuccess('Message sent successfully');
-    } catch (error) {
-        console.error('Error sending message:', error);
-        showError('Failed to send message');
-    }
-}
-
-// Start polling for new messages
-function startPolling() {
-    // Poll every 5 seconds for new messages
-    pollInterval = setInterval(async () => {
-        if (currentConversationUserId) {
-            const username = document.getElementById('chatUserName').textContent;
-            const response = await fetch(`/messages/api/conversation/${currentConversationUserId}`);
-            if (response.ok) {
-                const messages = await response.json();
-                renderMessages(messages);
-            }
+    // Close modal on outside click
+    newMessageModal.addEventListener('click', (e) => {
+        if (e.target === newMessageModal) {
+            closeModal();
         }
-        
-        // Update conversations list
-        await loadConversations();
-    }, 5000);
+    });
+
+    // Enter to send (Shift+Enter for new line)
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 }
 
-// Stop polling when page is hidden
+// ============================================================================
+// AUTO REFRESH
+// ============================================================================
+
+function startAutoRefresh() {
+    // Refresh conversations every 10 seconds
+    refreshInterval = setInterval(async () => {
+        await loadConversations();
+        
+        // Refresh current conversation if open
+        if (currentConversationUserId) {
+            await loadConversation(currentConversationUserId);
+        }
+    }, 10000);
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+}
+
+// Stop refresh when page is hidden
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        if (pollInterval) clearInterval(pollInterval);
+        stopAutoRefresh();
     } else {
-        startPolling();
+        startAutoRefresh();
     }
 });
 
-// Utility functions
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
 
 function formatTime(timestamp) {
     if (!timestamp) return '';
-    
+
     const date = new Date(timestamp);
     const now = new Date();
     const diffMs = now - date;
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-    
+
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    
-    return date.toLocaleDateString();
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-function formatMessageTime(timestamp) {
-    if (!timestamp) return '';
-    
-    const date = new Date(timestamp);
-    const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    
-    if (isToday) {
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
-function showError(message) {
-    // Simple alert for now - you can implement a better toast notification
-    alert(message);
-}
+// ============================================================================
+// EXPORTS (for inline onclick handlers)
+// ============================================================================
 
-function showSuccess(message) {
-    // Simple alert for now - you can implement a better toast notification
-    console.log(message);
-}
+window.loadConversation = loadConversation;

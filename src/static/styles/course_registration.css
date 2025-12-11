@@ -220,19 +220,19 @@
 }
 
 /* Role-based avatar colors */
-.cr-avatar[data-role="Student"] {
+.cr-avatar[data-user-role="Student"] {
     background: linear-gradient(135deg, #3b82f6, #2563eb); /* Blue for Students */
 }
 
-.cr-avatar[data-role="Instructor"] {
+.cr-avatar[data-user-role="Instructor"] {
     background: linear-gradient(135deg, #8b5cf6, #7c3aed); /* Purple for Instructors */
 }
 
-.cr-avatar[data-role="Admin"] {
+.cr-avatar[data-user-role="Admin"] {
     background: linear-gradient(135deg, #ef4444, #dc2626); /* Red for Admins */
 }
 
-.cr-avatar[data-role="User"] {
+.cr-avatar[data-user-role="User"] {
     background: linear-gradient(135deg, #6b7280, #4b5563); /* Gray for generic Users */
 }
 

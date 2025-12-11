@@ -73,13 +73,15 @@ class StudentRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO [Student] (User_ID, Department, Year_Level, GPA) VALUES (?, ?, ?, ?)",
+                "INSERT INTO [Student] (User_ID, Department, Year_Level, GPA) "
+                "OUTPUT INSERTED.Student_ID "
+                "VALUES (?, ?, ?, ?)",
                 (student.User_ID, student.Department, student.Year_Level, student.GPA)
             )
+            row = cursor.fetchone()
+            if row:
+                student.Student_ID = row[0]
             conn.commit()
-            # Get the last inserted ID for SQL Server
-            cursor.execute("SELECT SCOPE_IDENTITY()")
-            student.Student_ID = cursor.fetchone()[0]
             return student
         finally:
             cursor.close()
