@@ -127,13 +127,15 @@ CREATE TABLE IF NOT EXISTS Message (
     Receiver_ID INT NOT NULL,
     Message_Text TEXT NOT NULL,
     Timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Is_Read TINYINT(1) DEFAULT 0,
     CONSTRAINT FK_Message_Sender FOREIGN KEY (Sender_ID)
         REFERENCES `User`(User_ID) ON DELETE CASCADE,
     CONSTRAINT FK_Message_Receiver FOREIGN KEY (Receiver_ID)
         REFERENCES `User`(User_ID) ON DELETE CASCADE,
     INDEX idx_sender_id (Sender_ID),
     INDEX idx_receiver_id (Receiver_ID),
-    INDEX idx_timestamp (Timestamp)
+    INDEX idx_timestamp (Timestamp),
+    INDEX idx_is_read (Is_Read)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =========================================
