@@ -92,7 +92,7 @@ def summarize_text(text):
             continue
         
         # Check if adding the current sentence exceeds the chunk limit
-        if tokenizer(current_chunk + " " + sentence, return_length=True)['length'] > max_chunk_tokens:
+        if len(tokenizer.encode(current_chunk + " " + sentence)) > max_chunk_tokens:
             # If it does, add the current chunk to the list and start a new one
             text_chunks.append(current_chunk.strip())
             current_chunk = sentence
@@ -109,7 +109,7 @@ def summarize_text(text):
         try:
             # Adjust max_length and min_length for each chunk based on its size
             # A simple approach: max_length is 80% of chunk tokens, min_length is 20%
-            chunk_token_count = tokenizer(chunk, return_length=True)['length']
+            chunk_token_count = len(tokenizer.encode(chunk))
             chunk_max_length = int(chunk_token_count * 0.8)
             chunk_min_length = int(chunk_token_count * 0.2)
             

@@ -7,11 +7,14 @@ from typing import Optional
 
 class Enrollment:
     def __init__(self, Enrollment_ID: Optional[int] = None, Student_ID: int = 0,
-                 Course_ID: int = 0, Status: str = "enrolled", **kwargs):
+                 Course_ID: int = 0, Status: str = "enrolled", 
+                 Grade: Optional[str] = None, Semester: Optional[str] = None, **kwargs):
         self.Enrollment_ID = Enrollment_ID
         self.Student_ID = Student_ID
         self.Course_ID = Course_ID
         self.Status = Status  # 'enrolled', 'dropped', 'completed'
+        self.Grade = Grade  # Grade received (e.g., 'A', 'B+', 'C')
+        self.Semester = Semester  # Semester name (e.g., 'Fall 2021', 'Spring 2022')
         
         # Handle any additional fields passed via kwargs
         for key, value in kwargs.items():
@@ -26,6 +29,8 @@ class Enrollment:
             'Enrollment_ID': self.Enrollment_ID,
             'Student_ID': self.Student_ID,
             'Course_ID': self.Course_ID,
-            'Status': self.Status
+            'Status': self.Status,
+            'Grade': self.Grade,
+            'Semester': self.Semester
         }
 
