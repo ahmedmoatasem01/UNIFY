@@ -48,14 +48,17 @@ def get_user_data(user_id):
         role = 'Student'
         department = student.Department if student.Department else 'Zewail City'
         major = student.Department if student.Department else 'Computer Science'  # Use Department as Major
+        avatar_letter = 'S'  # S for Student
     elif instructor:
         role = 'Instructor'
         department = instructor.Department if instructor.Department else 'Zewail City'
         major = instructor.Department if instructor.Department else 'Computer Science'  # Use Department as Major
+        avatar_letter = 'I'  # I for Instructor
     else:
         role = 'User'
         department = 'Zewail City'
         major = 'Computer Science'
+        avatar_letter = 'U'  # U for User
     
     return {
         'name': user.Username if user.Username else 'User',
@@ -63,7 +66,7 @@ def get_user_data(user_id):
         'role': role,
         'department': department,
         'major': major,
-        'avatar_letter': user.Username[0].upper() if user.Username else 'U'
+        'avatar_letter': avatar_letter
     }
 
 

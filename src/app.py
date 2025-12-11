@@ -10,6 +10,7 @@ from controllers.schedule_controller import schedule_bp
 from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
 from controllers.transcript_controller import transcript_bp
+from controllers.overview_controller import overview_bp
 from repositories.repository_factory import RepositoryFactory
 
 # Conditionally import AI Note controller (requires additional dependencies)
@@ -20,7 +21,6 @@ except ImportError as e:
     print(f"Warning: AI Note controller not available: {e}")
     ai_note_bp = None
     ai_note_available = False
-from utils.schedule_loader import get_today_schedule, get_sample_schedule
 from core.user_helper import get_user_data
 import os
 import sys
@@ -44,6 +44,7 @@ app.register_blueprint(schedule_bp)
 app.register_blueprint(calendar_bp)
 app.register_blueprint(course_reg_bp)
 app.register_blueprint(transcript_bp)
+app.register_blueprint(overview_bp)
 if ai_note_available and ai_note_bp:
     app.register_blueprint(ai_note_bp)
 app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
@@ -212,12 +213,8 @@ def login_page():
 @app.route('/overview')
 @app.route('/dashboard')
 def overview():
-    """Overview page - requires authentication"""
-    if 'user_id' not in session:
-        return redirect(url_for('login_page'))
-    user_id = session.get('user_id', DEFAULT_USER_ID)
-    user = get_user_data(user_id)
-    return render_template('overview.html', user=user, user_data=user)
+    """Overview page - redirects to overview blueprint"""
+    return redirect('/overview/')
 
 
 @app.route('/schedule')
@@ -254,6 +251,15 @@ def calendar_page():
         return redirect(url_for('login_page'))
     user_data = get_user_data(session.get('user_id'))
     return render_template('Calendar.html', user_data=user_data)
+
+
+@app.route('/reminders')
+def reminders_page():
+    """Smart Reminders page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('Reminder.html', user_data=user_data)
 
 
 @app.route('/messages')
