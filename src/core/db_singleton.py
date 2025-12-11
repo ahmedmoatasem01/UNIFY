@@ -14,8 +14,8 @@ class DatabaseConnection:
         if not hasattr(self, 'initialized'):
             # Configure SQL Server connection
             self.connection_string = (
-                "DRIVER={ODBC Driver 17 for SQL Server};"
-                "SERVER=DESKTOP-V6DPJFP\\SQLEXPRESS;"
+                "DRIVER={ODBC Driver 17 for SQL Server};"  # or "ODBC Driver 18 for SQL Server"
+                "SERVER=DESKTOP-V6DPJFP\\SQLEXPRESS;"       # Use your server (e.g., localhost, .\\SQLEXPRESS)
                 "DATABASE=unify;"
                 "Trusted_Connection=yes;"
             )

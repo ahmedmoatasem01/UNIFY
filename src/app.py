@@ -9,12 +9,23 @@ from controllers.enrollment_controller import enrollment_bp
 from controllers.schedule_controller import schedule_bp
 from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
+<<<<<<< HEAD
+from controllers.AI_Note_controller import ai_note_bp
+=======
 from repositories.repository_factory import RepositoryFactory
 from utils.schedule_loader import get_today_schedule, get_sample_schedule
 from core.user_helper import get_user_data
+>>>>>>> 11756ba59579946f1b504084a7c26bee69354c0f
 import os
 import sys
 
+<<<<<<< HEAD
+app = Flask(__name__, 
+            static_folder=os.path.join(os.path.dirname(__file__), 'static'),
+            template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
+
+=======
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -23,6 +34,7 @@ app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.secret_key = os.environ.get('SECRET_KEY', 'unify-secret-key-change-in-production')
 
 # --- Register Blueprints ---
+>>>>>>> 11756ba59579946f1b504084a7c26bee69354c0f
 app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(student_bp)
@@ -33,6 +45,9 @@ app.register_blueprint(enrollment_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(calendar_bp)
 app.register_blueprint(course_reg_bp)
+<<<<<<< HEAD
+app.register_blueprint(ai_note_bp)
+=======
 app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
 
 # --- Repository instances ---
@@ -57,6 +72,7 @@ except Exception as e:
     schedule_repo = None
 
 DEFAULT_USER_ID = 1  # Fallback user ID for testing
+>>>>>>> 11756ba59579946f1b504084a7c26bee69354c0f
 
 
 def get_default_user():

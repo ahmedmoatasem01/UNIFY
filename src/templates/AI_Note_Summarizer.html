@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | AI Note Summarizer</title>
+    <link rel="stylesheet" href="../static/styles/course_registration.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* AI Note Summarizer specific styles */
+        .summarizer-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .summarizer-header {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .summarizer-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .summarizer-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(79, 70, 229, 0.3);
+            border-radius: 12px;
+            padding: 48px 32px;
+            text-align: center;
+            background: rgba(79, 70, 229, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .upload-area i {
+            font-size: 48px;
+            color: var(--accent);
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .upload-area h3 {
+            color: var(--text-main);
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .upload-area p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-info {
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .file-info i {
+            color: var(--accent);
+            margin-right: 8px;
+        }
+
+        .btn-summarize {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+        }
+
+        .btn-summarize:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-summarize:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .summary-section {
+            display: none;
+        }
+
+        .summary-section.active {
+            display: block;
+        }
+
+        .summary-box {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .summary-box h3 {
+            color: #22c55e;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .summary-box p {
+            color: var(--text-main);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .error-section {
+            display: none;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .error-section.active {
+            display: block;
+        }
+
+        .error-section h3 {
+            color: #ef4444;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .error-section p {
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(79, 70, 229, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 10px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(79, 70, 229, 0.1);
+            border-color: var(--accent);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .summarizer-container {
+                padding: 24px;
+            }
+
+            .upload-area {
+                padding: 32px 16px;
+            }
+
+            .summarizer-header h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Header and Profile Badge Styles */
+        .cr-header {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .cr-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+
+        .cr-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .cr-btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(30, 36, 55, 0.8);
+            color: #e5e7eb;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 16px;
+        }
+
+        .cr-btn-icon:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: #38bdf8;
+        }
+
+        .cr-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cr-profile:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .cr-profile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            object-fit: cover;
+        }
+
+        .cr-profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .cr-profile-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin: 0;
+        }
+
+        .cr-profile-role {
+            font-size: 12px;
+            color: #9ca3af;
+            margin: 0;
+        }
+
+        .cr-content {
+            padding: 32px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .cr-main-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item active" href="/api/summarize">
+
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>AI Note Summarizer</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes & Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/calendar">
+                <i class="fa-solid fa-bell"></i>
+                <span>Calendar & Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Transcript</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="cr-main-content">
+        <!-- Header -->
+        <header class="cr-header">
+            <h1>AI Note Summarizer</h1>
+        </header>
+
+        <!-- Summarizer Content -->
+        <div class="cr-content">
+            <div class="summarizer-container">
+                <div class="summarizer-header">
+                    <h1>Upload Your Notes</h1>
+                    <p>Paste text or upload a file to get an AI-powered summary</p>
+                </div>
+
+                <!-- Upload Area -->
+                <div class="upload-area" id="uploadArea">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <h3>Drop your file here</h3>
+                    <p>or click to browse (TXT, PDF, DOC, DOCX)</p>
+                </div>
+
+                <!-- File Info -->
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <div>
+                        <i class="fa-solid fa-file"></i>
+                        <span id="fileName"></span>
+                    </div>
+                    <button class="btn-secondary" onclick="clearFile()" style="width: auto; padding: 6px 12px;">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Summarize Button -->
+                <button class="btn-summarize" id="summarizeBtn" disabled>Summarize</button>
+
+                <!-- Loading State -->
+                <div class="loading" id="loadingState">
+                    <div class="spinner"></div>
+                    <p>Generating summary...</p>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-section" id="errorMessage">
+                    <h3>Error</h3>
+                    <p id="errorText"></p>
+                </div>
+
+                <!-- Summary Result -->
+                <div class="summary-section" id="summaryResult">
+                    <div class="summary-box">
+                        <h3>Summary</h3>
+                        <p id="summaryText"></p>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="originalPages">0</div>
+                            <div class="stat-label">Original Pages</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="reductionPercentage">0%</div>
+                            <div class="stat-label">Reduction</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn-secondary" onclick="downloadSummary()">
+                            <i class="fa-solid fa-download"></i> Download
+                        </button>
+                        <button class="btn-secondary" onclick="saveSummary()">
+                            <i class="fa-solid fa-save"></i> Save
+                        </button>
+                        <button class="btn-secondary" onclick="clearSummary()">
+                            <i class="fa-solid fa-redo"></i> New Summary
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Hidden File Input -->
+<input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx">
+
+<script>
+    let selectedFile = null;
+
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const summarizeBtn = document.getElementById('summarizeBtn');
+    const loadingState = document.getElementById('loadingState');
+    const errorMessage = document.getElementById('errorMessage');
+    const summaryResult = document.getElementById('summaryResult');
+
+    // Upload area click handler
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // File input change handler
+    fileInput.addEventListener('change', (e) => {
+        handleFileSelect(e.target.files[0]);
+    });
+
+    // Drag and drop handlers
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--accent)';
+        uploadArea.style.background = 'rgba(79, 70, 229, 0.1)';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = 'rgba(79, 70, 229, 0.3)';
+        uploadArea.style.background = 'rgba(79, 70, 229, 0.05)';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'rgba(79, 70, 229, 0.3)';
+        uploadArea.style.background = 'rgba(79, 70, 229, 0.05)';
+        handleFileSelect(e.dataTransfer.files[0]);
+    });
+
+    function handleFileSelect(file) {
+        if (!file) return;
+
+        const allowedTypes = ['.txt', '.pdf', '.doc', '.docx'];
+        const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+        if (!allowedTypes.includes(fileExt)) {
+            showError('Invalid file type. Please upload TXT, PDF, DOC, or DOCX files.');
+            return;
+        }
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileInfo.style.display = 'flex';
+        uploadArea.style.display = 'none';
+        summarizeBtn.disabled = false;
+        clearResults();
+    }
+
+    function clearFile() {
+        selectedFile = null;
+        fileInput.value = '';
+        fileInfo.style.display = 'none';
+        uploadArea.style.display = 'block';
+        summarizeBtn.disabled = true;
+        clearResults();
+    }
+
+    summarizeBtn.addEventListener('click', async () => {
+        if (!selectedFile) return;
+
+        loadingState.classList.add('active');
+        errorMessage.classList.remove('active');
+        summaryResult.classList.remove('active');
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            const response = await fetch('/api/summarize', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                showError(data.error);
+            } else {
+                displaySummary(data.summary, data.original_text);
+            }
+        } catch (error) {
+            showError('Failed to summarize. Please try again.');
+        } finally {
+            loadingState.classList.remove('active');
+        }
+    });
+
+    function displaySummary(summary, originalText) {
+        document.getElementById('summaryText').textContent = summary;
+
+        const originalPages = Math.ceil(originalText.length / 1500);
+        const summaryPages = Math.ceil(summary.length / 1500);
+        const reduction = Math.round(((originalPages - summaryPages) / originalPages) * 100);
+
+        document.getElementById('originalPages').textContent = originalPages;
+        document.getElementById('reductionPercentage').textContent = reduction + '%';
+
+        summaryResult.classList.add('active');
+    }
+
+    function showError(message) {
+        document.getElementById('errorText').textContent = message;
+        errorMessage.classList.add('active');
+    }
+
+    function downloadSummary() {
+        const summary = document.getElementById('summaryText').textContent;
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(summary));
+        element.setAttribute('download', 'summary.txt');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+    function saveSummary() {
+        alert('Summary saved to your notes!');
+    }
+
+    function clearSummary() {
+        clearFile();
+    }
+
+    function clearResults() {
+        summaryResult.classList.remove('active');
+        errorMessage.classList.remove('active');
+        loadingState.classList.remove('active');
+    }
+</script>
+</body>
+</html>

@@ -16,6 +16,7 @@ def _import_repository(filename, class_name):
     spec.loader.exec_module(module)
     return getattr(module, class_name)
 
+AINoteRepository = _import_repository('ai_note.repository', 'AINoteRepository')
 UserRepository = _import_repository('user.repository', 'UserRepository')
 StudentRepository = _import_repository('student.repository', 'StudentRepository')
 InstructorRepository = _import_repository('instructor.repository', 'InstructorRepository')
@@ -31,6 +32,7 @@ ReminderRepository = _import_repository('reminder.repository', 'ReminderReposito
 FocusSessionRepository = _import_repository('focus_session.repository', 'FocusSessionRepository')
 TeachingAssistantRepository = _import_repository('teaching_assistant.repository', 'TeachingAssistantRepository')
 
+
 # Import CourseScheduleSlotRepository
 CourseScheduleSlotRepository = _import_repository('course_schedule_slot.repository', 'CourseScheduleSlotRepository')
 
@@ -42,6 +44,8 @@ class RepositoryFactory:
         
         if entity_type == "user":
             return UserRepository()
+        elif entity_type == "ai_note":
+            return AINoteRepository()
         elif entity_type == "student":
             return StudentRepository()
         elif entity_type == "instructor":
