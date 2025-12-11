@@ -9,17 +9,21 @@ from controllers.enrollment_controller import enrollment_bp
 from controllers.schedule_controller import schedule_bp
 from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
-from controllers.AI_Note_controller import ai_note_bp
+from controllers.transcript_controller import transcript_bp
 from repositories.repository_factory import RepositoryFactory
+
+# Conditionally import AI Note controller (requires additional dependencies)
+try:
+    from controllers.AI_Note_controller import ai_note_bp
+    ai_note_available = True
+except ImportError as e:
+    print(f"Warning: AI Note controller not available: {e}")
+    ai_note_bp = None
+    ai_note_available = False
 from utils.schedule_loader import get_today_schedule, get_sample_schedule
 from core.user_helper import get_user_data
 import os
 import sys
-
-app = Flask(__name__, 
-            static_folder=os.path.join(os.path.dirname(__file__), 'static'),
-            template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
-app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this-in-production')
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -39,7 +43,9 @@ app.register_blueprint(enrollment_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(calendar_bp)
 app.register_blueprint(course_reg_bp)
-app.register_blueprint(ai_note_bp)
+app.register_blueprint(transcript_bp)
+if ai_note_available and ai_note_bp:
+    app.register_blueprint(ai_note_bp)
 app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
 
 # --- Repository instances ---
