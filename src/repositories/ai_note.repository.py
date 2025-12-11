@@ -32,3 +32,62 @@ class AINoteRepository:
 
         finally:
             conn.close()
+
+    def get_by_id(self, note_id):
+        """Get note by ID"""
+        conn = self.db.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT Note_ID, Student_ID, Original_File, Summary_Text, Upload_Date
+                FROM [Note]
+                WHERE Note_ID = ?
+            """, (note_id,))
+            row = cursor.fetchone()
+            if row:
+                return AINote(
+                    Note_ID=row[0],
+                    Student_ID=row[1],
+                    Original_File=row[2],
+                    Summary_Text=row[3],
+                    Upload_Date=row[4]
+                )
+            return None
+        finally:
+            conn.close()
+
+    def get_by_student_id(self, student_id):
+        """Get all notes for a student"""
+        conn = self.db.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT Note_ID, Student_ID, Original_File, Summary_Text, Upload_Date
+                FROM [Note]
+                WHERE Student_ID = ?
+                ORDER BY Upload_Date DESC
+            """, (student_id,))
+            rows = cursor.fetchall()
+            notes = []
+            for row in rows:
+                notes.append(AINote(
+                    Note_ID=row[0],
+                    Student_ID=row[1],
+                    Original_File=row[2],
+                    Summary_Text=row[3],
+                    Upload_Date=row[4]
+                ))
+            return notes
+        finally:
+            conn.close()
+
+    def delete(self, note_id):
+        """Delete a note by ID"""
+        conn = self.db.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM [Note] WHERE Note_ID = ?", (note_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+        finally:
+            conn.close()

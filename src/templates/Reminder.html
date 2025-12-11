@@ -2,20 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Unify | Course Registration</title>
-    <link rel="stylesheet" href="../static/styles/course_registration.css">
-
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <title>Unify | Smart Reminders</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/SmartReminders.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="cr-body">
 <div class="cr-app-layout">
-    <!-- ===== Sidebar ===== -->
+    <!-- Sidebar -->
     <aside class="cr-sidebar">
         <div class="cr-sidebar-header">
             <div class="cr-brand-logo">U</div>
@@ -24,7 +19,6 @@
                 <p class="cr-brand-subtitle">Student Assistant</p>
             </div>
         </div>
-
         <nav class="cr-sidebar-nav">
             <a class="cr-nav-item" href="/overview">
                 <i class="fa-solid fa-chart-column"></i>
@@ -42,9 +36,9 @@
                 <i class="fa-solid fa-note-sticky"></i>
                 <span>Notes &amp; Summaries</span>
             </a>
-            <a class="cr-nav-item" href="/calendar">
+            <a class="cr-nav-item active" href="/reminders">
                 <i class="fa-solid fa-bell"></i>
-                <span>Calendar &amp; Reminders</span>
+                <span>Smart Reminders</span>
             </a>
             <a class="cr-nav-item" href="/messages">
                 <i class="fa-solid fa-message"></i>
@@ -54,7 +48,7 @@
                 <i class="fa-solid fa-file-lines"></i>
                 <span>Transcript</span>
             </a>
-            <a class="cr-nav-item active" href="/course-registration">
+            <a class="cr-nav-item" href="/course-registration">
                 <i class="fa-solid fa-book-open"></i>
                 <span>Course Registration</span>
             </a>
@@ -63,34 +57,137 @@
                 <span>Settings</span>
             </a>
         </nav>
-
         <div class="cr-sidebar-footer">
             <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
-            <p class="cr-small-text">CSAI 203 · Team 5</p>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
         </div>
     </aside>
 
-    <!-- ===== Main panel ===== -->
-    <div class="cr-main-panel">
-        <!-- Top navbar -->
-        <header class="cr-topbar">
-            <div class="cr-topbar-left">
-                <h1><i class="fa-solid fa-graduation-cap"></i> Reminders</h1>
-                <p>Manage your reminders and notifications.</p>
-            </div>
-            <div class="cr-topbar-right">
-                <button id="cr-theme-toggle" class="cr-icon-btn" title="Toggle light/dark mode">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <div class="cr-user-chip">
-                    <div class="cr-avatar">{{ user_data.avatar_letter if user_data else 'U' }}</div>
-                    <div>
-                        <p class="cr-user-name">{{ user_data.name if user_data else 'User' }}</p>
-                        <p class="cr-user-role">{{ user_data.role if user_data else 'User' }} · {{ user_data.department if user_data else 'Zewail City' }}</p>
+    <!-- Main Panel -->
+    <main class="cr-main-panel">
+        {% include 'components/topbar.html' %}
+        {% block topbar_title %}
+        <div class="cr-topbar-left">
+            <h1><i class="fa-solid fa-bell"></i> Smart Reminders</h1>
+            <p>Your command center for staying on top of everything</p>
+        </div>
+        {% endblock %}
+        
+        <div class="cr-content" style="padding: 20px;">
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card orange">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Urgent</div>
+                        <div class="stat-value" id="urgentCount">0</div>
+                    </div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value" id="todayCount">0</div>
+                    </div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">This Week</div>
+                        <div class="stat-value" id="weekCount">0</div>
                     </div>
                 </div>
             </div>
-        </header>
+
+            <!-- Main Dashboard -->
+            <div class="reminder-dashboard">
+                <!-- Priority Alerts -->
+                <div class="reminder-card priority-alerts">
+                    <div class="reminder-card-header">
+                        <div class="reminder-card-title">
+                            <i class="fa-solid fa-fire"></i>
+                            <span>Priority Alerts</span>
+                        </div>
+                        <span id="priorityCount" style="color: #e53e3e; font-weight: 600;">0</span>
+                    </div>
+                    <div id="priorityAlertsContainer">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <p>No urgent items! You're all caught up.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Add Reminder -->
+                <div class="reminder-card quick-add">
+                    <div class="reminder-card-header">
+                        <div class="reminder-card-title">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>Quick Add Reminder</span>
+                        </div>
+                    </div>
+                    <form class="quick-add-form" id="quickAddForm">
+                        <input type="text" class="quick-add-input" placeholder="What do you need to remember?" id="reminderTitle" required>
+                        <div class="quick-add-row">
+                            <input type="datetime-local" class="quick-add-input" id="reminderTime" required>
+                            <select class="quick-add-input" id="reminderPriority">
+                                <option value="low">Low Priority</option>
+                                <option value="medium" selected>Medium Priority</option>
+                                <option value="high">High Priority</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="quick-add-btn">
+                            <i class="fa-solid fa-bell"></i> Create Reminder
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Today's Agenda -->
+                <div class="reminder-card today-agenda">
+                    <div class="reminder-card-header">
+                        <div class="reminder-card-title">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Today's Agenda</span>
+                        </div>
+                    </div>
+                    <div id="todayAgendaContainer">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-calendar"></i>
+                            <p>No items for today</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Timeline -->
+                <div class="reminder-card upcoming">
+                    <div class="reminder-card-header">
+                        <div class="reminder-card-title">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <span>Upcoming This Week</span>
+                        </div>
+                    </div>
+                    <div id="upcomingTimeline" class="timeline">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-inbox"></i>
+                            <p>No upcoming items this week</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/smart-reminders.js') }}"></script>
+</body>
+</html>
