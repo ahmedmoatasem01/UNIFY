@@ -3,9 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Tasks</title>
-    <link rel="stylesheet" href="../static/styles/course_registration.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Task-specific styles */
+        .tasks-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .task-input-section {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .task-form {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .task-input {
+            padding: 12px 16px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg);
+            color: var(--cr-text-main);
+            font-size: 0.95rem;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: var(--cr-accent);
+            box-shadow: 0 0 0 3px var(--cr-accent-soft);
+        }
+
+        .priority-select {
+            padding: 12px 16px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg);
+            color: var(--cr-text-main);
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .due-date-input {
+            padding: 12px 16px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg);
+            color: var(--cr-text-main);
+            font-size: 0.95rem;
+        }
+
+        .add-task-btn {
+            padding: 12px 24px;
+            background: var(--cr-accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-task-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+        }
+
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .tasks-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg-panel);
+            color: var(--cr-text-main);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--cr-accent-soft);
+            border-color: var(--cr-accent);
+            color: var(--cr-accent);
+        }
+
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-card {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .task-card:hover {
+            border-color: var(--cr-accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-card.completed {
+            opacity: 0.6;
+        }
+
+        .task-card.completed .task-text {
+            text-decoration: line-through;
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--cr-border);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            background: var(--cr-bg);
+        }
+
+        .task-checkbox:hover {
+            border-color: var(--cr-accent);
+        }
+
+        .task-checkbox.completed {
+            background: var(--cr-accent);
+            border-color: var(--cr-accent);
+            color: white;
+        }
+
+        .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .priority-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .priority-dot.priority-high {
+            background: var(--cr-danger);
+        }
+
+        .priority-dot.priority-medium {
+            background: #f59e0b;
+        }
+
+        .priority-dot.priority-low {
+            background: #22c55e;
+        }
+
+        .task-text {
+            font-size: 0.95rem;
+            color: var(--cr-text-main);
+            margin: 0;
+            word-break: break-word;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--cr-text-muted);
+        }
+
+        .due-date {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .due-date.overdue {
+            color: var(--cr-danger);
+            font-weight: 600;
+        }
+
+        .due-date.due-soon {
+            color: #f59e0b;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .task-action-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--cr-border);
+            border-radius: 6px;
+            background: var(--cr-bg);
+            color: var(--cr-text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .task-action-btn:hover {
+            border-color: var(--cr-danger);
+            color: var(--cr-danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--cr-text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .clear-all-btn {
+            margin-top: 24px;
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            color: var(--cr-text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-all-btn:hover {
+            border-color: var(--cr-danger);
+            color: var(--cr-danger);
+        }
+
+        @media (max-width: 768px) {
+            .task-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body class="cr-body">
 <div class="cr-app-layout">
@@ -56,7 +337,7 @@
             </a>
         </nav>
         <div class="cr-sidebar-footer">
-            <button class="cr-btn-ghost cr-logout-btn" onclick="window.location.href='/auth/logout'">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
@@ -64,29 +345,337 @@
         </div>
     </aside>
     <main class="cr-main-panel">
-        <header class="cr-topbar">
-            <div class="cr-topbar-left">
-                <h1><i class="fa-solid fa-list-check"></i> Tasks</h1>
-                <p>Manage your assignments and tasks</p>
-            </div>
-            <div class="cr-topbar-right">
-                <button id="cr-theme-toggle" class="cr-icon-btn" title="Toggle light/dark mode">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <div class="cr-user-chip">
-                    <div class="cr-avatar">{{ user_data.avatar_letter if user_data else 'U' }}</div>
-                    <div>
-                        <p class="cr-user-name">{{ user_data.name if user_data else 'User' }}</p>
-                        <p class="cr-user-role">{{ user_data.role if user_data else 'User' }} · {{ user_data.department if user_data else 'Zewail City' }}</p>
+        {% include 'components/topbar.html' %}
+        {% block topbar_title %}
+        <div class="cr-topbar-left">
+            <h1><i class="fa-solid fa-list-check"></i> Tasks</h1>
+            <p>Stay organized. Stay ahead.</p>
+        </div>
+        {% endblock %}
+        
+        <div class="cr-content">
+            <div class="tasks-container">
+                <!-- Add Task Section -->
+                <div class="task-input-section">
+                    <form id="task-form" class="task-form">
+                        <input 
+                            type="text" 
+                            id="task-input" 
+                            class="task-input" 
+                            placeholder="Add your task..." 
+                            required
+                        >
+                        <select id="priority-select" class="priority-select">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                        <input 
+                            type="datetime-local" 
+                            id="due-date-input" 
+                            class="due-date-input"
+                        >
+                        <button type="submit" class="add-task-btn">
+                            <i class="fa-solid fa-plus"></i> Add Task
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tasks Header with Filters -->
+                <div class="tasks-header">
+                    <h2 class="section-title">Your Tasks</h2>
+                    <div class="tasks-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="pending">Pending</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                        <button class="filter-btn" data-filter="high">High Priority</button>
                     </div>
                 </div>
+
+                <!-- Tasks List -->
+                <div id="tasks-list" class="tasks-list">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <p>No tasks yet. Add your first task above!</p>
+                    </div>
+                </div>
+
+                <!-- Clear All Button (hidden by default) -->
+                <div id="clear-all-container" style="display: none; text-align: center;">
+                    <button id="clear-all-btn" class="clear-all-btn">
+                        <i class="fa-solid fa-trash"></i> Clear All Completed
+                    </button>
+                </div>
             </div>
-        </header>
-        <div class="cr-content" style="padding: 20px;">
-            <p>Tasks content will be displayed here.</p>
         </div>
     </main>
 </div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script>
+    // =============== STATE ===============
+    let allTasks = [];
+    let currentFilter = 'all';
+
+    // =============== DOM ELEMENTS ===============
+    const taskForm = document.getElementById('task-form');
+    const taskInput = document.getElementById('task-input');
+    const prioritySelect = document.getElementById('priority-select');
+    const dueDateInput = document.getElementById('due-date-input');
+    const tasksList = document.getElementById('tasks-list');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const clearAllContainer = document.getElementById('clear-all-container');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+
+    // =============== LOAD TASKS ===============
+    async function loadTasks() {
+        try {
+            const response = await fetch('/tasks/api/user');
+            if (response.ok) {
+                const tasks = await response.json();
+                allTasks = tasks;
+                renderTasks();
+            } else {
+                console.error('Failed to load tasks');
+            }
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+        }
+    }
+
+    // =============== RENDER TASKS ===============
+    function renderTasks() {
+        const filteredTasks = filterTasks(allTasks);
+        
+        if (filteredTasks.length === 0) {
+            tasksList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <p>No tasks found. ${currentFilter === 'all' ? 'Add your first task above!' : 'Try a different filter.'}</p>
+                </div>
+            `;
+            clearAllContainer.style.display = 'none';
+            return;
+        }
+
+        tasksList.innerHTML = filteredTasks.map(task => {
+            const isCompleted = task.Status === 'completed';
+            const dueDate = task.Due_Date ? new Date(task.Due_Date) : null;
+            const now = new Date();
+            let dueStatus = '';
+            let dueText = '';
+            
+            if (dueDate) {
+                const diffTime = dueDate - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 0 && !isCompleted) {
+                    dueStatus = 'overdue';
+                    dueText = `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''}`;
+                } else if (diffDays === 0) {
+                    dueStatus = 'due-soon';
+                    dueText = 'Due today';
+                } else if (diffDays === 1) {
+                    dueStatus = 'due-soon';
+                    dueText = 'Due tomorrow';
+                } else {
+                    dueText = `Due ${dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+                }
+            }
+
+            return `
+                <div class="task-card ${isCompleted ? 'completed' : ''}" data-task-id="${task.Task_ID}">
+                    <div class="task-checkbox ${isCompleted ? 'completed' : ''}" onclick="toggleTask(${task.Task_ID})">
+                        ${isCompleted ? '<i class="fa-solid fa-check"></i>' : ''}
+                    </div>
+                    <div class="task-content">
+                        <div class="task-header">
+                            <span class="priority-dot priority-${task.Priority}"></span>
+                            <p class="task-text">${escapeHtml(task.Task_Title)}</p>
+                        </div>
+                        ${dueDate ? `
+                            <div class="task-meta">
+                                <div class="due-date ${dueStatus}">
+                                    <i class="fa-solid fa-calendar"></i>
+                                    <span>${dueText}</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action-btn" onclick="deleteTask(${task.Task_ID})" title="Delete task">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Show/hide clear all button
+        const completedCount = allTasks.filter(t => t.Status === 'completed').length;
+        clearAllContainer.style.display = completedCount > 0 ? 'block' : 'none';
+    }
+
+    // =============== FILTER TASKS ===============
+    function filterTasks(tasks) {
+        switch (currentFilter) {
+            case 'pending':
+                return tasks.filter(t => t.Status === 'pending');
+            case 'completed':
+                return tasks.filter(t => t.Status === 'completed');
+            case 'high':
+                return tasks.filter(t => t.Priority === 'high');
+            default:
+                return tasks;
+        }
+    }
+
+    // =============== ADD TASK ===============
+    taskForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const taskTitle = taskInput.value.trim();
+        if (!taskTitle) return;
+
+        const priority = prioritySelect.value;
+        const dueDate = dueDateInput.value;
+
+        try {
+            const response = await fetch('/tasks/api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    Task_Title: taskTitle,
+                    Priority: priority,
+                    Due_Date: dueDate || null,
+                    Status: 'pending'
+                })
+            });
+
+            if (response.ok) {
+                taskInput.value = '';
+                dueDateInput.value = '';
+                await loadTasks();
+            } else {
+                const error = await response.json();
+                alert('Error: ' + (error.error || 'Failed to create task'));
+            }
+        } catch (error) {
+            console.error('Error creating task:', error);
+            alert('Error creating task. Please try again.');
+        }
+    });
+
+    // =============== TOGGLE TASK ===============
+    async function toggleTask(taskId) {
+        const task = allTasks.find(t => t.Task_ID === taskId);
+        if (!task) return;
+
+        const newStatus = task.Status === 'completed' ? 'pending' : 'completed';
+
+        try {
+            const response = await fetch(`/tasks/api/${taskId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...task,
+                    Status: newStatus
+                })
+            });
+
+            if (response.ok) {
+                await loadTasks();
+            } else {
+                alert('Error updating task');
+            }
+        } catch (error) {
+            console.error('Error updating task:', error);
+            alert('Error updating task. Please try again.');
+        }
+    }
+
+    // =============== DELETE TASK ===============
+    async function deleteTask(taskId) {
+        if (!confirm('Are you sure you want to delete this task?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/tasks/api/${taskId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                await loadTasks();
+            } else {
+                alert('Error deleting task');
+            }
+        } catch (error) {
+            console.error('Error deleting task:', error);
+            alert('Error deleting task. Please try again.');
+        }
+    }
+
+    // =============== CLEAR ALL COMPLETED ===============
+    clearAllBtn.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to clear all completed tasks?')) {
+            return;
+        }
+
+        const completedTasks = allTasks.filter(t => t.Status === 'completed');
+        
+        try {
+            for (const task of completedTasks) {
+                await fetch(`/tasks/api/${task.Task_ID}`, { method: 'DELETE' });
+            }
+            await loadTasks();
+        } catch (error) {
+            console.error('Error clearing tasks:', error);
+            alert('Error clearing tasks. Please try again.');
+        }
+    });
+
+    // =============== FILTER BUTTONS ===============
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderTasks();
+        });
+    });
+
+    // =============== UTILITY ===============
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // =============== INITIALIZE ===============
+    // Set minimum date to today
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    dueDateInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    loadTasks();
+
+    // Logout handler
+    async function handleLogout() {
+        try {
+            const response = await fetch('/auth/logout', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = '/login';
+        }
+    }
+</script>
 </body>
 </html>
-

@@ -24,6 +24,7 @@ class UserRepository:
                 ))
             return users
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_id(self, user_id):
@@ -43,6 +44,7 @@ class UserRepository:
                 )
             return None
         finally:
+            cursor.close()
             conn.close()
 
     def get_by_email(self, email):
@@ -62,6 +64,7 @@ class UserRepository:
                 )
             return None
         finally:
+            cursor.close()
             conn.close()
 
     def create(self, user):
@@ -70,14 +73,16 @@ class UserRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO [User] (Username, Email, Password_Hash) OUTPUT INSERTED.User_ID VALUES (?, ?, ?)",
+                "INSERT INTO [User] (Username, Email, Password_Hash) VALUES (?, ?, ?)",
                 (user.Username, user.Email, user.Password_Hash)
             )
-            user_id = cursor.fetchone()[0]
             conn.commit()
-            user.User_ID = user_id
+            # Get the last inserted ID for SQL Server
+            cursor.execute("SELECT SCOPE_IDENTITY()")
+            user.User_ID = cursor.fetchone()[0]
             return user
         finally:
+            cursor.close()
             conn.close()
 
     def update(self, user):
@@ -92,6 +97,7 @@ class UserRepository:
             conn.commit()
             return user
         finally:
+            cursor.close()
             conn.close()
 
     def delete(self, user_id):
@@ -103,4 +109,6 @@ class UserRepository:
             conn.commit()
             return cursor.rowcount > 0
         finally:
+            cursor.close()
             conn.close()
+  

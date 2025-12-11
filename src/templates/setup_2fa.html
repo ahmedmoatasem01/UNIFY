@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Setup Two-Factor Authentication - Unify{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/settings.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="page-header">
+        <h1><i class="fas fa-shield-alt"></i> Setup Two-Factor Authentication</h1>
+        <p class="subtitle">Secure your account with 2FA</p>
+    </div>
+    
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-body">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 1rem;">Scan QR Code</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Use an authenticator app (Google Authenticator, Authy, etc.) to scan this QR code:</p>
+                <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="2FA QR Code" style="max-width: 300px; border: 2px solid var(--border-color); border-radius: 0.5rem; padding: 1rem; background: white;">
+                </div>
+                <div style="background: var(--bg-color); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                    <p style="margin-bottom: 0.5rem; color: var(--text-secondary);">Or enter this code manually:</p>
+                    <strong style="font-size: 1.1rem; color: var(--text-primary); font-family: monospace; letter-spacing: 0.1em;">{{ secret }}</strong>
+                </div>
+                <button class="btn btn-primary btn-block">Enable 2FA</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

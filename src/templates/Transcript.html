@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Transcript</title>
-    <link rel="stylesheet" href="../static/styles/course_registration.css">
-    <link rel="stylesheet" href="../static/styles/transcript.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -68,154 +67,19 @@
 
     <!-- Main Panel -->
     <main class="cr-main-panel">
-        <header class="cr-topbar">
-            <div class="cr-topbar-left">
-                <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
-                <p>View your complete academic transcript and performance summary</p>
-            </div>
-            <div class="cr-topbar-right">
-                <button id="cr-theme-toggle" class="cr-icon-btn" title="Toggle light/dark mode">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <div class="cr-user-chip">
-                    <div class="cr-avatar">{{ user_data.avatar_letter if user_data else 'U' }}</div>
-                    <div>
-                        <p class="cr-user-name">{{ user_data.name if user_data else 'User' }}</p>
-                        <p class="cr-user-role">{{ user_data.role if user_data else 'User' }} · {{ user_data.department if user_data else 'Zewail City' }}</p>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <div class="cr-content">
-            <!-- Academic Summary Cards -->
-            <section class="ts-summary">
-                <div class="ts-card ts-card-primary">
-                    <div class="ts-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-                    <div class="ts-card-content">
-                        <p class="ts-card-label">Cumulative GPA</p>
-                        <p class="ts-card-value" id="cumulativeGPA">3.75</p>
-                    </div>
-                </div>
-                <div class="ts-card ts-card-success">
-                    <div class="ts-card-icon"><i class="fa-solid fa-book"></i></div>
-                    <div class="ts-card-content">
-                        <p class="ts-card-label">Total Credits</p>
-                        <p class="ts-card-value" id="totalCredits">120</p>
-                    </div>
-                </div>
-                <div class="ts-card ts-card-info">
-                    <div class="ts-card-icon"><i class="fa-solid fa-chart-line"></i></div>
-                    <div class="ts-card-content">
-                        <p class="ts-card-label">Semesters</p>
-                        <p class="ts-card-value" id="semesterCount">8</p>
-                    </div>
-                </div>
-                <div class="ts-card ts-card-warning">
-                    <div class="ts-card-icon"><i class="fa-solid fa-star"></i></div>
-                    <div class="ts-card-content">
-                        <p class="ts-card-label">Academic Standing</p>
-                        <p class="ts-card-value" id="academicStanding">Good</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Controls Section -->
-            <section class="ts-controls">
-                <div class="ts-search-filter">
-                    <input type="text" id="courseSearch" placeholder="Search courses..." class="ts-search">
-                    <select id="semesterFilter" class="ts-filter">
-                        <option value="">All Semesters</option>
-                    </select>
-                    <select id="gradeFilter" class="ts-filter">
-                        <option value="">All Grades</option>
-                        <option value="A">A (4.0)</option>
-                        <option value="B">B (3.0)</option>
-                        <option value="C">C (2.0)</option>
-                        <option value="D">D (1.0)</option>
-                        <option value="F">F (0.0)</option>
-                    </select>
-                </div>
-                <div class="ts-actions">
-                    <button id="printBtn" class="ts-btn ts-btn-secondary" onclick="printTranscript()">
-                        <i class="fa-solid fa-print"></i> Print
-                    </button>
-                    <button id="downloadBtn" class="ts-btn ts-btn-secondary" onclick="downloadTranscript()">
-                        <i class="fa-solid fa-download"></i> Download PDF
-                    </button>
-                </div>
-            </section>
-
-            <!-- Honors & Achievements -->
-            <section class="ts-honors" id="honorsSection" style="display:none;">
-                <h3><i class="fa-solid fa-award"></i> Honors & Achievements</h3>
-                <div class="ts-honors-list" id="honorsList"></div>
-            </section>
-
-            <!-- Grade Distribution Chart -->
-            <section class="ts-chart-section">
-                <h3>Grade Distribution</h3>
-                <div class="ts-chart-container">
-                    <canvas id="gradeChart"></canvas>
-                </div>
-            </section>
-
-            <!-- Semester Breakdown -->
-            <section class="ts-semesters">
-                <h3>Semester History</h3>
-                <div class="ts-semester-tabs" id="semesterTabs"></div>
-                <div class="ts-courses-container" id="coursesContainer"></div>
-            </section>
-
-            <!-- Transcript Details Table -->
-            <section class="ts-transcript-table">
-                <h3>Course Details</h3>
-                <div class="ts-table-wrapper">
-                    <table class="ts-table" id="transcriptTable">
-                        <thead>
-                            <tr>
-                                <th>Course Code</th>
-                                <th>Course Name</th>
-                                <th>Credits</th>
-                                <th>Grade</th>
-                                <th>Quality Points</th>
-                                <th>Semester</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Statistics -->
-            <section class="ts-statistics">
-                <h3>Academic Statistics</h3>
-                <div class="ts-stats-grid">
-                    <div class="ts-stat-box">
-                        <p class="ts-stat-label">Courses Completed</p>
-                        <p class="ts-stat-value" id="coursesCompleted">32</p>
-                    </div>
-                    <div class="ts-stat-box">
-                        <p class="ts-stat-label">Average Grade</p>
-                        <p class="ts-stat-value" id="averageGrade">A-</p>
-                    </div>
-                    <div class="ts-stat-box">
-                        <p class="ts-stat-label">Highest Grade</p>
-                        <p class="ts-stat-value" id="highestGrade">A+</p>
-                    </div>
-                    <div class="ts-stat-box">
-                        <p class="ts-stat-label">Dean's List Count</p>
-                        <p class="ts-stat-value" id="deansListCount">6</p>
-                    </div>
-                </div>
-            </section>
+        {% include 'components/topbar.html' %}
+        {% block topbar_title %}
+        <div class="cr-topbar-left">
+            <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
+            <p>View your academic transcript</p>
+        </div>
+        {% endblock %}
+        <div class="cr-content" style="padding: 20px;">
+            <p>Transcript content will be displayed here.</p>
         </div>
     </main>
 </div>
-
-<!-- Chart.js for Grade Distribution -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
 <script>
     // Mock Transcript Data
     const transcriptData = {
