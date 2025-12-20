@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unify | Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/settings.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body class="cr-body">
+<div class="cr-app-layout">
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/reminders">
+                <i class="fa-solid fa-bell"></i>
+                <span>Smart Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Transcript</span>
+            </a>
+            <a class="cr-nav-item" href="/course-registration">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Course Registration</span>
+            </a>
+            <a class="cr-nav-item active" href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <main class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-gear"></i> Settings</h1>
+                <p>Manage your account and preferences</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+        <div class="cr-content" style="padding: 20px;">
+            <p>Settings content will be displayed here.</p>
+        </div>
+
+        <div class="settings-wrapper">
+            <!-- Settings Navigation -->
+            <div class="settings-sidebar">
+                <ul class="settings-nav">
+                    <li><a href="#" class="settings-nav-link active" data-section="profile">
+                        <i class="fas fa-user"></i> Profile
+                    </a></li>
+                    <li><a href="#" class="settings-nav-link" data-section="notifications">
+                        <i class="fas fa-bell"></i> Notifications
+                    </a></li>
+                    <li><a href="#" class="settings-nav-link" data-section="calendar">
+                        <i class="fas fa-calendar"></i> Calendar
+                    </a></li>
+                    <li><a href="#" class="settings-nav-link" data-section="appearance">
+                        <i class="fas fa-palette"></i> Appearance
+                    </a></li>
+                    <li><a href="#" class="settings-nav-link" data-section="privacy">
+                        <i class="fas fa-shield-alt"></i> Privacy
+                    </a></li>
+                    <li><a href="#" class="settings-nav-link" data-section="integrations">
+                        <i class="fas fa-plug"></i> Integrations
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- Settings Panels -->
+            <div class="settings-panels">
+                <!-- Profile Panel -->
+                <div class="settings-panel active" id="profile-panel">
+                    <div class="panel-header">
+                        <h2>Profile Information</h2>
+                        <p>Manage your personal information and account details</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" value="{{ user.name if user else 'Student' }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" value="{{ user.email if user else 'student@example.com' }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>University</label>
+                        <input type="text" value="{{ user.university if user else 'University Name' }}" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Major</label>
+                        <input type="text" value="{{ user.major if user else 'Computer Science' }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Academic Year</label>
+                        <select class="form-control">
+                            <option>Freshman</option>
+                            <option>Sophomore</option>
+                            <option>Junior</option>
+                            <option>Senior</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+
+                <!-- Notifications Panel -->
+                <div class="settings-panel" id="notifications-panel">
+                    <div class="panel-header">
+                        <h2>Notification Preferences</h2>
+                        <p>Control how and when you receive notifications</p>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Email Notifications</h3>
+                            <p>Receive notifications via email</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="email-notif" {% if settings.notifications.email %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Push Notifications</h3>
+                            <p>Receive push notifications in your browser</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="push-notif" {% if settings.notifications.push %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Calendar Reminders</h3>
+                            <p>Get reminded about upcoming calendar events</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="calendar-notif" {% if settings.notifications.calendar_reminders %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Assignment Deadlines</h3>
+                            <p>Receive alerts for upcoming assignment deadlines</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="deadline-notif" {% if settings.notifications.assignment_deadlines %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 16px;"><i class="fas fa-save"></i> Save Preferences</button>
+                </div>
+
+                <!-- Calendar Panel -->
+                <div class="settings-panel" id="calendar-panel">
+                    <div class="panel-header">
+                        <h2>Calendar Settings</h2>
+                        <p>Configure your calendar preferences and sync options</p>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Google Calendar Sync</h3>
+                            <p>Synchronize your schedule with Google Calendar</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="sync-google" {% if settings.calendar.sync_google %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Default Calendar View</label>
+                        <select class="form-control" id="default-view">
+                            <option value="week" {% if settings.calendar.default_view == 'week' %}selected{% endif %}>Week</option>
+                            <option value="month" {% if settings.calendar.default_view == 'month' %}selected{% endif %}>Month</option>
+                            <option value="day" {% if settings.calendar.default_view == 'day' %}selected{% endif %}>Day</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Timezone</label>
+                        <select class="form-control" id="timezone">
+                            <option value="Africa/Cairo" {% if settings.calendar.timezone == 'Africa/Cairo' %}selected{% endif %}>Africa/Cairo (EET)</option>
+                            <option value="UTC" {% if settings.calendar.timezone == 'UTC' %}selected{% endif %}>UTC</option>
+                            <option value="America/New_York" {% if settings.calendar.timezone == 'America/New_York' %}selected{% endif %}>America/New_York (EST)</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary"><i class="fas fa-save"></i> Save Calendar Settings</button>
+                </div>
+
+                <!-- Appearance Panel -->
+                <div class="settings-panel" id="appearance-panel">
+                    <div class="panel-header">
+                        <h2>Appearance</h2>
+                        <p>Customize the look and feel of your Unify experience</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Theme</label>
+                        <div class="theme-options">
+                            <label class="theme-option">
+                                <input type="radio" name="theme" value="light" {% if settings.appearance.theme == 'light' %}checked{% endif %}>
+                                <div class="theme-preview">
+                                    <i class="fas fa-sun"></i>
+                                    <span>Light</span>
+                                </div>
+                            </label>
+                            <label class="theme-option">
+                                <input type="radio" name="theme" value="dark" {% if settings.appearance.theme == 'dark' %}checked{% endif %}>
+                                <div class="theme-preview">
+                                    <i class="fas fa-moon"></i>
+                                    <span>Dark</span>
+                                </div>
+                            </label>
+                            <label class="theme-option">
+                                <input type="radio" name="theme" value="auto" {% if settings.appearance.theme == 'auto' %}checked{% endif %}>
+                                <div class="theme-preview">
+                                    <i class="fas fa-adjust"></i>
+                                    <span>Auto</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Language</label>
+                        <select class="form-control" id="language">
+                            <option value="en" {% if settings.appearance.language == 'en' %}selected{% endif %}>English</option>
+                            <option value="ar" {% if settings.appearance.language == 'ar' %}selected{% endif %}>العربية (Arabic)</option>
+                            <option value="fr" {% if settings.appearance.language == 'fr' %}selected{% endif %}>Français (French)</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Color-Blind Mode</h3>
+                            <p>Enable color-blind friendly color schemes</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="colorblind" {% if settings.appearance.colorblind_mode %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Dyslexia-Friendly Font</h3>
+                            <p>Use fonts optimized for dyslexia</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dyslexia" {% if settings.appearance.dyslexia_font %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 16px;"><i class="fas fa-save"></i> Save Appearance Settings</button>
+                </div>
+
+                <!-- Privacy Panel -->
+                <div class="settings-panel" id="privacy-panel">
+                    <div class="panel-header">
+                        <h2>Privacy & Security</h2>
+                        <p>Manage your privacy settings and security preferences</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Profile Visibility</label>
+                        <select class="form-control" id="profile-visibility">
+                            <option value="public" {% if settings.privacy.profile_visibility == 'public' %}selected{% endif %}>Public</option>
+                            <option value="university" {% if settings.privacy.profile_visibility == 'university' %}selected{% endif %}>University Only</option>
+                            <option value="private" {% if settings.privacy.profile_visibility == 'private' %}selected{% endif %}>Private</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>Share Schedule</h3>
+                            <p>Allow others to view your class schedule</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="share-schedule" {% if settings.privacy.share_schedule %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="security-section">
+                        <h3>Security</h3>
+                        <div class="form-group">
+                            <button class="btn btn-outline"><i class="fas fa-key"></i> Change Password</button>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-outline"><i class="fas fa-shield-alt"></i> Enable 2FA</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary"><i class="fas fa-save"></i> Save Privacy Settings</button>
+                </div>
+
+                <!-- Integrations Panel -->
+                <div class="settings-panel" id="integrations-panel">
+                    <div class="panel-header">
+                        <h2>Integrations</h2>
+                        <p>Connect external services to enhance your Unify experience</p>
+                    </div>
+                    <div class="integration-item">
+                        <div class="integration-info">
+                            <i class="fab fa-google"></i>
+                            <div>
+                                <h3>Google Calendar</h3>
+                                <p>Sync your events and schedule</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline">Connect</button>
+                    </div>
+                    <div class="integration-item">
+                        <div class="integration-info">
+                            <i class="fas fa-book"></i>
+                            <div>
+                                <h3>Notebook LLM</h3>
+                                <p>AI-powered notebook with language models</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline">Connect</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Navigation functionality
+    document.querySelectorAll('.settings-nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove active from all links
+            document.querySelectorAll('.settings-nav-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            
+            // Hide all panels
+            document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+            
+            // Show selected panel
+            const section = link.dataset.section;
+            document.getElementById(`${section}-panel`).classList.add('active');
+        });
+    });
+
+    // Save Settings Functions
+    async function saveSettings(section) {
+        const settingsData = {};
+        
+        if (section === 'notifications') {
+            settingsData.notifications = {
+                email: document.querySelector('#email-notif')?.checked ?? true,
+                push: document.querySelector('#push-notif')?.checked ?? true,
+                calendar_reminders: document.querySelector('#calendar-notif')?.checked ?? true,
+                assignment_deadlines: document.querySelector('#deadline-notif')?.checked ?? true
+            };
+        } else if (section === 'calendar') {
+            settingsData.calendar = {
+                sync_google: document.querySelector('#sync-google')?.checked ?? false,
+                default_view: document.querySelector('#default-view')?.value ?? 'week',
+                timezone: document.querySelector('#timezone')?.value ?? 'Africa/Cairo'
+            };
+        } else if (section === 'appearance') {
+            settingsData.appearance = {
+                theme: document.querySelector('input[name="theme"]:checked')?.value ?? 'dark',
+                language: document.querySelector('#language')?.value ?? 'en',
+                colorblind_mode: document.querySelector('#colorblind')?.checked ?? false,
+                dyslexia_font: document.querySelector('#dyslexia')?.checked ?? false
+            };
+        } else if (section === 'privacy') {
+            settingsData.privacy = {
+                profile_visibility: document.querySelector('#profile-visibility')?.value ?? 'public',
+                share_schedule: document.querySelector('#share-schedule')?.checked ?? false
+            };
+        }
+        
+        try {
+            const response = await fetch('/api/settings/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settingsData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                // Show success message
+                showNotification('Settings saved successfully!', 'success');
+            } else {
+                showNotification('Failed to save settings: ' + (result.error || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            showNotification('Failed to save settings. Please try again.', 'error');
+        }
+    }
+
+    // Show notification
+    function showNotification(message, type = 'success') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `settings-notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#10b981' : '#ef4444'};
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // Add click handlers to save buttons
+    document.addEventListener('DOMContentLoaded', () => {
+        // Add IDs to toggle switches and inputs for easier access
+        const notificationToggles = document.querySelectorAll('#notifications-panel input[type="checkbox"]');
+        if (notificationToggles[0]) notificationToggles[0].id = 'email-notif';
+        if (notificationToggles[1]) notificationToggles[1].id = 'push-notif';
+        if (notificationToggles[2]) notificationToggles[2].id = 'calendar-notif';
+        if (notificationToggles[3]) notificationToggles[3].id = 'deadline-notif';
+        
+        const calendarToggles = document.querySelectorAll('#calendar-panel input[type="checkbox"]');
+        if (calendarToggles[0]) calendarToggles[0].id = 'sync-google';
+        
+        const calendarSelects = document.querySelectorAll('#calendar-panel select');
+        if (calendarSelects[0]) calendarSelects[0].id = 'default-view';
+        if (calendarSelects[1]) calendarSelects[1].id = 'timezone';
+        
+        const appearanceToggles = document.querySelectorAll('#appearance-panel input[type="checkbox"]');
+        if (appearanceToggles[0]) appearanceToggles[0].id = 'colorblind';
+        if (appearanceToggles[1]) appearanceToggles[1].id = 'dyslexia';
+        
+        const appearanceSelect = document.querySelector('#appearance-panel select');
+        if (appearanceSelect) appearanceSelect.id = 'language';
+        
+        const privacySelect = document.querySelector('#privacy-panel select');
+        if (privacySelect) privacySelect.id = 'profile-visibility';
+        
+        const privacyToggle = document.querySelector('#privacy-panel input[type="checkbox"]');
+        if (privacyToggle) privacyToggle.id = 'share-schedule';
+        
+        // Attach click handlers to save buttons
+        const saveButtons = document.querySelectorAll('.btn-primary');
+        saveButtons[0]?.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveSettings('profile');
+        });
+        saveButtons[1]?.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveSettings('notifications');
+        });
+        saveButtons[2]?.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveSettings('calendar');
+        });
+        saveButtons[3]?.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveSettings('appearance');
+        });
+        saveButtons[4]?.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveSettings('privacy');
+        });
+    });
+
+    async function handleLogout() {
+        try {
+            const response = await fetch('/auth/logout', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = '/login';
+        }
+    }
+    
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+</body>
+</html>
+

@@ -1,0 +1,204 @@
+/* ===== TASK TRACKER STYLES ===== */
+
+/* CSS Variables for Dark/Light Mode */
+:root {
+    --cr-bg: #0f172a;
+    --cr-bg-soft: #020617;
+    --cr-bg-panel: #020617;
+    --cr-border: #1f2937;
+    --cr-text-main: #e5e7eb;
+    --cr-text-muted: #9ca3af;
+    --cr-accent: #667eea;
+    --cr-success: #10b981;
+    --cr-warning: #f59e0b;
+    --cr-danger: #ef4444;
+}
+
+.cr-light-mode {
+    --cr-bg: #f3f4f6;
+    --cr-bg-soft: #e5e7eb;
+    --cr-bg-panel: #ffffff;
+    --cr-border: #d1d5db;
+    --cr-text-main: #111827;
+    --cr-text-muted: #6b7280;
+    --cr-accent: #667eea;
+    --cr-success: #10b981;
+    --cr-warning: #f59e0b;
+    --cr-danger: #ef4444;
+}
+
+.task-tracker-wrapper {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--cr-text-main);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ---- Header ---- */
+.task-tracker-wrapper .title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.task-tracker-wrapper .subtitle {
+    font-size: 1rem;
+    color: var(--cr-text-muted);
+    margin-bottom: 20px;
+}
+
+/* ---- Input Section ---- */
+.task-tracker-wrapper .input-section {
+    margin-bottom: 20px;
+}
+
+.task-tracker-wrapper .input-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.task-tracker-wrapper input[type="text"],
+.task-tracker-wrapper input[type="datetime-local"],
+.task-tracker-wrapper select {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--cr-border);
+    background: var(--cr-bg-panel);
+    color: var(--cr-text-main);
+    flex: 1;
+    font-size: 1rem;
+}
+
+.task-tracker-wrapper .add-btn {
+    padding: 8px 15px;
+    border: none;
+    background-color: var(--cr-accent);
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.task-tracker-wrapper .add-btn:hover {
+    opacity: 0.9;
+}
+
+/* ---- Tasks Section ---- */
+.task-tracker-wrapper .tasks-section {
+    margin-top: 20px;
+}
+
+.task-tracker-wrapper .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+/* ---- Task Card ---- */
+.task-tracker-wrapper .task-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--cr-border);
+    background-color: var(--cr-bg-soft);
+    transition: background 0.3s, transform 0.2s;
+}
+
+.task-tracker-wrapper .task-card:hover {
+    background-color: var(--cr-bg-panel);
+    transform: translateY(-1px);
+}
+
+/* ---- Checkbox Button ---- */
+.task-tracker-wrapper .checkbox-btn {
+    font-size: 1.3rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* ---- Task Text ---- */
+.task-tracker-wrapper .text-group {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.task-tracker-wrapper .task-text {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* ---- Priority Dots ---- */
+.task-tracker-wrapper .priority-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.task-tracker-wrapper .priority-low { background-color: green; }
+.task-tracker-wrapper .priority-medium { background-color: orange; }
+.task-tracker-wrapper .priority-high { background-color: red; }
+
+/* ---- Due Date ---- */
+.task-tracker-wrapper .due-date {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--cr-text-muted);
+}
+
+.task-tracker-wrapper .due-overdue {
+    color: var(--cr-danger);
+    font-weight: bold;
+}
+
+/* ---- Completed Task ---- */
+.task-tracker-wrapper .completed .task-text {
+    text-decoration: line-through;
+    color: var(--cr-text-muted);
+    opacity: 0.6;
+}
+
+/* ---- Delete Button ---- */
+.task-tracker-wrapper .delete-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--cr-danger);
+    transition: color 0.2s;
+}
+
+.task-tracker-wrapper .delete-btn:hover {
+    opacity: 0.8;
+}
+
+/* ---- Clear All Button ---- */
+.task-tracker-wrapper .clear-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--cr-danger);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.task-tracker-wrapper .clear-btn:hover {
+    opacity: 0.9;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+    .task-tracker-wrapper .input-container {
+        flex-direction: column;
+    }
+    .task-tracker-wrapper .text-group {
+        margin-left: 5px;
+    }
+}

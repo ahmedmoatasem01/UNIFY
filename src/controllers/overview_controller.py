@@ -1,0 +1,143 @@
+"""
+Overview Controller
+Handles the overview/dashboard page with real database statistics
+"""
+from flask import Blueprint, render_template, session, redirect, url_for
+from repositories.repository_factory import RepositoryFactory
+from core.user_helper import get_user_data
+from datetime import datetime, date, timedelta
+
+overview_bp = Blueprint("overview", __name__, url_prefix="/overview")
+
+
+@overview_bp.route("/")
+def overview_page():
+    """Overview page with real database statistics"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    
+    user_id = session.get('user_id')
+    user_data = get_user_data(user_id)
+    
+    # Initialize default values
+    stats = {
+        'total_courses': 0,
+        'active_tasks': 0,
+        'upcoming_events': 0,
+        'completed_assignments': 0
+    }
+    today_schedule = []
+    notifications = []
+    
+    # Get student data
+    student_repo = RepositoryFactory.get_repository("student")
+    student = student_repo.get_by_user_id(user_id)
+    
+    if student:
+        # ===== GET ENROLLED COURSES COUNT =====
+        try:
+            enrollment_repo = RepositoryFactory.get_repository("enrollment")
+            enrollments = enrollment_repo.get_by_student(student.Student_ID)
+            stats['total_courses'] = len([e for e in enrollments if e.Status == 'enrolled'])
+        except Exception as e:
+            print(f"Error fetching enrollments: {e}")
+        
+        # ===== GET ACTIVE TASKS COUNT =====
+        try:
+            task_repo = RepositoryFactory.get_repository("task")
+            tasks = task_repo.get_by_student(student.Student_ID)
+            stats['active_tasks'] = len([t for t in tasks if t.Status == 'pending'])
+            
+            # Count completed tasks this month for assignments stat
+            today = date.today()
+            first_day_of_month = today.replace(day=1)
+            completed_this_month = len([
+                t for t in tasks 
+                if t.Status == 'completed' and t.Due_Date and t.Due_Date.date() >= first_day_of_month
+            ]) if any(hasattr(t, 'Due_Date') and t.Due_Date for t in tasks) else 0
+            stats['completed_assignments'] = completed_this_month
+        except Exception as e:
+            print(f"Error fetching tasks: {e}")
+        
+        # ===== GET UPCOMING CALENDAR EVENTS COUNT =====
+        try:
+            calendar_repo = RepositoryFactory.get_repository("calendar")
+            events = calendar_repo.get_by_student(student.Student_ID)
+            today = date.today()
+            upcoming = [e for e in events if e.Date and e.Date >= today]
+            stats['upcoming_events'] = len(upcoming)
+        except Exception as e:
+            print(f"Error fetching calendar events: {e}")
+        
+        # ===== GET TODAY'S SCHEDULE =====
+        try:
+            schedule_repo = RepositoryFactory.get_repository("schedule")
+            schedules = schedule_repo.get_by_student(student.Student_ID)
+            
+            # Get today's day name (e.g., "MON", "TUE", etc.)
+            today_day = datetime.now().strftime('%A').upper()[:3]
+            # Also try full day name
+            today_day_full = datetime.now().strftime('%A').upper()
+            
+            for sched in schedules:
+                if sched.Day and (sched.Day.upper() == today_day or sched.Day.upper() == today_day_full or sched.Day.upper() in today_day_full):
+                    # Format time
+                    time_str = 'TBA'
+                    if sched.Start_Time and sched.End_Time:
+                        try:
+                            if isinstance(sched.Start_Time, str):
+                                time_str = f"{sched.Start_Time} - {sched.End_Time}"
+                            else:
+                                time_str = f"{sched.Start_Time.strftime('%I:%M %p')} - {sched.End_Time.strftime('%I:%M %p')}"
+                        except:
+                            time_str = 'TBA'
+                    
+                    today_schedule.append({
+                        'time': time_str,
+                        'course_name': sched.Course_Code if hasattr(sched, 'Course_Code') and sched.Course_Code else 'Course',
+                        'instructor': sched.Instructor if hasattr(sched, 'Instructor') and sched.Instructor else 'TBA',
+                        'location': sched.Location if hasattr(sched, 'Location') and sched.Location else 'TBA',
+                        'type': sched.Type if hasattr(sched, 'Type') and sched.Type else 'Lecture'
+                    })
+            
+            # Sort by time if possible
+            if today_schedule:
+                today_schedule.sort(key=lambda x: x['time'])
+        except Exception as e:
+            print(f"Error fetching today's schedule: {e}")
+        
+        # ===== GET NOTIFICATIONS/MESSAGES =====
+        try:
+            message_repo = RepositoryFactory.get_repository("message")
+            messages = message_repo.get_by_receiver(student.Student_ID)
+            
+            for msg in messages[:5]:  # Get latest 5 messages
+                time_str = 'Now'
+                if hasattr(msg, 'Sent_Date') and msg.Sent_Date:
+                    try:
+                        if isinstance(msg.Sent_Date, str):
+                            time_str = msg.Sent_Date
+                        else:
+                            time_str = msg.Sent_Date.strftime('%I:%M %p')
+                    except:
+                        time_str = 'Recently'
+                
+                notifications.append({
+                    'title': msg.Subject if hasattr(msg, 'Subject') and msg.Subject else 'Notification',
+                    'message': msg.Content if hasattr(msg, 'Content') and msg.Content else '',
+                    'time': time_str,
+                    'type': 'message',
+                    'read': False
+                })
+        except Exception as e:
+            print(f"Error fetching messages: {e}")
+    
+    return render_template(
+        'overview.html',
+        user_data=user_data,
+        user=user_data,  # For backwards compatibility
+        stats=stats,
+        today_schedule=today_schedule,
+        notifications=notifications
+    )
+

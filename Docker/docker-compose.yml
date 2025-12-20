@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  flask-app:
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=src/app.py
+      - FLASK_ENV=production
+      - PYTHONPATH=/app/src:/app
+      # For Docker Desktop on Windows/Mac, use host.docker.internal to access host database
+      # For Docker on Linux, you may need to use the host's IP address
+      - DB_HOST=host.docker.internal
+      - DB_NAME=unify
+      # If using SQL Server authentication instead of Windows auth:
+      # - DB_USER=your_sql_user
+      # - DB_PASSWORD=your_sql_password
+    volumes:
+      # Mount source code for development (optional)
+      - ./src:/app/src
+    networks:
+      - unify-network
+
+networks:
+  unify-network:
+    driver: bridge
+

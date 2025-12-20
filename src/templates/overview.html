@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Overview</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/overview.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item active" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/reminders">
+                <i class="fa-solid fa-bell"></i>
+                <span>Smart Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Transcript</span>
+            </a>
+            <a class="cr-nav-item" href="/course-registration">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Course Registration</span>
+            </a>
+            <a class="cr-nav-item" href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <main class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-chart-column"></i> Overview</h1>
+                <p>Welcome back, {{ user_data.name if user_data else 'Student' }}!</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <div class="overview-wrapper">
+            <!-- Left Column: Statistics & Notifications -->
+            <div class="left-column">
+                <!-- Notifications Card -->
+                <div class="card notifications-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bell"></i> Notifications</h2>
+                        <span class="notification-badge">
+                            {% if notifications %}
+                                {{ notifications|selectattr('read', 'equalto', False)|list|length }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        {% if notifications %}
+                        <div class="notifications-list">
+                            {% for notification in notifications[:5] %}
+                            <div class="notification-item {% if not notification.get('read') %}unread{% endif %} priority-{{ notification.get('priority', 'normal') }}">
+                                <div class="notification-icon">
+                                    {% if notification.get('type') == 'assignment' %}
+                                        <i class="fas fa-file-alt"></i>
+                                    {% elif notification.get('type') == 'grade' %}
+                                        <i class="fas fa-graduation-cap"></i>
+                                    {% elif notification.get('type') == 'exam' %}
+                                        <i class="fas fa-clipboard-check"></i>
+                                    {% else %}
+                                        <i class="fas fa-bullhorn"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="notification-content">
+                                    <h4>{{ notification.get('title', notification.get('subject', 'Notification')) }}</h4>
+                                    <p>{{ notification.get('message', notification.get('content', '')) }}</p>
+                                    <span class="notification-time">{{ notification.get('time', notification.get('sent_date', 'Now')) }}</span>
+                                </div>
+                                {% if not notification.get('read') %}
+                                <div class="notification-dot"></div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <a href="#" class="view-all-link">View all notifications <i class="fas fa-arrow-right"></i></a>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>No new notifications</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ stats.total_courses if stats else 0 }}</h3>
+                            <p>Active Courses</p>
+                            <span class="stat-change positive">+2 this semester</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ stats.active_tasks if stats else 0 }}</h3>
+                            <p>Active Tasks</p>
+                            <span class="stat-change">3 due today</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ stats.upcoming_events if stats else 0 }}</h3>
+                            <p>Upcoming Events</p>
+                            <span class="stat-change">2 this week</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ stats.completed_assignments if stats else 0 }}</h3>
+                            <p>Completed Assignments</p>
+                            <span class="stat-change positive">+5 this month</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="card schedule-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-calendar-day"></i> Today's Schedule</h2>
+                        <span class="date-badge">Today</span>
+                    </div>
+                    <div class="card-body">
+                        {% if today_schedule %}
+                        <div class="schedule-list">
+                            {% for item in today_schedule %}
+                            <div class="schedule-item">
+                                <div class="schedule-time">
+                                    <span class="time">{{ item.get('time', '10:00 AM') }}</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <h4>{{ item.get('course_name', 'Course') }}</h4>
+                                    <p><i class="fas fa-chalkboard-teacher"></i> {{ item.get('instructor', 'Instructor') }}</p>
+                                    <p><i class="fas fa-map-marker-alt"></i> {{ item.get('location', 'Room 101') }}</p>
+                                    <span class="schedule-type type-{{ item.get('type', 'lecture').lower() }}">{{ item.get('type', 'Lecture')|title }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>No classes scheduled for today</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="/course-registration" class="action-btn">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Add Course</span>
+                            </a>
+                            <a href="/calendar" class="action-btn">
+                                <i class="fas fa-calendar-plus"></i>
+                                <span>New Event</span>
+                            </a>
+                            <a href="/notes" class="action-btn">
+                                <i class="fas fa-sticky-note"></i>
+                                <span>Create Note</span>
+                            </a>
+                            <a href="#" class="action-btn" onclick="alert('AI Assistant coming soon!');">
+                                <i class="fas fa-robot"></i>
+                                <span>AI Assistant</span>
+                            </a>
+                            <a href="/tasks" class="action-btn">
+                                <i class="fas fa-tasks"></i>
+                                <span>New Task</span>
+                            </a>
+                            <a href="/course-registration" class="action-btn">
+                                <i class="fas fa-book"></i>
+                                <span>View Courses</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script>
+async function handleLogout() {
+    try {
+        const response = await fetch('/auth/logout', { method: 'POST' });
+        if (response.ok) {
+            window.location.href = '/login';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login';
+    }
+}
+</script>
+</body>
+</html>
