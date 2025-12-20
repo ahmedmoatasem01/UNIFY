@@ -43,23 +43,30 @@ def get_user_data(user_id):
     instructor_repo = RepositoryFactory.get_repository("instructor")
     instructor = instructor_repo.get_by_user_id(user_id)
     
-    # Determine role
+    # Determine role and get major/department
     if student:
         role = 'Student'
         department = student.Department if student.Department else 'Zewail City'
+        major = student.Department if student.Department else 'Computer Science'  # Use Department as Major
+        avatar_letter = 'S'  # S for Student
     elif instructor:
         role = 'Instructor'
         department = instructor.Department if instructor.Department else 'Zewail City'
+        major = instructor.Department if instructor.Department else 'Computer Science'  # Use Department as Major
+        avatar_letter = 'I'  # I for Instructor
     else:
         role = 'User'
         department = 'Zewail City'
+        major = 'Computer Science'
+        avatar_letter = 'U'  # U for User
     
     return {
         'name': user.Username if user.Username else 'User',
         'email': user.Email if user.Email else '',
         'role': role,
         'department': department,
-        'avatar_letter': user.Username[0].upper() if user.Username else 'U'
+        'major': major,
+        'avatar_letter': avatar_letter
     }
 
 

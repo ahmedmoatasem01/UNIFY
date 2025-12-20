@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Transcript</title>
-    <link rel="stylesheet" href="../static/styles/course_registration.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/Transcript.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="cr-body">
 <div class="cr-app-layout">
+    <!-- Sidebar -->
     <aside class="cr-sidebar">
         <div class="cr-sidebar-header">
             <div class="cr-brand-logo">U</div>
@@ -26,7 +29,24 @@
                 <i class="fa-solid fa-calendar-day"></i>
                 <span>Schedule</span>
             </a>
-        {% include 'components/topbar.html' %}
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/reminders">
+                <i class="fa-solid fa-bell"></i>
+                <span>Smart Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item active" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
                 <span>Transcript</span>
             </a>
             <a class="cr-nav-item" href="/course-registration">
@@ -43,46 +63,396 @@
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
-            <p class="cr-small-text">CSAI 203 · Team 5</p>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
         </div>
     </aside>
+
+    <!-- Main Panel -->
     <main class="cr-main-panel">
+        <!-- Topbar -->
         <header class="cr-topbar">
             <div class="cr-topbar-left">
                 <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
                 <p>View your academic transcript</p>
             </div>
-            <div class="cr-topbar-right">
-                <button id="cr-theme-toggle" class="cr-icon-btn" title="Toggle light/dark mode">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-                <div class="cr-user-chip">
-                    <div class="cr-avatar">{{ user_data.avatar_letter if user_data else 'U' }}</div>
-                    <div>
-                        <p class="cr-user-name">{{ user_data.name if user_data else 'User' }}</p>
-                        <p class="cr-user-role">{{ user_data.role if user_data else 'User' }} · {{ user_data.department if user_data else 'Zewail City' }}</p>
+            {% include 'components/topbar_right.html' %}
+        </header>
+        
+        <div class="cr-content" style="padding: 20px;">
+            <!-- Loading State -->
+            <div id="loadingState" style="text-align: center; padding: 40px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 48px; color: #667eea;"></i>
+                <p style="margin-top: 16px; color: #666;">Loading transcript data...</p>
+            </div>
+
+            <!-- Main Content (Hidden initially) -->
+            <div id="transcriptContent" style="display: none;">
+                <!-- Summary Cards -->
+                <div class="ts-summary">
+                    <div class="ts-card ts-card-primary">
+                        <div class="ts-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <div class="ts-card-content">
+                            <div class="ts-card-label">Cumulative GPA</div>
+                            <div class="ts-card-value" id="cumulativeGPA">0.00</div>
+                        </div>
+                    </div>
+                    <div class="ts-card ts-card-success">
+                        <div class="ts-card-icon"><i class="fa-solid fa-book"></i></div>
+                        <div class="ts-card-content">
+                            <div class="ts-card-label">Total Credits</div>
+                            <div class="ts-card-value" id="totalCredits">0</div>
+                        </div>
+                    </div>
+                    <div class="ts-card ts-card-info">
+                        <div class="ts-card-icon"><i class="fa-solid fa-calendar"></i></div>
+                        <div class="ts-card-content">
+                            <div class="ts-card-label">Semesters</div>
+                            <div class="ts-card-value" id="semesterCount">0</div>
+                        </div>
+                    </div>
+                    <div class="ts-card ts-card-warning">
+                        <div class="ts-card-icon"><i class="fa-solid fa-award"></i></div>
+                        <div class="ts-card-content">
+                            <div class="ts-card-label">Dean's List</div>
+                            <div class="ts-card-value" id="deansListCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="ts-controls">
+                    <div class="ts-search-filter">
+                        <input type="text" id="courseSearch" class="ts-search" placeholder="Search courses...">
+                        <select id="semesterFilter" class="ts-filter">
+                            <option value="">All Semesters</option>
+                        </select>
+                        <select id="gradeFilter" class="ts-filter">
+                            <option value="">All Grades</option>
+                            <option value="A">A Grades</option>
+                            <option value="B">B Grades</option>
+                            <option value="C">C Grades</option>
+                            <option value="D">D Grades</option>
+                            <option value="F">F Grades</option>
+                        </select>
+                    </div>
+                    <div class="ts-actions">
+                        <button class="ts-btn ts-btn-secondary" onclick="printTranscript()">
+                            <i class="fa-solid fa-print"></i> Print
+                        </button>
+                        <button class="ts-btn ts-btn-secondary" onclick="downloadTranscript()">
+                            <i class="fa-solid fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Honors Section -->
+                <div class="ts-honors" id="honorsSection" style="display: none;">
+                    <h3><i class="fa-solid fa-trophy"></i> Honors & Awards</h3>
+                    <div class="ts-honors-list" id="honorsList"></div>
+                </div>
+
+                <!-- Grade Distribution Chart -->
+                <div class="ts-chart-section">
+                    <h3><i class="fa-solid fa-chart-pie"></i> Grade Distribution</h3>
+                    <div class="ts-chart-container">
+                        <canvas id="gradeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Semester Details -->
+                <div class="ts-semesters">
+                    <h3><i class="fa-solid fa-calendar-days"></i> Semester Details</h3>
+                    <div class="ts-semester-tabs" id="semesterTabs"></div>
+                    <div id="coursesContainer"></div>
+                </div>
+
+                <!-- Full Transcript Table -->
+                <div class="ts-table-section">
+                    <h3><i class="fa-solid fa-table"></i> Complete Transcript</h3>
+                    <div class="ts-table-container">
+                        <table class="ts-table">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Name</th>
+                                    <th>Credits</th>
+                                    <th>Grade</th>
+                                    <th>Quality Points</th>
+                                    <th>Semester</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </header>
-        <div class="cr-content" style="padding: 20px;">
-            <p>Transcript content will be displayed here.</p>
+
+            <!-- Error State -->
+            <div id="errorState" style="display: none; text-align: center; padding: 40px;">
+                <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; color: #f44336;"></i>
+                <p style="margin-top: 16px; color: #666;" id="errorMessage">Failed to load transcript data</p>
+            </div>
         </div>
     </main>
 </div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
 <script>
-async function handleLogout() {
-    try {
-        const response = await fetch('/auth/logout', { method: 'POST' });
-        if (response.ok) {
+    // Grade to Point Conversion
+    const gradePoints = {
+        'A+': 4.0, 'A': 4.0, 'A-': 3.7,
+        'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+        'C+': 2.3, 'C': 2.0, 'C-': 1.7,
+        'D+': 1.3, 'D': 1.0, 'D-': 0.7,
+        'F': 0.0
+    };
+
+    let transcriptData = null;
+    let filteredCourses = [];
+    let allCourses = [];
+
+    // Initialize - Fetch data from API
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadTranscriptData();
+    });
+
+    async function loadTranscriptData() {
+        try {
+            const response = await fetch('/transcript/api/data');
+            if (!response.ok) {
+                throw new Error('Failed to fetch transcript data');
+            }
+            
+            transcriptData = await response.json();
+            
+            // Hide loading, show content
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('transcriptContent').style.display = 'block';
+            
+            // Populate UI
+            // populateUserData(); // Skip - topbar already shows user info
+            populateSummary();
+            populateAllCourses();
+            populateSemesters();
+            renderTranscriptTable(allCourses);
+            initializeGradeChart();
+            populateHonors();
+            setupEventListeners();
+        } catch (error) {
+            console.error('Error loading transcript:', error);
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = error.message || 'Failed to load transcript data';
+        }
+    }
+
+    function populateUserData() {
+        if (!transcriptData) return;
+        document.getElementById('userName').textContent = transcriptData.student.name;
+        document.getElementById('userAvatar').textContent = transcriptData.student.avatar;
+        document.getElementById('userRole').textContent = `${transcriptData.student.program} · ID: ${transcriptData.student.id}`;
+    }
+
+    function populateSummary() {
+        if (!transcriptData) return;
+        document.getElementById('cumulativeGPA').textContent = transcriptData.summary.cumulativeGPA.toFixed(2);
+        document.getElementById('totalCredits').textContent = transcriptData.summary.totalCredits;
+        document.getElementById('semesterCount').textContent = transcriptData.semesters.length;
+        document.getElementById('deansListCount').textContent = transcriptData.summary.deansListCount;
+    }
+
+    function populateAllCourses() {
+        if (!transcriptData) return;
+        allCourses = [];
+        transcriptData.semesters.forEach(semester => {
+            semester.courses.forEach(course => {
+                allCourses.push({
+                    ...course,
+                    semester: semester.name,
+                    semesterId: semester.id
+                });
+            });
+        });
+    }
+
+    function populateSemesters() {
+        if (!transcriptData || !transcriptData.semesters.length) return;
+        
+        const container = document.getElementById('semesterTabs');
+        const filterSelect = document.getElementById('semesterFilter');
+
+        transcriptData.semesters.forEach((semester, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'ts-semester-btn' + (idx === 0 ? ' active' : '');
+            btn.textContent = semester.name;
+            btn.onclick = () => selectSemester(semester.id, btn);
+            container.appendChild(btn);
+
+            const option = document.createElement('option');
+            option.value = semester.id;
+            option.textContent = semester.name;
+            filterSelect.appendChild(option);
+        });
+
+        selectSemester(transcriptData.semesters[0].id, container.firstChild);
+    }
+
+    function selectSemester(semesterId, targetButton) {
+        document.querySelectorAll('.ts-semester-btn').forEach(btn => btn.classList.remove('active'));
+        if (targetButton) {
+            targetButton.classList.add('active');
+        }
+
+        const semester = transcriptData.semesters.find(s => s.id === semesterId);
+        if (!semester) return;
+        
+        const container = document.getElementById('coursesContainer');
+        container.innerHTML = `
+            <div class="ts-semester-summary">
+                <div class="ts-semester-stat">
+                    <p>Semester GPA</p>
+                    <p class="ts-semester-gpa">${semester.gpa.toFixed(2)}</p>
+                </div>
+                <div class="ts-semester-stat">
+                    <p>Credits Taken</p>
+                    <p class="ts-semester-gpa">${semester.credits}</p>
+                </div>
+            </div>
+            <div class="ts-semester-courses">
+                ${semester.courses.map(course => `
+                    <div class="ts-course-card">
+                        <div class="ts-course-header">
+                            <h4>${course.code}</h4>
+                            <span class="ts-grade-badge ts-grade-${course.grade.replace(/[^A-Z]/g, '')}">${course.grade}</span>
+                        </div>
+                        <p class="ts-course-name">${course.name}</p>
+                        <div class="ts-course-footer">
+                            <span><i class="fa-solid fa-book"></i> ${course.credits} Credits</span>
+                            <span><i class="fa-solid fa-star"></i> ${course.gradePoint.toFixed(1)} QP</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function populateHonors() {
+        if (!transcriptData) return;
+        
+        const honors = [];
+        const deansListSemesters = transcriptData.semesters.filter(s => s.gpa >= 3.7);
+        
+        if (deansListSemesters.length > 0) {
+            honors.push(`Dean's List: ${deansListSemesters.length} semester${deansListSemesters.length > 1 ? 's' : ''}`);
+        }
+        if (transcriptData.summary.cumulativeGPA >= 3.9) {
+            honors.push('High Honors (3.9+ GPA)');
+        }
+        if (transcriptData.summary.cumulativeGPA >= 3.7) {
+            honors.push('Honors (3.7+ GPA)');
+        }
+
+        const honorsList = document.getElementById('honorsList');
+        if (honors.length > 0) {
+            document.getElementById('honorsSection').style.display = 'block';
+            honorsList.innerHTML = honors.map(h => `
+                <div class="ts-honor-item">
+                    <i class="fa-solid fa-award"></i>
+                    <span>${h}</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    function renderTranscriptTable(courses) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = courses.map(course => `
+            <tr>
+                <td>${course.code}</td>
+                <td>${course.name}</td>
+                <td>${course.credits}</td>
+                <td><span class="ts-grade-badge ts-grade-${course.grade.replace(/[^A-Z]/g, '')}">${course.grade}</span></td>
+                <td>${(course.gradePoint * course.credits).toFixed(1)}</td>
+                <td>${course.semester}</td>
+            </tr>
+        `).join('');
+        filteredCourses = courses;
+    }
+
+    function initializeGradeChart() {
+        if (!allCourses.length) return;
+        
+        const gradeDistribution = {};
+        allCourses.forEach(course => {
+            const gradePrefix = course.grade.charAt(0);
+            gradeDistribution[gradePrefix] = (gradeDistribution[gradePrefix] || 0) + 1;
+        });
+
+        const ctx = document.getElementById('gradeChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(gradeDistribution).sort().reverse(),
+                datasets: [{
+                    data: Object.values(gradeDistribution),
+                    backgroundColor: ['#4CAF50', '#8BC34A', '#FFC107', '#FF9800', '#F44336'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    }
+
+    function setupEventListeners() {
+        document.getElementById('courseSearch').addEventListener('input', filterCourses);
+        document.getElementById('semesterFilter').addEventListener('change', filterCourses);
+        document.getElementById('gradeFilter').addEventListener('change', filterCourses);
+    }
+
+    function filterCourses() {
+        const searchTerm = document.getElementById('courseSearch').value.toLowerCase();
+        const semesterFilter = document.getElementById('semesterFilter').value;
+        const gradeFilter = document.getElementById('gradeFilter').value;
+
+        let filtered = allCourses.filter(course => {
+            const matchSearch = course.code.toLowerCase().includes(searchTerm) || 
+                              course.name.toLowerCase().includes(searchTerm);
+            const matchSemester = !semesterFilter || course.semesterId === semesterFilter;
+            const matchGrade = !gradeFilter || course.grade.startsWith(gradeFilter);
+            return matchSearch && matchSemester && matchGrade;
+        });
+
+        renderTranscriptTable(filtered);
+    }
+
+    function printTranscript() {
+        window.print();
+    }
+
+    function downloadTranscript() {
+        alert('PDF download feature coming soon!');
+    }
+
+    async function handleLogout() {
+        try {
+            const response = await fetch('/auth/logout', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
             window.location.href = '/login';
         }
-    } catch (error) {
-        console.error('Logout error:', error);
-        window.location.href = '/login';
     }
-}
 </script>
 </body>
 </html>
-

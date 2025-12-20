@@ -219,6 +219,23 @@
     color: white;
 }
 
+/* Role-based avatar colors */
+.cr-avatar[data-user-role="Student"] {
+    background: linear-gradient(135deg, #3b82f6, #2563eb); /* Blue for Students */
+}
+
+.cr-avatar[data-user-role="Instructor"] {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed); /* Purple for Instructors */
+}
+
+.cr-avatar[data-user-role="Admin"] {
+    background: linear-gradient(135deg, #ef4444, #dc2626); /* Red for Admins */
+}
+
+.cr-avatar[data-user-role="User"] {
+    background: linear-gradient(135deg, #6b7280, #4b5563); /* Gray for generic Users */
+}
+
 .cr-user-name {
     font-size: 0.8rem;
 }
@@ -400,6 +417,27 @@
     opacity: 0.4;
 }
 
+.cr-btn-danger {
+    border-radius: 999px;
+    padding: 6px 12px;
+    border: 1px solid var(--cr-danger);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--cr-danger);
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.cr-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
 .cr-btn-ghost {
     border: none;
     background: transparent;
@@ -544,17 +582,22 @@
     border-radius: 14px;
     border: 1px solid var(--cr-border);
     background: var(--cr-bg-soft);
-    overflow: hidden;
-    max-height: 430px;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 550px;
+    position: relative;
 }
 
 .cr-calendar-grid {
     display: grid;
-    grid-template-columns: 60px repeat(6, 1fr);
-    grid-auto-rows: 34px;
+    grid-template-columns: 60px repeat(5, 1fr);
+    grid-auto-rows: minmax(50px, 1fr);
     font-size: 0.75rem;
     position: relative;
+    min-height: 450px;
+    width: 100%;
 }
+
 
 .cr-day-header {
     background: #020617f0;
@@ -577,6 +620,15 @@
     align-items: center;
     justify-content: center;
     color: var(--cr-text-muted);
+    background: var(--cr-bg-soft);
+}
+
+.cr-calendar-cell {
+    border-top: 1px solid var(--cr-border);
+    border-right: 1px solid var(--cr-border);
+    min-height: 50px;
+    position: relative;
+    overflow: hidden;
 }
 
 .cr-calendar-empty {
@@ -585,37 +637,123 @@
 
 .cr-calendar-event {
     border-radius: 8px;
-    padding: 3px 5px;
+    padding: 6px 8px;
     margin: 2px;
-    border: 1px solid var(--cr-border);
+    border: 1.5px solid var(--cr-border);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 1px;
+    justify-content: flex-start;
+    gap: 3px;
     color: var(--cr-text-main);
     animation: crEventFade 0.25s ease-out;
+    overflow: hidden;
+    min-height: 45px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* ⬇️ IMPORTANT: keep events in the grid flow */
+    position: relative;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.cr-calendar-event.cr-event-stacked {
+    min-height: 35px;
+    padding: 4px 6px;
+    gap: 2px;
+    font-size: 0.7rem;
+}
+
+.cr-calendar-event:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .cr-calendar-event.cr-lecture {
     background: var(--cr-event-lecture);
+    border-color: rgba(59, 130, 246, 0.4);
 }
 
 .cr-calendar-event.cr-lab {
     background: var(--cr-event-lab);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.cr-event-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.cr-event-icon {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cr-calendar-event.cr-lecture .cr-event-icon {
+    color: #3b82f6;
+}
+
+.cr-calendar-event.cr-lab .cr-event-icon {
+    color: #22c55e;
 }
 
 .cr-event-title {
     font-weight: 600;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    word-break: break-word;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cr-calendar-event.cr-event-stacked .cr-event-title {
+    font-size: 0.7rem;
 }
 
 .cr-event-sub {
     font-size: 0.7rem;
     color: var(--cr-text-muted);
+    line-height: 1.2;
+    word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cr-calendar-event.cr-event-stacked .cr-event-sub {
+    font-size: 0.65rem;
+}
+
+.cr-event-sec {
+    font-size: 0.68rem;
+    color: var(--cr-text-muted);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cr-calendar-event.cr-event-stacked .cr-event-sec {
+    font-size: 0.6rem;
 }
 
 .cr-event-time {
     font-size: 0.68rem;
+    font-weight: 500;
+    margin-top: auto;
+    color: var(--cr-text-main);
+    opacity: 0.9;
+    white-space: nowrap;
+}
+
+.cr-calendar-event.cr-event-stacked .cr-event-time {
+    font-size: 0.6rem;
 }
 
 @keyframes crEventFade {

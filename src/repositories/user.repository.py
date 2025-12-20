@@ -11,7 +11,7 @@ class UserRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM `User`")
+            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM [User]")
             rows = cursor.fetchall()
             users = []
             for row in rows:
@@ -32,7 +32,7 @@ class UserRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM `User` WHERE User_ID = %s", (user_id,))
+            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM [User] WHERE User_ID = ?", (user_id,))
             row = cursor.fetchone()
             if row:
                 return User(
@@ -52,7 +52,7 @@ class UserRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM `User` WHERE Email = %s", (email,))
+            cursor.execute("SELECT User_ID, Username, Email, Password_Hash, Created_At FROM [User] WHERE Email = ?", (email,))
             row = cursor.fetchone()
             if row:
                 return User(
@@ -73,11 +73,15 @@ class UserRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO `User` (Username, Email, Password_Hash) VALUES (%s, %s, %s)",
+                "INSERT INTO [User] (Username, Email, Password_Hash) "
+                "OUTPUT INSERTED.User_ID "
+                "VALUES (?, ?, ?)",
                 (user.Username, user.Email, user.Password_Hash)
             )
+            row = cursor.fetchone()
+            if row:
+                user.User_ID = row[0]
             conn.commit()
-            user.User_ID = cursor.lastrowid
             return user
         finally:
             cursor.close()
@@ -89,7 +93,7 @@ class UserRepository:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE `User` SET Username = %s, Email = %s, Password_Hash = %s WHERE User_ID = %s",
+                "UPDATE [User] SET Username = ?, Email = ?, Password_Hash = ? WHERE User_ID = ?",
                 (user.Username, user.Email, user.Password_Hash, user.User_ID)
             )
             conn.commit()
@@ -103,7 +107,7 @@ class UserRepository:
         conn = self.db_connection.get_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM `User` WHERE User_ID = %s", (user_id,))
+            cursor.execute("DELETE FROM [User] WHERE User_ID = ?", (user_id,))
             conn.commit()
             return cursor.rowcount > 0
         finally:

@@ -9,8 +9,18 @@ from controllers.enrollment_controller import enrollment_bp
 from controllers.schedule_controller import schedule_bp
 from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
+from controllers.transcript_controller import transcript_bp
+from controllers.overview_controller import overview_bp
 from repositories.repository_factory import RepositoryFactory
-from utils.schedule_loader import get_today_schedule, get_sample_schedule
+
+# Conditionally import AI Note controller (requires additional dependencies)
+try:
+    from controllers.AI_Note_controller import ai_note_bp
+    ai_note_available = True
+except ImportError as e:
+    print(f"Warning: AI Note controller not available: {e}")
+    ai_note_bp = None
+    ai_note_available = False
 from core.user_helper import get_user_data
 import os
 import sys
@@ -27,12 +37,17 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(student_bp)
 app.register_blueprint(course_bp)
-app.register_blueprint(task_bp)
+# Note: task_bp registered after routes to avoid conflicts
 app.register_blueprint(message_bp)
 app.register_blueprint(enrollment_bp)
 app.register_blueprint(schedule_bp)
 app.register_blueprint(calendar_bp)
 app.register_blueprint(course_reg_bp)
+app.register_blueprint(transcript_bp)
+app.register_blueprint(overview_bp)
+if ai_note_available and ai_note_bp:
+    app.register_blueprint(ai_note_bp)
+app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
 
 # --- Repository instances ---
 try:
@@ -187,7 +202,7 @@ def inject_user_data():
 def index():
     if 'user_id' not in session:
         session['user_id'] = DEFAULT_USER_ID
-    return redirect(url_for('overview'))
+    return render_template('login.html')
 
 
 @app.route('/login')
@@ -198,12 +213,8 @@ def login_page():
 @app.route('/overview')
 @app.route('/dashboard')
 def overview():
-    """Overview page - requires authentication"""
-    if 'user_id' not in session:
-        return redirect(url_for('login_page'))
-    user_id = session.get('user_id', DEFAULT_USER_ID)
-    user = get_user_data(user_id)
-    return render_template('overview.html', user=user, user_data=user)
+    """Overview page - redirects to overview blueprint"""
+    return redirect('/overview/')
 
 
 @app.route('/schedule')
@@ -215,25 +226,120 @@ def schedule_page():
     return render_template('schedule.html', user_data=user_data)
 
 
-@app.route('/settings')
-def settings():
+@app.route('/tasks', strict_slashes=False)
+def tasks_page():
+    """Tasks page - requires authentication"""
     if 'user_id' not in session:
         return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('tasks.html', user_data=user_data)
+
+
+@app.route('/notes')
+def notes_page():
+    """Notes page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('notes.html', user_data=user_data)
+
+
+@app.route('/calendar')
+def calendar_page():
+    """Calendar page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('Calendar.html', user_data=user_data)
+
+
+@app.route('/reminders')
+def reminders_page():
+    """Smart Reminders page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('Reminder.html', user_data=user_data)
+
+
+@app.route('/messages')
+def messages_page():
+    """Messages page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('messages.html', user_data=user_data)
+
+
+@app.route('/transcript')
+def transcript_page():
+    """Transcript page - requires authentication"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    user_data = get_user_data(session.get('user_id'))
+    return render_template('Transcript.html', user_data=user_data)
+
+
+@app.route('/settings')
+def settings():
+    """Settings page - loads user settings from database"""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    
     user_id = session.get('user_id', DEFAULT_USER_ID)
-    user = get_user_data(user_id)
-    user_settings = {
-        'notifications': {'email': True, 'push': True, 'calendar_reminders': True, 'assignment_deadlines': True},
-        'calendar': {'sync_google': False, 'default_view': 'week', 'timezone': 'Africa/Cairo'},
-        'appearance': {'theme': 'light', 'language': 'en', 'colorblind_mode': False, 'dyslexia_font': False},
-        'privacy': {'profile_visibility': 'public', 'share_schedule': False}
-    }
-    return render_template('settings.html', user=user, settings=user_settings)
+    user_data = get_user_data(user_id)
+    
+    # Get settings from database (or create default if doesn't exist)
+    settings_repo = RepositoryFactory.get_repository("user_settings")
+    user_settings_obj = settings_repo.get_or_create(user_id)
+    user_settings = user_settings_obj.to_dict()
+    
+    return render_template('settings.html', user=user_data, user_data=user_data, settings=user_settings)
 
 
 @app.route('/api/settings/update', methods=['POST'])
 def update_settings():
-    data = request.json
-    return jsonify({'success': True, 'message': 'Settings updated successfully'})
+    """API endpoint to update user settings"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        user_id = session.get('user_id')
+        data = request.json
+        
+        # Get current settings
+        settings_repo = RepositoryFactory.get_repository("user_settings")
+        user_settings = settings_repo.get_or_create(user_id)
+        
+        # Update settings from request data
+        if 'notifications' in data:
+            user_settings.email_notifications = data['notifications'].get('email', True)
+            user_settings.push_notifications = data['notifications'].get('push', True)
+            user_settings.calendar_reminders = data['notifications'].get('calendar_reminders', True)
+            user_settings.assignment_deadlines = data['notifications'].get('assignment_deadlines', True)
+        
+        if 'calendar' in data:
+            user_settings.sync_google_calendar = data['calendar'].get('sync_google', False)
+            user_settings.calendar_default_view = data['calendar'].get('default_view', 'week')
+            user_settings.timezone = data['calendar'].get('timezone', 'Africa/Cairo')
+        
+        if 'appearance' in data:
+            user_settings.theme = data['appearance'].get('theme', 'dark')
+            user_settings.language = data['appearance'].get('language', 'en')
+            user_settings.colorblind_mode = data['appearance'].get('colorblind_mode', False)
+            user_settings.dyslexia_font = data['appearance'].get('dyslexia_font', False)
+        
+        if 'privacy' in data:
+            user_settings.profile_visibility = data['privacy'].get('profile_visibility', 'public')
+            user_settings.share_schedule = data['privacy'].get('share_schedule', False)
+        
+        # Save to database
+        settings_repo.update(user_settings)
+        
+        return jsonify({'success': True, 'message': 'Settings updated successfully'})
+    except Exception as e:
+        print(f"Error updating settings: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/stats')

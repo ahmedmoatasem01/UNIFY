@@ -45,6 +45,8 @@ class NoteRepository:
         finally:
             conn.close()
 
+    
+
     def get_by_student(self, student_id):
         """Get all notes for a student"""
         conn = self.db_connection.get_connection()
@@ -105,4 +107,7 @@ class NoteRepository:
             return cursor.rowcount > 0
         finally:
             conn.close()
+
+
+    
 

@@ -16,6 +16,7 @@ def _import_repository(filename, class_name):
     spec.loader.exec_module(module)
     return getattr(module, class_name)
 
+AINoteRepository = _import_repository('ai_note.repository', 'AINoteRepository')
 UserRepository = _import_repository('user.repository', 'UserRepository')
 StudentRepository = _import_repository('student.repository', 'StudentRepository')
 InstructorRepository = _import_repository('instructor.repository', 'InstructorRepository')
@@ -30,6 +31,8 @@ CalendarRepository = _import_repository('calendar.repository', 'CalendarReposito
 ReminderRepository = _import_repository('reminder.repository', 'ReminderRepository')
 FocusSessionRepository = _import_repository('focus_session.repository', 'FocusSessionRepository')
 TeachingAssistantRepository = _import_repository('teaching_assistant.repository', 'TeachingAssistantRepository')
+UserSettingsRepository = _import_repository('user_settings.repository', 'UserSettingsRepository')
+
 
 # Import CourseScheduleSlotRepository
 CourseScheduleSlotRepository = _import_repository('course_schedule_slot.repository', 'CourseScheduleSlotRepository')
@@ -42,6 +45,8 @@ class RepositoryFactory:
         
         if entity_type == "user":
             return UserRepository()
+        elif entity_type == "ai_note":
+            return AINoteRepository()
         elif entity_type == "student":
             return StudentRepository()
         elif entity_type == "instructor":
@@ -70,5 +75,7 @@ class RepositoryFactory:
             return TeachingAssistantRepository()
         elif entity_type == "course_schedule_slot" or entity_type == "schedule_slot":
             return CourseScheduleSlotRepository()
+        elif entity_type == "user_settings" or entity_type == "settings":
+            return UserSettingsRepository()
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")
