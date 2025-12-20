@@ -1,10 +1,10 @@
 import os
 
 try:
-    import pyodbc
+    import pyodbc  # type: ignore
     _HAS_PYODBC = True
 except Exception:
-    pyodbc = None
+    pyodbc = None  # type: ignore
     _HAS_PYODBC = False
     import sqlite3
 
