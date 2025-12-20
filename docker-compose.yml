@@ -1,0 +1,25 @@
+services:
+  unify-app:
+    build: .
+    container_name: unify-app
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount source code for development (optional - remove in production)
+      - ./src:/app/src
+      # Persist database data
+      - unify-data:/app/src/data
+      # Persist uploads
+      - unify-uploads:/app/src/uploads
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - SECRET_KEY=unify-secret-key-change-in-production
+      - SQLITE_DB_DIR=/app/src/data
+      - SQLITE_DB_NAME=unify_dev.db
+    restart: unless-stopped
+
+volumes:
+  unify-data:
+  unify-uploads:
+

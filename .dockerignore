@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.pdf
+
+# Tests
+tests/
+test_*.py
+*_test.py
+
+# Database files (will be created in container)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Other
+README.md
+.env
+.env.local
+
