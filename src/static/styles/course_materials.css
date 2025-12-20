@@ -1,0 +1,463 @@
+/* Course Materials Management Styles */
+
+.course-materials-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.materials-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-subtle, #e0e0e0);
+    gap: 1rem;
+}
+
+.materials-header .header-left {
+    flex: 1;
+}
+
+.materials-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 1.8rem;
+}
+
+.week-section {
+    margin-bottom: 3rem;
+}
+
+.week-title {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+}
+
+.topic-section {
+    margin-bottom: 2rem;
+}
+
+.topic-title {
+    color: #555;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-left: 0.5rem;
+    border-left: 4px solid #667eea;
+}
+
+.materials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.material-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.material-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.material-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.material-icon .fa-file-pdf { color: #e74c3c; }
+.material-icon .fa-file-powerpoint { color: #d04423; }
+.material-icon .fa-video { color: #e91e63; }
+.material-icon .fa-file-word { color: #2b579a; }
+.material-icon .fa-link { color: #3498db; }
+.material-icon .fa-file { color: #95a5a6; }
+
+.material-info h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.material-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.material-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 1rem;
+}
+
+.material-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.material-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+.btn-link {
+    background: #3498db;
+    color: white;
+}
+
+.btn-link:hover {
+    background: #2980b9;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #888;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Upload Form Styles */
+.upload-material-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.upload-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.upload-form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.upload-type-selector {
+    margin-bottom: 1.5rem;
+}
+
+.radio-group {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.upload-section {
+    margin-bottom: 1.5rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.upload-status {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.upload-status.loading {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.upload-status.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.upload-status.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Main Course Materials Page Styles */
+.course-materials-main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.materials-section {
+    margin-bottom: 3rem;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary, #333);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-description {
+    color: var(--text-muted, #666);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.course-card-materials {
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.course-card-materials:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    border-color: var(--accent, #667eea);
+}
+
+.course-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.course-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    flex-shrink: 0;
+}
+
+.course-icon.instructor {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.course-info {
+    flex: 1;
+}
+
+.course-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary, #333);
+    font-size: 1.2rem;
+}
+
+.course-meta {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+    color: var(--text-muted, #666);
+}
+
+.course-credits {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9rem;
+    color: var(--accent, #667eea);
+    font-weight: 500;
+}
+
+.course-card-body {
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+.course-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.empty-state-large {
+    text-align: center;
+    padding: 5rem 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.empty-icon {
+    font-size: 5rem;
+    color: var(--text-muted, #999);
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+}
+
+.empty-state-large h2 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary, #333);
+    font-size: 1.8rem;
+}
+
+.empty-state-large p {
+    margin: 0 0 2rem 0;
+    color: var(--text-muted, #666);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .materials-grid,
+    .courses-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row,
+    .course-actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .materials-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .course-materials-main-container {
+        padding: 1rem;
+    }
+}
+

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Materials - Unify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_materials.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <!-- ===== Sidebar ===== -->
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/reminders">
+                <i class="fa-solid fa-bell"></i>
+                <span>Smart Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Transcript</span>
+            </a>
+            <a class="cr-nav-item" href="/course-registration">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Course Registration</span>
+            </a>
+            <a class="cr-nav-item active" href="/course-materials">
+                <i class="fa-solid fa-folder-open"></i>
+                <span>Course Materials</span>
+            </a>
+            <a class="cr-nav-item" href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <!-- ===== Main panel ===== -->
+    <div class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-folder-open"></i> Course Materials</h1>
+                <p>Access course materials, assignments, and resources for your enrolled courses.</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <!-- Main content -->
+        <main class="cr-main">
+            <div class="course-materials-main-container">
+                {% if enrolled_courses or instructor_courses %}
+                    {% if enrolled_courses %}
+                    <!-- Student Courses Section -->
+                    <section class="materials-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-book-reader"></i> My Enrolled Courses</h2>
+                            <p class="section-description">Click on a course to view its materials, assignments, and resources.</p>
+                        </div>
+                        <div class="courses-grid">
+                            {% for course in enrolled_courses %}
+                            <div class="course-card-materials">
+                                <div class="course-card-header">
+                                    <div class="course-icon">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <div class="course-info">
+                                        <h3>{{ course.Course_Name }}</h3>
+                                        <p class="course-meta">Course ID: {{ course.Course_ID }}</p>
+                                        {% if course.Credits %}
+                                        <p class="course-credits">{{ course.Credits }} Credits</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="course-card-body">
+                                    <a href="{{ url_for('course_material.course_materials_page', course_id=course.Course_ID) }}" class="btn btn-primary btn-block">
+                                        <i class="fas fa-folder-open"></i> View Materials
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    {% if instructor_courses %}
+                    <!-- Instructor Courses Section -->
+                    <section class="materials-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-chalkboard-teacher"></i> My Teaching Courses</h2>
+                            <p class="section-description">Manage and upload materials for the courses you teach.</p>
+                        </div>
+                        <div class="courses-grid">
+                            {% for course in instructor_courses %}
+                            <div class="course-card-materials">
+                                <div class="course-card-header">
+                                    <div class="course-icon instructor">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                    </div>
+                                    <div class="course-info">
+                                        <h3>{{ course.Course_Name }}</h3>
+                                        <p class="course-meta">Course ID: {{ course.Course_ID }}</p>
+                                        {% if course.Credits %}
+                                        <p class="course-credits">{{ course.Credits }} Credits</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="course-card-body">
+                                    <div class="course-actions-grid">
+                                        <a href="{{ url_for('course_material.course_materials_page', course_id=course.Course_ID) }}" class="btn btn-primary">
+                                            <i class="fas fa-folder-open"></i> View Materials
+                                        </a>
+                                        <a href="{{ url_for('course_material.upload_materials_page', course_id=course.Course_ID) }}" class="btn btn-secondary">
+                                            <i class="fas fa-upload"></i> Upload
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state-large">
+                        <div class="empty-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <h2>No Courses Available</h2>
+                        <p>You don't have any enrolled courses yet. Enroll in courses to access course materials.</p>
+                        <div class="empty-actions">
+                            <a href="/course-registration" class="btn btn-primary">
+                                <i class="fas fa-book-open"></i> Browse Courses
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+async function handleLogout() {
+    try {
+        const response = await fetch('/auth/logout', { method: 'POST' });
+        if (response.ok) {
+            window.location.href = '/login';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login';
+    }
+}
+</script>
+</body>
+</html>
+

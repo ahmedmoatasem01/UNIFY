@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.Course_Name }} - Course Materials - Unify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_materials.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <!-- Sidebar same as index -->
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview"><i class="fa-solid fa-chart-column"></i><span>Overview</span></a>
+            <a class="cr-nav-item" href="/schedule"><i class="fa-solid fa-calendar-day"></i><span>Schedule</span></a>
+            <a class="cr-nav-item" href="/tasks"><i class="fa-solid fa-list-check"></i><span>Tasks</span></a>
+            <a class="cr-nav-item" href="/notes"><i class="fa-solid fa-note-sticky"></i><span>Notes &amp; Summaries</span></a>
+            <a class="cr-nav-item" href="/reminders"><i class="fa-solid fa-bell"></i><span>Smart Reminders</span></a>
+            <a class="cr-nav-item" href="/messages"><i class="fa-solid fa-message"></i><span>Messages</span></a>
+            <a class="cr-nav-item" href="/transcript"><i class="fa-solid fa-file-lines"></i><span>Transcript</span></a>
+            <a class="cr-nav-item" href="/course-registration"><i class="fa-solid fa-book-open"></i><span>Course Registration</span></a>
+            <a class="cr-nav-item active" href="/course-materials"><i class="fa-solid fa-folder-open"></i><span>Course Materials</span></a>
+            <a class="cr-nav-item" href="/settings"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+        </nav>
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <div class="cr-main-panel">
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fas fa-book"></i> {{ course.Course_Name }} - Course Materials</h1>
+                <p>View and download course materials, assignments, and resources.</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <main class="cr-main">
+            <div class="course-materials-container">
+                <div class="materials-header">
+                    <div class="header-left">
+                        <a href="{{ url_for('course_material.course_materials_main') }}" class="btn btn-secondary" style="margin-bottom: 1rem; display: inline-flex;">
+                            <i class="fas fa-arrow-left"></i> Back to Course Materials
+                        </a>
+                    </div>
+                    <div class="actions">
+                        {% if user_data.role == 'Instructor' %}
+                        <a href="{{ url_for('course_material.upload_materials_page', course_id=course.Course_ID) }}" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload Material
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+    <div class="materials-content">
+        {% if materials_by_week %}
+            {% for week_num in materials_by_week.keys()|sort %}
+                <div class="week-section">
+                    <h2 class="week-title">
+                        <i class="fas fa-calendar-week"></i>
+                        {% if week_num == 0 %}General Materials{% else %}Week {{ week_num }}{% endif %}
+                    </h2>
+                    
+                    {% for topic, materials in materials_by_week[week_num].items() %}
+                        <div class="topic-section">
+                            {% if topic != "General" %}
+                            <h3 class="topic-title"><i class="fas fa-tag"></i> {{ topic }}</h3>
+                            {% endif %}
+                            
+                            <div class="materials-grid">
+                                {% for material in materials %}
+                                <div class="material-card">
+                                    <div class="material-icon">
+                                        {% if material.Material_Type == 'pdf' %}
+                                            <i class="fas fa-file-pdf"></i>
+                                        {% elif material.Material_Type == 'pptx' %}
+                                            <i class="fas fa-file-powerpoint"></i>
+                                        {% elif material.Material_Type == 'video' %}
+                                            <i class="fas fa-video"></i>
+                                        {% elif material.Material_Type == 'assignment' %}
+                                            <i class="fas fa-file-word"></i>
+                                        {% elif material.Material_Type == 'link' %}
+                                            <i class="fas fa-link"></i>
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="material-info">
+                                        <h4>{{ material.Material_Title }}</h4>
+                                        {% if material.Description %}
+                                        <p class="material-description">{{ material.Description }}</p>
+                                        {% endif %}
+                                        <div class="material-meta">
+                                            <span><i class="fas fa-clock"></i> {{ material.Upload_Date.strftime('%Y-%m-%d') if material.Upload_Date else 'N/A' }}</span>
+                                            {% if material.File_Size %}
+                                            <span><i class="fas fa-hdd"></i> {{ (material.File_Size / 1024 / 1024) | round(2) }} MB</span>
+                                            {% endif %}
+                                            <span><i class="fas fa-download"></i> {{ material.Download_Count }} downloads</span>
+                                        </div>
+                                    </div>
+                                    <div class="material-actions">
+                                        {% if material.is_link %}
+                                            <a href="{{ material.Link_URL }}" target="_blank" class="btn btn-link">
+                                                <i class="fas fa-external-link-alt"></i> Open Link
+                                            </a>
+                                        {% else %}
+                                            {% if material.is_previewable %}
+                                            <a href="{{ url_for('course_material.preview_material', material_id=material.Material_ID) }}" target="_blank" class="btn btn-secondary">
+                                                <i class="fas fa-eye"></i> Preview
+                                            </a>
+                                            {% endif %}
+                                            <a href="{{ url_for('course_material.download_material', material_id=material.Material_ID) }}" class="btn btn-primary">
+                                                <i class="fas fa-download"></i> Download
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>No materials available</h3>
+                <p>Course materials will appear here once the instructor uploads them.</p>
+            </div>
+        {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+async function handleLogout() {
+    try {
+        const response = await fetch('/auth/logout', { method: 'POST' });
+        if (response.ok) {
+            window.location.href = '/login';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login';
+    }
+}
+</script>
+</body>
+</html>
+
