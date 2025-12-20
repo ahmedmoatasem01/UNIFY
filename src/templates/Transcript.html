@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Unify | Transcript</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/Transcript.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="cr-body">
@@ -35,9 +37,9 @@
                 <i class="fa-solid fa-note-sticky"></i>
                 <span>Notes &amp; Summaries</span>
             </a>
-            <a class="cr-nav-item" href="/calendar">
+            <a class="cr-nav-item" href="/reminders">
                 <i class="fa-solid fa-bell"></i>
-                <span>Calendar &amp; Reminders</span>
+                <span>Smart Reminders</span>
             </a>
             <a class="cr-nav-item" href="/messages">
                 <i class="fa-solid fa-message"></i>
@@ -61,123 +63,141 @@
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
-            <p class="cr-small-text">CSAI 203 · Team 5</p>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
         </div>
     </aside>
 
     <!-- Main Panel -->
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
-            <p>View your academic transcript</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-file-lines"></i> Transcript</h1>
+                <p>View your academic transcript</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+        
         <div class="cr-content" style="padding: 20px;">
-            <p>Transcript content will be displayed here.</p>
+            <!-- Loading State -->
+            <div id="loadingState" style="text-align: center; padding: 40px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 48px; color: #667eea;"></i>
+                <p style="margin-top: 16px; color: #666;">Loading transcript data...</p>
+            </div>
+
+            <!-- Main Content (Hidden initially) -->
+            <div id="transcriptContent" style="display: none;">
+                <!-- Summary Cards -->
+                <div class="ts-summary">
+                    <div class="ts-card ts-card-primary">
+                        <div class="ts-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <div class="ts-card-content">
+                            <div class="ts-card-label">Cumulative GPA</div>
+                            <div class="ts-card-value" id="cumulativeGPA">0.00</div>
+                        </div>
+                    </div>
+                    <div class="ts-card ts-card-success">
+                        <div class="ts-card-icon"><i class="fa-solid fa-book"></i></div>
+                        <div class="ts-card-content">
+                            <div class="ts-card-label">Total Credits</div>
+                            <div class="ts-card-value" id="totalCredits">0</div>
+                        </div>
+                    </div>
+                    <div class="ts-card ts-card-info">
+                        <div class="ts-card-icon"><i class="fa-solid fa-calendar"></i></div>
+                        <div class="ts-card-content">
+                            <div class="ts-card-label">Semesters</div>
+                            <div class="ts-card-value" id="semesterCount">0</div>
+                        </div>
+                    </div>
+                    <div class="ts-card ts-card-warning">
+                        <div class="ts-card-icon"><i class="fa-solid fa-award"></i></div>
+                        <div class="ts-card-content">
+                            <div class="ts-card-label">Dean's List</div>
+                            <div class="ts-card-value" id="deansListCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="ts-controls">
+                    <div class="ts-search-filter">
+                        <input type="text" id="courseSearch" class="ts-search" placeholder="Search courses...">
+                        <select id="semesterFilter" class="ts-filter">
+                            <option value="">All Semesters</option>
+                        </select>
+                        <select id="gradeFilter" class="ts-filter">
+                            <option value="">All Grades</option>
+                            <option value="A">A Grades</option>
+                            <option value="B">B Grades</option>
+                            <option value="C">C Grades</option>
+                            <option value="D">D Grades</option>
+                            <option value="F">F Grades</option>
+                        </select>
+                    </div>
+                    <div class="ts-actions">
+                        <button class="ts-btn ts-btn-secondary" onclick="printTranscript()">
+                            <i class="fa-solid fa-print"></i> Print
+                        </button>
+                        <button class="ts-btn ts-btn-secondary" onclick="downloadTranscript()">
+                            <i class="fa-solid fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Honors Section -->
+                <div class="ts-honors" id="honorsSection" style="display: none;">
+                    <h3><i class="fa-solid fa-trophy"></i> Honors & Awards</h3>
+                    <div class="ts-honors-list" id="honorsList"></div>
+                </div>
+
+                <!-- Grade Distribution Chart -->
+                <div class="ts-chart-section">
+                    <h3><i class="fa-solid fa-chart-pie"></i> Grade Distribution</h3>
+                    <div class="ts-chart-container">
+                        <canvas id="gradeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Semester Details -->
+                <div class="ts-semesters">
+                    <h3><i class="fa-solid fa-calendar-days"></i> Semester Details</h3>
+                    <div class="ts-semester-tabs" id="semesterTabs"></div>
+                    <div id="coursesContainer"></div>
+                </div>
+
+                <!-- Full Transcript Table -->
+                <div class="ts-table-section">
+                    <h3><i class="fa-solid fa-table"></i> Complete Transcript</h3>
+                    <div class="ts-table-container">
+                        <table class="ts-table">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Name</th>
+                                    <th>Credits</th>
+                                    <th>Grade</th>
+                                    <th>Quality Points</th>
+                                    <th>Semester</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" style="display: none; text-align: center; padding: 40px;">
+                <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; color: #f44336;"></i>
+                <p style="margin-top: 16px; color: #666;" id="errorMessage">Failed to load transcript data</p>
+            </div>
         </div>
     </main>
 </div>
+
 <script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
 <script>
-    // Mock Transcript Data
-    const transcriptData = {
-        student: {
-            name: 'Ahmed Hassan',
-            id: '201234567',
-            program: 'Computer Science',
-            email: 'ahmed.hassan@student.example.com',
-            avatar: 'A'
-        },
-        summary: {
-            cumulativeGPA: 3.75,
-            totalCredits: 120,
-            academicStanding: 'Good',
-            deansListCount: 6
-        },
-        semesters: [
-            {
-                id: 'fall-2021',
-                name: 'Fall 2021',
-                gpa: 3.8,
-                credits: 15,
-                courses: [
-                    { code: 'CS101', name: 'Introduction to Programming', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'MATH201', name: 'Calculus I', credits: 4, grade: 'A', gradePoint: 4.0 },
-                    { code: 'ENG101', name: 'English Composition', credits: 3, grade: 'B+', gradePoint: 3.3 },
-                    { code: 'PHY101', name: 'Physics I', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CHM101', name: 'Chemistry I', credits: 3, grade: 'A-', gradePoint: 3.7 }
-                ]
-            },
-            {
-                id: 'spring-2022',
-                name: 'Spring 2022',
-                gpa: 3.7,
-                credits: 16,
-                courses: [
-                    { code: 'CS102', name: 'Data Structures', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'MATH202', name: 'Calculus II', credits: 4, grade: 'A', gradePoint: 4.0 },
-                    { code: 'PHYS102', name: 'Physics II', credits: 4, grade: 'A-', gradePoint: 3.7 },
-                    { code: 'CS103', name: 'Discrete Mathematics', credits: 3, grade: 'B+', gradePoint: 3.3 },
-                    { code: 'CS104', name: 'Digital Logic', credits: 2, grade: 'A', gradePoint: 4.0 }
-                ]
-            },
-            {
-                id: 'fall-2022',
-                name: 'Fall 2022',
-                gpa: 3.9,
-                credits: 15,
-                courses: [
-                    { code: 'CS201', name: 'Algorithms', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CS202', name: 'Database Systems', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CS203', name: 'Web Development', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CS204', name: 'Software Engineering', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'MATH301', name: 'Linear Algebra', credits: 3, grade: 'A-', gradePoint: 3.7 }
-                ]
-            },
-            {
-                id: 'spring-2023',
-                name: 'Spring 2023',
-                gpa: 3.75,
-                credits: 15,
-                courses: [
-                    { code: 'CS205', name: 'Operating Systems', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CS206', name: 'Computer Networks', credits: 3, grade: 'A-', gradePoint: 3.7 },
-                    { code: 'CS207', name: 'Mobile Development', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CS208', name: 'Cybersecurity', credits: 3, grade: 'B+', gradePoint: 3.3 },
-                    { code: 'MATH302', name: 'Probability & Statistics', credits: 3, grade: 'A', gradePoint: 4.0 }
-                ]
-            },
-            {
-                id: 'fall-2023',
-                name: 'Fall 2023',
-                gpa: 3.8,
-                credits: 15,
-                courses: [
-                    { code: 'CS301', name: 'AI & Machine Learning', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CS302', name: 'Data Mining', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CS303', name: 'Cloud Computing', credits: 3, grade: 'A-', gradePoint: 3.7 },
-                    { code: 'CS304', name: 'Advanced Algorithms', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'TECH401', name: 'Capstone Project I', credits: 3, grade: 'A', gradePoint: 4.0 }
-                ]
-            },
-            {
-                id: 'spring-2024',
-                name: 'Spring 2024',
-                gpa: 3.7,
-                credits: 15,
-                courses: [
-                    { code: 'CS305', name: 'Advanced AI', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'CS306', name: 'Deep Learning', credits: 3, grade: 'A-', gradePoint: 3.7 },
-                    { code: 'CS307', name: 'Natural Language Processing', credits: 3, grade: 'A', gradePoint: 4.0 },
-                    { code: 'TECH402', name: 'Capstone Project II', credits: 3, grade: 'B+', gradePoint: 3.3 },
-                    { code: 'CS308', name: 'Advanced Cybersecurity', credits: 3, grade: 'A', gradePoint: 4.0 }
-                ]
-            }
-        ]
-    };
-
     // Grade to Point Conversion
     const gradePoints = {
         'A+': 4.0, 'A': 4.0, 'A-': 3.7,
@@ -187,37 +207,62 @@
         'F': 0.0
     };
 
+    let transcriptData = null;
     let filteredCourses = [];
     let allCourses = [];
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-        populateUserData();
-        populateSummary();
-        populateSemesters();
-        populateAllCourses();
-        renderTranscriptTable(allCourses);
-        initializeGradeChart();
-        populateHonors();
-        setupEventListeners();
+    // Initialize - Fetch data from API
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadTranscriptData();
     });
 
+    async function loadTranscriptData() {
+        try {
+            const response = await fetch('/transcript/api/data');
+            if (!response.ok) {
+                throw new Error('Failed to fetch transcript data');
+            }
+            
+            transcriptData = await response.json();
+            
+            // Hide loading, show content
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('transcriptContent').style.display = 'block';
+            
+            // Populate UI
+            // populateUserData(); // Skip - topbar already shows user info
+            populateSummary();
+            populateAllCourses();
+            populateSemesters();
+            renderTranscriptTable(allCourses);
+            initializeGradeChart();
+            populateHonors();
+            setupEventListeners();
+        } catch (error) {
+            console.error('Error loading transcript:', error);
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = error.message || 'Failed to load transcript data';
+        }
+    }
+
     function populateUserData() {
+        if (!transcriptData) return;
         document.getElementById('userName').textContent = transcriptData.student.name;
         document.getElementById('userAvatar').textContent = transcriptData.student.avatar;
         document.getElementById('userRole').textContent = `${transcriptData.student.program} · ID: ${transcriptData.student.id}`;
     }
 
     function populateSummary() {
+        if (!transcriptData) return;
         document.getElementById('cumulativeGPA').textContent = transcriptData.summary.cumulativeGPA.toFixed(2);
         document.getElementById('totalCredits').textContent = transcriptData.summary.totalCredits;
         document.getElementById('semesterCount').textContent = transcriptData.semesters.length;
-        document.getElementById('academicStanding').textContent = transcriptData.summary.academicStanding;
-        document.getElementById('coursesCompleted').textContent = allCourses.length;
         document.getElementById('deansListCount').textContent = transcriptData.summary.deansListCount;
     }
 
     function populateAllCourses() {
+        if (!transcriptData) return;
         allCourses = [];
         transcriptData.semesters.forEach(semester => {
             semester.courses.forEach(course => {
@@ -231,6 +276,8 @@
     }
 
     function populateSemesters() {
+        if (!transcriptData || !transcriptData.semesters.length) return;
+        
         const container = document.getElementById('semesterTabs');
         const filterSelect = document.getElementById('semesterFilter');
 
@@ -238,7 +285,7 @@
             const btn = document.createElement('button');
             btn.className = 'ts-semester-btn' + (idx === 0 ? ' active' : '');
             btn.textContent = semester.name;
-            btn.onclick = () => selectSemester(semester.id);
+            btn.onclick = () => selectSemester(semester.id, btn);
             container.appendChild(btn);
 
             const option = document.createElement('option');
@@ -247,14 +294,18 @@
             filterSelect.appendChild(option);
         });
 
-        selectSemester(transcriptData.semesters[0].id);
+        selectSemester(transcriptData.semesters[0].id, container.firstChild);
     }
 
-    function selectSemester(semesterId) {
+    function selectSemester(semesterId, targetButton) {
         document.querySelectorAll('.ts-semester-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+        if (targetButton) {
+            targetButton.classList.add('active');
+        }
 
         const semester = transcriptData.semesters.find(s => s.id === semesterId);
+        if (!semester) return;
+        
         const container = document.getElementById('coursesContainer');
         container.innerHTML = `
             <div class="ts-semester-summary">
@@ -286,6 +337,8 @@
     }
 
     function populateHonors() {
+        if (!transcriptData) return;
+        
         const honors = [];
         const deansListSemesters = transcriptData.semesters.filter(s => s.gpa >= 3.7);
         
@@ -327,6 +380,8 @@
     }
 
     function initializeGradeChart() {
+        if (!allCourses.length) return;
+        
         const gradeDistribution = {};
         allCourses.forEach(course => {
             const gradePrefix = course.grade.charAt(0);
@@ -384,17 +439,7 @@
     }
 
     function downloadTranscript() {
-        const element = document.querySelector('.cr-content');
-        const opt = {
-            margin: 10,
-            filename: `transcript-${transcriptData.student.id}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-        };
-        
-        // Note: Requires html2pdf library
-        alert('PDF download feature requires html2pdf library. Install via: npm install html2pdf.js');
+        alert('PDF download feature coming soon!');
     }
 
     async function handleLogout() {
@@ -411,4 +456,3 @@
 </script>
 </body>
 </html>
-

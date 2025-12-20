@@ -1,31 +1,35 @@
         .password-group {
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .password-toggle {
             position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+            right: 10px;
+            bottom: 10px;
             border: none;
             background: transparent;
             color: var(--text-muted);
             cursor: pointer;
-            padding: 4px;
+            padding: 6px 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             z-index: 10;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
 
         .password-toggle:hover {
             color: var(--text-main);
+            background: rgba(79, 70, 229, 0.1);
         }
 
         .password-toggle i {
-            font-size: 14px;
+            font-size: 16px;
             line-height: 1;
         }
 
@@ -219,24 +223,25 @@
         .form-group label {
             display: block;
             font-size: 13px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             color: var(--text-muted);
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 9px 10px;
+            padding: 10px 12px;
             border-radius: 10px;
             border: 1px solid var(--border-subtle);
             background: rgba(15,23,42,0.8);
             color: var(--text-main);
             outline: none;
             font-size: 14px;
+            line-height: 1.5;
         }
 
         .password-group input {
-            padding-right: 40px;
+            padding-right: 44px;
         }
 
         .form-group input:focus,

@@ -35,9 +35,9 @@
                 <i class="fa-solid fa-note-sticky"></i>
                 <span>Notes &amp; Summaries</span>
             </a>
-            <a class="cr-nav-item" href="/calendar">
+            <a class="cr-nav-item" href="/reminders">
                 <i class="fa-solid fa-bell"></i>
-                <span>Calendar &amp; Reminders</span>
+                <span>Smart Reminders</span>
             </a>
             <a class="cr-nav-item" href="/messages">
                 <i class="fa-solid fa-message"></i>
@@ -61,19 +61,20 @@
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
-            <p class="cr-small-text">CSAI 203 · Team 5</p>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-calendar-day"></i> Schedule</h1>
-            <p>View your enrolled courses and weekly schedule</p>
-        </div>
-        {% endblock %}
+    <div class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-calendar-day"></i> Schedule</h1>
+                <p>View your enrolled courses and weekly schedule</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
         <div class="cr-content" style="padding: 20px;">
             <!-- Schedule Table and Calendar -->
             <section class="cr-grid-2">
@@ -116,7 +117,7 @@
                 </div>
             </section>
         </div>
-    </main>
+    </div>
 </div>
 
 <script>

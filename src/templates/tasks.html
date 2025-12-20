@@ -14,6 +14,218 @@
             padding: 20px;
         }
 
+        /* Pomodoro Timer Styles */
+        .pomodoro-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        }
+
+        .pomodoro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .pomodoro-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timer-mode-toggle {
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .mode-btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            font-weight: 600;
+        }
+
+        .pomodoro-timer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .timer-circle {
+            position: relative;
+            width: 220px;
+            height: 220px;
+        }
+
+        .timer-progress {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .timer-track {
+            stroke: rgba(255, 255, 255, 0.2);
+        }
+
+        .timer-fill {
+            stroke: white;
+            stroke-linecap: round;
+            stroke-dasharray: 565.48;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .timer-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .timer-time {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .timer-btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timer-btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .timer-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
+        }
+
+        .timer-btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .timer-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .pomodoro-stats {
+            display: flex;
+            gap: 32px;
+            margin-top: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-item i {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .stat-item span {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-item small {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .pomodoro-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .timer-mode-toggle {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .mode-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .timer-circle {
+                width: 180px;
+                height: 180px;
+            }
+
+            .timer-time {
+                font-size: 2.5rem;
+            }
+
+            .timer-controls {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .timer-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         .task-input-section {
             background: var(--cr-bg-panel);
             border: 1px solid var(--cr-border);
@@ -315,9 +527,9 @@
                 <i class="fa-solid fa-note-sticky"></i>
                 <span>Notes &amp; Summaries</span>
             </a>
-            <a class="cr-nav-item" href="/calendar">
+            <a class="cr-nav-item" href="/reminders">
                 <i class="fa-solid fa-bell"></i>
-                <span>Calendar &amp; Reminders</span>
+                <span>Smart Reminders</span>
             </a>
             <a class="cr-nav-item" href="/messages">
                 <i class="fa-solid fa-message"></i>
@@ -341,20 +553,77 @@
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
-            <p class="cr-small-text">CSAI 203 · Team 5</p>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
         </div>
     </aside>
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-list-check"></i> Tasks</h1>
-            <p>Stay organized. Stay ahead.</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-list-check"></i> Tasks</h1>
+                <p>Stay organized. Stay ahead.</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
         
         <div class="cr-content">
             <div class="tasks-container">
+                <!-- Pomodoro Focus Timer -->
+                <div class="pomodoro-section">
+                    <div class="pomodoro-header">
+                        <h3><i class="fa-solid fa-clock"></i> Focus Timer</h3>
+                        <div class="timer-mode-toggle">
+                            <button class="mode-btn active" data-mode="pomodoro" data-duration="25">
+                                <i class="fa-solid fa-brain"></i> Focus (25m)
+                            </button>
+                            <button class="mode-btn" data-mode="short" data-duration="5">
+                                <i class="fa-solid fa-coffee"></i> Short Break (5m)
+                            </button>
+                            <button class="mode-btn" data-mode="long" data-duration="15">
+                                <i class="fa-solid fa-couch"></i> Long Break (15m)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="pomodoro-timer">
+                        <div class="timer-circle">
+                            <svg class="timer-progress" viewBox="0 0 200 200">
+                                <circle class="timer-track" cx="100" cy="100" r="90" fill="none" stroke-width="8"></circle>
+                                <circle class="timer-fill" cx="100" cy="100" r="90" fill="none" stroke-width="8"></circle>
+                            </svg>
+                            <div class="timer-display">
+                                <div class="timer-time" id="pomodoro-time">25:00</div>
+                                <div class="timer-label" id="pomodoro-label">Ready to focus?</div>
+                            </div>
+                        </div>
+                        
+                        <div class="timer-controls">
+                            <button id="timer-start" class="timer-btn timer-btn-primary">
+                                <i class="fa-solid fa-play"></i> Start
+                            </button>
+                            <button id="timer-pause" class="timer-btn timer-btn-secondary" style="display:none;">
+                                <i class="fa-solid fa-pause"></i> Pause
+                            </button>
+                            <button id="timer-reset" class="timer-btn timer-btn-secondary">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+                        
+                        <div class="pomodoro-stats">
+                            <div class="stat-item">
+                                <i class="fa-solid fa-fire"></i>
+                                <span id="pomodoros-today">0</span>
+                                <small>Today</small>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fa-solid fa-trophy"></i>
+                                <span id="total-minutes">0</span>
+                                <small>Minutes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Add Task Section -->
                 <div class="task-input-section">
                     <form id="task-form" class="task-form">
@@ -663,6 +932,206 @@
     dueDateInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
     
     loadTasks();
+
+    // =============== POMODORO TIMER ===============
+    let timerInterval = null;
+    let timeLeft = 25 * 60; // 25 minutes in seconds
+    let totalSeconds = 25 * 60;
+    let timerRunning = false;
+    let currentMode = 'pomodoro';
+    let pomodorosToday = 0;
+    let totalMinutesToday = 0;
+
+    const timerDisplay = document.getElementById('pomodoro-time');
+    const timerLabel = document.getElementById('pomodoro-label');
+    const startBtn = document.getElementById('timer-start');
+    const pauseBtn = document.getElementById('timer-pause');
+    const resetBtn = document.getElementById('timer-reset');
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const timerFill = document.querySelector('.timer-fill');
+    const pomodorosTodayEl = document.getElementById('pomodoros-today');
+    const totalMinutesEl = document.getElementById('total-minutes');
+
+    // Load stats from localStorage
+    function loadStats() {
+        const today = new Date().toDateString();
+        const savedDate = localStorage.getItem('pomodoro_date');
+        
+        if (savedDate === today) {
+            pomodorosToday = parseInt(localStorage.getItem('pomodoros_today') || '0');
+            totalMinutesToday = parseInt(localStorage.getItem('total_minutes_today') || '0');
+        } else {
+            pomodorosToday = 0;
+            totalMinutesToday = 0;
+            localStorage.setItem('pomodoro_date', today);
+        }
+        
+        updateStatsDisplay();
+    }
+
+    // Update stats display
+    function updateStatsDisplay() {
+        pomodorosTodayEl.textContent = pomodorosToday;
+        totalMinutesEl.textContent = totalMinutesToday;
+    }
+
+    // Save stats to localStorage
+    function saveStats() {
+        localStorage.setItem('pomodoros_today', pomodorosToday);
+        localStorage.setItem('total_minutes_today', totalMinutesToday);
+    }
+
+    // Format time as MM:SS
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Update timer display
+    function updateDisplay() {
+        timerDisplay.textContent = formatTime(timeLeft);
+        
+        // Update progress circle
+        const progress = (totalSeconds - timeLeft) / totalSeconds;
+        const circumference = 565.48; // 2 * π * 90
+        const offset = circumference * (1 - progress);
+        timerFill.style.strokeDashoffset = offset;
+    }
+
+    // Start timer
+    function startTimer() {
+        if (timerRunning) return;
+        
+        timerRunning = true;
+        timerLabel.textContent = currentMode === 'pomodoro' ? 'Focus time!' : 'Take a break';
+        startBtn.style.display = 'none';
+        pauseBtn.style.display = 'inline-flex';
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateDisplay();
+            
+            if (timeLeft <= 0) {
+                completeTimer();
+            }
+        }, 1000);
+    }
+
+    // Pause timer
+    function pauseTimer() {
+        if (!timerRunning) return;
+        
+        clearInterval(timerInterval);
+        timerRunning = false;
+        timerLabel.textContent = 'Paused';
+        startBtn.style.display = 'inline-flex';
+        pauseBtn.style.display = 'none';
+    }
+
+    // Reset timer
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        const activeModeBtn = document.querySelector('.mode-btn.active');
+        const duration = parseInt(activeModeBtn.dataset.duration);
+        timeLeft = duration * 60;
+        totalSeconds = duration * 60;
+        timerLabel.textContent = 'Ready to focus?';
+        startBtn.style.display = 'inline-flex';
+        pauseBtn.style.display = 'none';
+        updateDisplay();
+    }
+
+    // Complete timer
+    function completeTimer() {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        timerLabel.textContent = 'Complete! 🎉';
+        startBtn.style.display = 'inline-flex';
+        pauseBtn.style.display = 'none';
+        
+        // Play sound (optional)
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjGK0fPTgjMGHm7A7+OZPQ0OVKbo8bllGAg+ltryxXElBiR+xO/ekj4IFGWx6uypUBELRqDg8r5sIQYuiM/z1IAw');
+            audio.play();
+        } catch (e) {
+            // Sound not critical
+        }
+        
+        // Update stats if it was a focus session
+        if (currentMode === 'pomodoro') {
+            pomodorosToday++;
+            totalMinutesToday += 25;
+            updateStatsDisplay();
+            saveStats();
+        }
+        
+        // Auto-switch to break
+        if (currentMode === 'pomodoro') {
+            setTimeout(() => {
+                const shortBreakBtn = document.querySelector('.mode-btn[data-mode="short"]');
+                shortBreakBtn.click();
+            }, 2000);
+        }
+    }
+
+    // Mode button click handler
+    modeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Reset timer first
+            clearInterval(timerInterval);
+            timerRunning = false;
+            startBtn.style.display = 'inline-flex';
+            pauseBtn.style.display = 'none';
+            
+            // Update active button
+            modeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Update mode and time
+            currentMode = btn.dataset.mode;
+            const duration = parseInt(btn.dataset.duration);
+            timeLeft = duration * 60;
+            totalSeconds = duration * 60;
+            
+            // Update label
+            if (currentMode === 'pomodoro') {
+                timerLabel.textContent = 'Ready to focus?';
+            } else {
+                timerLabel.textContent = 'Ready for a break?';
+            }
+            
+            updateDisplay();
+        });
+    });
+
+    // Button event listeners
+    startBtn.addEventListener('click', startTimer);
+    pauseBtn.addEventListener('click', pauseTimer);
+    resetBtn.addEventListener('click', resetTimer);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Space to start/pause
+        if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            if (timerRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+        // R to reset
+        if (e.code === 'KeyR' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            resetTimer();
+        }
+    });
+
+    // Initialize timer
+    loadStats();
+    updateDisplay();
 
     // Logout handler
     async function handleLogout() {

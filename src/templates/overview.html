@@ -35,9 +35,9 @@
                 <i class="fa-solid fa-note-sticky"></i>
                 <span>Notes &amp; Summaries</span>
             </a>
-            <a class="cr-nav-item" href="/calendar">
+            <a class="cr-nav-item" href="/reminders">
                 <i class="fa-solid fa-bell"></i>
-                <span>Calendar &amp; Reminders</span>
+                <span>Smart Reminders</span>
             </a>
             <a class="cr-nav-item" href="/messages">
                 <i class="fa-solid fa-message"></i>
@@ -61,18 +61,19 @@
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log out</span>
             </button>
-            <p class="cr-small-text">CSAI 203 · Team 5</p>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
         </div>
     </aside>
 
     <main class="cr-main-panel">
-        {% include 'components/topbar.html' %}
-        {% block topbar_title %}
-        <div class="cr-topbar-left">
-            <h1><i class="fa-solid fa-chart-column"></i> Overview</h1>
-            <p>Welcome back, {{ user_data.name if user_data else 'Student' }}!</p>
-        </div>
-        {% endblock %}
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-chart-column"></i> Overview</h1>
+                <p>Welcome back, {{ user_data.name if user_data else 'Student' }}!</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
 
         <div class="overview-wrapper">
             <!-- Left Column: Statistics & Notifications -->

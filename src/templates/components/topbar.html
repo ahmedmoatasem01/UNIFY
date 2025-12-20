@@ -10,7 +10,7 @@
             <i class="fa-solid fa-moon"></i>
         </button>
         <div class="cr-user-chip">
-            <div class="cr-avatar">{{ user_data.avatar_letter if user_data else 'U' }}</div>
+            <div class="cr-avatar" data-user-role="{{ user_data.role if user_data else 'User' }}">{{ user_data.avatar_letter if user_data else 'U' }}</div>
             <div>
                 <p class="cr-user-name">{{ user_data.name if user_data else 'User' }}</p>
                 <p class="cr-user-role">{{ user_data.role if user_data else 'User' }} · {{ user_data.major if user_data and user_data.major else (user_data.department if user_data else 'Computer Science') }}</p>
