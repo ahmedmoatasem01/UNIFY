@@ -59,6 +59,10 @@
                 <i class="fa-solid fa-book-open"></i>
                 <span>Course Registration</span>
             </a>
+            <a class="cr-nav-item" href="/course-materials">
+                <i class="fa-solid fa-folder-open"></i>
+                <span>Course Materials</span>
+            </a>
             <a class="cr-nav-item" href="/settings">
                 <i class="fa-solid fa-gear"></i>
                 <span>Settings</span>
@@ -147,6 +151,7 @@
                             <th>Day</th>
                             <th>Start</th>
                             <th>End</th>
+                            <th>Materials</th>
                             <th>Action</th>
                         </tr>
                         </thead>
@@ -221,7 +226,12 @@
                 </div>
                 <div class="cr-course-actions">
                     ${isEnrolled 
-                        ? '<button class="cr-btn-secondary" disabled><i class="fa-solid fa-check"></i> Enrolled</button>'
+                        ? `<div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="cr-btn-secondary" disabled><i class="fa-solid fa-check"></i> Enrolled</button>
+                            <a href="/course-materials/course/${course.id}" class="cr-btn-primary-outline" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); transition: all 0.2s;">
+                                <i class="fa-solid fa-folder-open"></i> Materials
+                            </a>
+                           </div>`
                         : `<button class="cr-btn-secondary" ${inCart ? 'disabled' : ''}>
                             ${inCart ? '<i class="fa-solid fa-check"></i> Added' : '<i class="fa-solid fa-plus"></i> Add'}
                            </button>`
@@ -574,6 +584,9 @@
                             <td>${slot.day}</td>
                             <td>${slot.start}</td>
                             <td>${slot.end}</td>
+                            <td>${index === 0 && slot.course_id ? `<a href="/course-materials/course/${slot.course_id}" class="cr-btn-primary-outline" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); transition: all 0.2s; font-size: 0.85rem;" title="View Course Materials" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">
+                                <i class="fa-solid fa-folder-open"></i> Materials
+                            </a>` : index === 0 ? '<span style="color: var(--text-muted); font-size: 0.85rem;">-</span>' : ''}</td>
                             <td>${index === 0 ? `<button class="cr-btn-danger cr-drop-btn" data-course="${slot.course_code}" title="Drop this course">
                                 <i class="fa-solid fa-trash"></i> Drop
                             </button>` : ''}</td>
@@ -676,6 +689,9 @@
                             <td>${slot.day}</td>
                             <td>${slot.start}</td>
                             <td>${slot.end}</td>
+                            <td>${index === 0 && slot.course_id ? `<a href="/course-materials/course/${slot.course_id}" class="cr-btn-primary-outline" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); transition: all 0.2s; font-size: 0.85rem;" title="View Course Materials" onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">
+                                <i class="fa-solid fa-folder-open"></i> Materials
+                            </a>` : index === 0 ? '<span style="color: var(--text-muted); font-size: 0.85rem;">-</span>' : ''}</td>
                             <td>${index === 0 ? `<button class="cr-btn-danger cr-drop-btn" data-course="${slot.course_code}" title="Drop this course">
                                 <i class="fa-solid fa-trash"></i> Drop
                             </button>` : ''}</td>

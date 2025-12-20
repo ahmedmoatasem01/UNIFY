@@ -55,8 +55,12 @@ def api_courses():
     # Get all unique courses from schedule slots
     from core.db_singleton import DatabaseConnection
     db_connection = DatabaseConnection()
-    conn = db_connection.get_connection()
+    conn = None
+    cursor = None
+    course_codes_map = {}
+    
     try:
+        conn = db_connection.get_connection()
         cursor = conn.cursor()
         query = """
             SELECT DISTINCT Course_Code, Course_ID
@@ -67,14 +71,19 @@ def api_courses():
         rows = cursor.fetchall()
         
         # Build a map of course codes
-        course_codes_map = {}
         for row in rows:
             course_code = row[0]
             course_id = row[1]
             if course_code not in course_codes_map:
                 course_codes_map[course_code] = course_id
+    except Exception as e:
+        print(f"Error fetching courses: {e}")
+        return jsonify({"error": str(e)}), 500
     finally:
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
     
     results = []
     for course_code, course_id in course_codes_map.items():
@@ -409,15 +418,17 @@ def api_my_schedule():
     # Get schedule slots for enrolled courses
     from core.db_singleton import DatabaseConnection
     db_connection = DatabaseConnection()
-    conn = db_connection.get_connection()
-    
+    conn = None
+    cursor = None
     schedule = []
+    
     try:
+        conn = db_connection.get_connection()
         cursor = conn.cursor()
         # Build query with placeholders
         placeholders = ','.join(['?' for _ in course_ids])
         query = f"""
-            SELECT Course_Code, Section, Day, Start_Time, End_Time, Slot_Type, Sub_Type
+            SELECT Course_ID, Course_Code, Section, Day, Start_Time, End_Time, Slot_Type, Sub_Type
             FROM Course_Schedule_Slot
             WHERE Course_ID IN ({placeholders})
             AND Academic_Year = ?
@@ -430,14 +441,23 @@ def api_my_schedule():
         cursor.execute(query, params)
         rows = cursor.fetchall()
         
+        # Create mapping from course_id to course name
+        course_repo = RepositoryFactory.get_repository("course")
+        course_id_to_name = {}
+        for cid in course_ids:
+            course = course_repo.get_by_id(cid)
+            if course:
+                course_id_to_name[cid] = course.Course_Name
+        
         for row in rows:
-            course_code = row[0]
-            section = row[1]
-            day = row[2]
-            start_time = row[3]
-            end_time = row[4]
-            slot_type = row[5]
-            sub_type = row[6]
+            course_id = row[0]
+            course_code = row[1]
+            section = row[2]
+            day = row[3]
+            start_time = row[4]
+            end_time = row[5]
+            slot_type = row[6]
+            sub_type = row[7]
             
             # Filter: Only include slots that match the enrolled sections
             # If we have saved optimized schedule, use it to filter
@@ -464,9 +484,13 @@ def api_my_schedule():
             else:
                 type_str = "lab"
             
+            # Get course name from mapping
+            course_name = course_id_to_name.get(course_id, course_code)
+            
             schedule.append({
+                "course_id": course_id,
                 "course_code": course_code,
-                "course_name": course_code,  # Using code as name
+                "course_name": course_name,
                 "type": type_str,
                 "sub_type": sub_type or "LCTR",
                 "section": section,
@@ -474,8 +498,14 @@ def api_my_schedule():
                 "start": start_str,
                 "end": end_str
             })
+    except Exception as e:
+        print(f"Error fetching schedule for student {student_id}: {e}")
+        return jsonify({"status": "error", "error": str(e), "schedule": []}), 500
     finally:
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
     
     return jsonify({"status": "ok", "schedule": schedule})
 
