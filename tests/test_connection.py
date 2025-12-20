@@ -5,8 +5,9 @@ Run this to verify your database connection is working
 import sys
 import os
 
-# Add parent directory to path to import core module
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add src directory to path to import core module
+src_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src')
+sys.path.insert(0, src_path)
 
 from core.db_singleton import DatabaseConnection
 
