@@ -3,6 +3,8 @@
 <div align="center">
 
 ![Unify Logo](https://img.shields.io/badge/Unify-Student%20Assistant-blue?style=for-the-badge)
+![CI Pipeline](https://github.com/YOUR-USERNAME/UNIFY/actions/workflows/ci.yml/badge.svg)
+![Python Version](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11-blue)
 
 **A comprehensive student management system with AI-powered features**
 
