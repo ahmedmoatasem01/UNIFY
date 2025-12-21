@@ -1,0 +1,56 @@
+================================================================================
+FILE ORGANIZATION SUMMARY
+================================================================================
+Date: December 2024
+Action: Cleaned up and organized project files
+
+================================================================================
+FILES MOVED TO CORRECT LOCATIONS
+================================================================================
+
+1. Utility Scripts (moved from tests/ to src/utils/)
+   - create_test_user.py → src/utils/create_test_user.py
+   - add_student_to_test_user.py → src/utils/add_student_to_test_user.py
+   - test_connection.py → src/utils/test_db_connection.py
+   - download_model.py → src/utils/download_model.py
+   - download_model_fix.py → src/utils/download_model_fix.py
+
+2. SQL Scripts (moved from tests/ to src/database/)
+   - add_sample_messages.sql → src/database/add_sample_messages.sql
+   - check_transcript_data.sql → src/database/check_transcript_data.sql
+
+================================================================================
+FILES DELETED (USELESS/DUPLICATE)
+================================================================================
+
+1. test_messaging.py
+   - Reason: Diagnostic script, not a proper test
+   - Status: Deleted
+
+2. test_huggingface_connection.py
+   - Reason: Diagnostic script, not a proper test
+   - Status: Deleted
+
+================================================================================
+CURRENT FILE STRUCTURE
+================================================================================
+
+tests/
+  - Test files only (test_*.py)
+  - Test documentation (*.txt, *.md)
+  - Test runner (run_tests.py)
+  - Test fixtures (conftest.py)
+
+src/utils/
+  - Utility scripts
+  - Setup scripts
+  - Test/diagnostic scripts
+
+src/database/
+  - SQL schema files
+  - Migration scripts
+  - Sample data scripts
+
+================================================================================
+STATUS: ALL FILES ORGANIZED
+================================================================================

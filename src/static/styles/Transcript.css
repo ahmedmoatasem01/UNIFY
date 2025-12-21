@@ -3,10 +3,12 @@
     --cr-bg: #0f172a;
     --cr-bg-soft: #020617;
     --cr-bg-panel: #020617;
+    --cr-bg-elevated: #1e293b;
     --cr-border: #1f2937;
     --cr-text-main: #e5e7eb;
     --cr-text-muted: #9ca3af;
     --cr-accent: #667eea;
+    --cr-accent-soft: rgba(102, 126, 234, 0.16);
     --cr-success: #10b981;
     --cr-warning: #f59e0b;
     --cr-danger: #ef4444;
@@ -16,10 +18,12 @@
     --cr-bg: #f3f4f6;
     --cr-bg-soft: #e5e7eb;
     --cr-bg-panel: #ffffff;
+    --cr-bg-elevated: #f9fafb;
     --cr-border: #d1d5db;
     --cr-text-main: #111827;
     --cr-text-muted: #6b7280;
     --cr-accent: #667eea;
+    --cr-accent-soft: rgba(102, 126, 234, 0.1);
     --cr-success: #10b981;
     --cr-warning: #f59e0b;
     --cr-danger: #ef4444;
@@ -156,7 +160,7 @@
 
 .ts-honors h3 {
     margin-bottom: 12px;
-    color: #333;
+    color: var(--cr-text-main);
 }
 
 .ts-honors-list {
@@ -173,11 +177,11 @@
     align-items: center;
     gap: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: #333;
+    color: var(--cr-text-main);
 }
 
 .ts-honor-item i {
-    color: #ff9800;
+    color: var(--cr-warning);
 }
 
 /* Chart Section */
@@ -322,7 +326,7 @@
 
 .ts-grade-C {
     background: #FFC107;
-    color: #333;
+    color: var(--cr-text-main);
 }
 
 .ts-grade-D {
@@ -514,3 +518,88 @@
     }
 }
 
+
+/* ================= LIGHT MODE SUPPORT ================= */
+
+.cr-light-mode .ts-semesters,
+.cr-light-mode .ts-table-section,
+.cr-light-mode .ts-chart-section {
+    background: var(--cr-bg-panel);
+    border: 1px solid var(--cr-border);
+}
+
+.cr-light-mode .ts-semesters h3,
+.cr-light-mode .ts-table-section h3,
+.cr-light-mode .ts-chart-section h3 {
+    color: var(--cr-text-main);
+}
+
+.cr-light-mode .ts-semester-btn {
+    background: var(--cr-bg-panel);
+    border: 2px solid var(--cr-border);
+    color: var(--cr-text-main);
+}
+
+.cr-light-mode .ts-semester-btn:hover {
+    border-color: var(--cr-accent);
+}
+
+.cr-light-mode .ts-semester-btn.active {
+    background: var(--cr-accent);
+    color: white;
+}
+
+.cr-light-mode .ts-semester-stat {
+    background: var(--cr-bg-elevated);
+}
+
+.cr-light-mode .ts-semester-stat p:first-child {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .ts-semester-gpa {
+    color: var(--cr-accent);
+}
+
+.cr-light-mode .ts-course-card {
+    background: var(--cr-bg-panel);
+    border: 1px solid var(--cr-border);
+}
+
+.cr-light-mode .ts-course-card:hover {
+    border-color: var(--cr-accent);
+}
+
+.cr-light-mode .ts-course-header h4 {
+    color: var(--cr-text-main);
+}
+
+.cr-light-mode .ts-course-name {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .ts-course-footer {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .ts-table thead {
+    background: var(--cr-bg-elevated);
+}
+
+.cr-light-mode .ts-table th {
+    color: var(--cr-text-main);
+    border-bottom: 2px solid var(--cr-border);
+}
+
+.cr-light-mode .ts-table td {
+    color: var(--cr-text-main);
+    border-bottom: 1px solid var(--cr-border);
+}
+
+.cr-light-mode .ts-table tbody tr:hover {
+    background: var(--cr-bg-elevated);
+}
+
+.cr-light-mode .ts-table tbody tr:nth-child(even) {
+    background: var(--cr-bg-soft);
+}
