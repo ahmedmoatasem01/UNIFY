@@ -21,6 +21,15 @@ except ImportError as e:
     print(f"Warning: AI Note controller not available: {e}")
     ai_note_bp = None
     ai_note_available = False
+
+# Import AI Assistant controller
+try:
+    from controllers.ai_assistant_controller import ai_assistant_bp
+    ai_assistant_available = True
+except ImportError as e:
+    print(f"Warning: AI Assistant controller not available: {e}")
+    ai_assistant_bp = None
+    ai_assistant_available = False
 from core.user_helper import get_user_data
 import os
 import sys
@@ -29,25 +38,53 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
-app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
-app.secret_key = os.environ.get('SECRET_KEY', 'unify-secret-key-change-in-production')
 
-# --- Register Blueprints ---
-app.register_blueprint(auth_bp)
-app.register_blueprint(user_bp)
-app.register_blueprint(student_bp)
-app.register_blueprint(course_bp)
-# Note: task_bp registered after routes to avoid conflicts
-app.register_blueprint(message_bp)
-app.register_blueprint(enrollment_bp)
-app.register_blueprint(schedule_bp)
-app.register_blueprint(calendar_bp)
-app.register_blueprint(course_reg_bp)
-app.register_blueprint(transcript_bp)
-app.register_blueprint(overview_bp)
-if ai_note_available and ai_note_bp:
-    app.register_blueprint(ai_note_bp)
-app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
+#create app factory
+def create_app(config=None):
+    """
+    Application Factory Pattern
+    Creates and configures the Flask application instance.
+    
+    Args:
+        config: Optional configuration dictionary to override defaults
+        
+    Returns:
+        Flask application instance
+    """
+    # Create Flask app instance
+    app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+    
+    # Configuration
+    app.secret_key = os.environ.get('SECRET_KEY', 'unify-secret-key-change-in-production')
+    
+    # Apply custom config if provided
+    if config:
+        app.config.update(config)
+    
+    # --- Register Blueprints ---
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(student_bp)
+    app.register_blueprint(course_bp)
+    # Note: task_bp registered after routes to avoid conflicts
+    app.register_blueprint(message_bp)
+    app.register_blueprint(enrollment_bp)
+    app.register_blueprint(schedule_bp)
+    app.register_blueprint(calendar_bp)
+    app.register_blueprint(course_reg_bp)
+    app.register_blueprint(transcript_bp)
+    app.register_blueprint(overview_bp)
+    if ai_note_available and ai_note_bp:
+        app.register_blueprint(ai_note_bp)
+    if ai_assistant_available and ai_assistant_bp:
+        app.register_blueprint(ai_assistant_bp)
+    app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
+    
+    return app
+
+
+# Create app instance using factory
+app = create_app()
 
 # --- Repository instances ---
 try:
@@ -352,4 +389,5 @@ def get_stats():
 
 
 if __name__ == '__main__':
+    # App is created using factory pattern above
     app.run(debug=True, host='0.0.0.0', port=5000)

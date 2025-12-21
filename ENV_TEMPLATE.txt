@@ -1,0 +1,22 @@
+# Unify Application Configuration
+# Copy this file to .env and configure your settings
+
+# Multi-Tenant Mode
+MULTI_TENANT_MODE=false
+
+# LLM Configuration
+LLM_PROVIDER=ollama
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama2
+
+# OpenAI (optional)
+# OPENAI_API_KEY=your_key_here
+# OPENAI_MODEL=gpt-3.5-turbo
+
+# Database
+DB_HOST=DESKTOP-V6DPJFP\SQLEXPRESS
+DB_NAME=unify
+
+# Flask
+SECRET_KEY=unify-secret-key-change-in-production
+DEBUG=True

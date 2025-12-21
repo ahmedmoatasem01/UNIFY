@@ -32,6 +32,9 @@ ReminderRepository = _import_repository('reminder.repository', 'ReminderReposito
 FocusSessionRepository = _import_repository('focus_session.repository', 'FocusSessionRepository')
 TeachingAssistantRepository = _import_repository('teaching_assistant.repository', 'TeachingAssistantRepository')
 UserSettingsRepository = _import_repository('user_settings.repository', 'UserSettingsRepository')
+KnowledgeBaseRepository = _import_repository('knowledge_base.repository', 'KnowledgeBaseRepository')
+ChatHistoryRepository = _import_repository('chat_history.repository', 'ChatHistoryRepository')
+UserDatabaseConfigRepository = _import_repository('user_database_config.repository', 'UserDatabaseConfigRepository')
 
 
 # Import CourseScheduleSlotRepository
@@ -77,5 +80,11 @@ class RepositoryFactory:
             return CourseScheduleSlotRepository()
         elif entity_type == "user_settings" or entity_type == "settings":
             return UserSettingsRepository()
+        elif entity_type == "knowledge_base" or entity_type == "kb":
+            return KnowledgeBaseRepository()
+        elif entity_type == "chat_history" or entity_type == "chat":
+            return ChatHistoryRepository()
+        elif entity_type == "user_database_config" or entity_type == "user_db_config":
+            return UserDatabaseConfigRepository()
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")

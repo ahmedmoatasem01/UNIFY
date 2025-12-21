@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ai_assistant.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <!-- Sidebar -->
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/reminders">
+                <i class="fa-solid fa-bell"></i>
+                <span>Smart Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item active" href="/ai-assistant/">
+                <i class="fa-solid fa-robot"></i>
+                <span>AI Assistant</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Transcript</span>
+            </a>
+            <a class="cr-nav-item" href="/course-registration">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Course Registration</span>
+            </a>
+            <a class="cr-nav-item" href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <!-- Main Panel -->
+    <main class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-robot"></i> AI Assistant</h1>
+                <p>Ask me anything about your courses, schedule, and university</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <!-- Content -->
+        <div class="cr-content" style="padding: 20px;">
+            <!-- Tab Navigation -->
+            <div class="ai-tabs-nav">
+                <button class="ai-tab-btn active" data-tab="chat">
+                    <i class="fas fa-comments"></i>
+                    Ask Question
+                </button>
+                <button class="ai-tab-btn" data-tab="history">
+                    <i class="fas fa-history"></i>
+                    Chat History
+                </button>
+                <button class="ai-tab-btn" data-tab="knowledge">
+                    <i class="fas fa-book"></i>
+                    Knowledge Base
+                </button>
+                <button class="ai-tab-btn" data-tab="categories">
+                    <i class="fas fa-tags"></i>
+                    Categories
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="ai-tabs-content">
+                <!-- Chat Tab (Default) -->
+                <div class="ai-tab-pane active" id="chatTab">
+                    <div class="ai-layout-grid">
+                        <!-- Left Column: Recent Chats & Quick Categories -->
+                        <div class="ai-left-column">
+                            <!-- Recent Conversations Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2><i class="fas fa-history"></i> Recent Conversations</h2>
+                                    <button class="cr-btn-ghost" id="clearHistoryBtn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                <div class="card-body" style="padding: 0;">
+                                    <div class="recent-chats-list" id="recentChats">
+                                        {% if recent_chats %}
+                                            {% for chat in recent_chats %}
+                                            <div class="chat-preview-item" data-chat-id="{{ chat.Chat_ID }}">
+                                                <div class="chat-preview-icon">
+                                                    <i class="fas fa-comment-dots"></i>
+                                                </div>
+                                                <div class="chat-preview-content">
+                                                    <div class="chat-preview-question">{{ chat.Question[:60] }}{% if chat.Question|length > 60 %}...{% endif %}</div>
+                                                    <div class="chat-preview-time">{{ chat.Created_Date }}</div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="empty-state">
+                                                <i class="fas fa-inbox"></i>
+                                                <p>No conversation history yet</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Categories Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2><i class="fas fa-tags"></i> Quick Topics</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="category-tags-grid" id="categoryTags">
+                                        {% if categories %}
+                                            {% for category in categories[:6] %}
+                                            <button class="category-tag-btn" data-category="{{ category }}">
+                                                {{ category }}
+                                            </button>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="text-muted">No categories available</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Chat Area -->
+                        <div class="ai-right-column">
+                            <div class="card ai-chat-card">
+                                <!-- Chat Header with Model Selector and New Chat Button -->
+                                <div class="chat-header-actions">
+                                    <div class="model-selector-container">
+                                        <label class="model-selector-label">
+                                            <i class="fas fa-brain"></i>
+                                            Model:
+                                        </label>
+                                        <div class="model-selector-toggle">
+                                            <button class="model-option active" data-model="unify" id="unifyModelBtn" title="Unify Model - Fast and lightweight">
+                                                <i class="fas fa-bolt"></i>
+                                                <span>Unify Model</span>
+                                            </button>
+                                            <button class="model-option" data-model="ollama" id="ollamaModelBtn" title="Ollama - Advanced AI with better understanding">
+                                                <i class="fas fa-robot"></i>
+                                                <span>Ollama</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button class="cr-btn-ghost new-chat-btn" id="newChatBtn" title="Start New Chat">
+                                        <i class="fas fa-plus"></i>
+                                        <span>New Chat</span>
+                                    </button>
+                                </div>
+                        <!-- Chat Messages -->
+                        <div class="chat-messages-container" id="chatMessages">
+                            <div class="welcome-message-new">
+                                <div class="welcome-icon-new">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <h2>Hello! I'm your AI Assistant</h2>
+                                <p>I can help you with:</p>
+                                
+                                <div class="capabilities-grid-new">
+                                    <div class="capability-item">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <div>
+                                            <h4>Course Information</h4>
+                                            <p>Prerequisites, syllabi, and details</p>
+                                        </div>
+                                    </div>
+                                    <div class="capability-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <div>
+                                            <h4>Schedule & Deadlines</h4>
+                                            <p>Class times and exam dates</p>
+                                        </div>
+                                    </div>
+                                    <div class="capability-item">
+                                        <i class="fas fa-book"></i>
+                                        <div>
+                                            <h4>Academic Policies</h4>
+                                            <p>Rules and procedures</p>
+                                        </div>
+                                    </div>
+                                    <div class="capability-item">
+                                        <i class="fas fa-question-circle"></i>
+                                        <div>
+                                            <h4>General Questions</h4>
+                                            <p>Campus and resources</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="sample-questions-new">
+                                    <p class="sample-title">Try asking:</p>
+                                    <button class="sample-question-btn" data-question="What are the prerequisites for Data Structures?">
+                                        <i class="fas fa-lightbulb"></i>
+                                        "What are the prerequisites for Data Structures?"
+                                    </button>
+                                    <button class="sample-question-btn" data-question="When is the deadline for course registration?">
+                                        <i class="fas fa-lightbulb"></i>
+                                        "When is the deadline for course registration?"
+                                    </button>
+                                    <button class="sample-question-btn" data-question="How do I calculate my GPA?">
+                                        <i class="fas fa-lightbulb"></i>
+                                        "How do I calculate my GPA?"
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Input -->
+                        <div class="chat-input-container">
+                            <form id="chatForm" class="chat-form-new">
+                                <div class="input-wrapper-new">
+                                    <textarea 
+                                        id="questionInput" 
+                                        class="chat-input-new" 
+                                        placeholder="Type your question here..."
+                                        rows="1"
+                                        required
+                                    ></textarea>
+                                    <button type="submit" class="btn-send-new" id="sendBtn">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            <div class="input-hint-new">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Be specific for better answers</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Chat History Tab -->
+            <div class="ai-tab-pane" id="historyTab">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-history"></i> Complete Chat History</h2>
+                        <button class="cr-btn-ghost" id="clearHistoryBtn2" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <div class="full-history-list" id="fullHistoryList">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading history...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Knowledge Base Tab -->
+            <div class="ai-tab-pane" id="knowledgeTab">
+                <div class="knowledge-grid" id="knowledgeGrid">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading knowledge base...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Tab -->
+            <div class="ai-tab-pane" id="categoriesTab">
+                <div class="categories-grid" id="categoriesGrid">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading categories...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-spinner">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <p>Thinking...</p>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/ai_assistant.js') }}"></script>
+<script>
+async function handleLogout() {
+    try {
+        const response = await fetch('/auth/logout', { method: 'POST' });
+        if (response.ok) {
+            window.location.href = '/login';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login';
+    }
+}
+</script>
+</body>
+</html>

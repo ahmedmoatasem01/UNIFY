@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, session, redirect, url_for
 from repositories.repository_factory import RepositoryFactory
+from core.db_singleton import DatabaseConnection
 import hashlib
+import os
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -37,6 +39,15 @@ def login():
         session['user_id'] = user.User_ID
         session['email'] = user.Email
         session['username'] = user.Username
+        
+        # Set user database context for multi-tenant mode
+        if os.environ.get('MULTI_TENANT_MODE', 'false').lower() == 'true':
+            try:
+                db = DatabaseConnection.get_instance()
+                db.set_user_context(user.User_ID)
+                print(f"[Multi-Tenant] User {user.User_ID} database context set")
+            except Exception as e:
+                print(f"Warning: Could not set user database context: {e}")
         
         return jsonify({
             "message": "Login successful",
@@ -86,6 +97,16 @@ def register():
     
     created_user = user_repo.create(new_user)
     
+    # Initialize user database in multi-tenant mode
+    if os.environ.get('MULTI_TENANT_MODE', 'false').lower() == 'true':
+        try:
+            from core.multi_tenant_db import MultiTenantDatabaseManager
+            db_manager = MultiTenantDatabaseManager()
+            db_manager.initialize_user_database(created_user.User_ID, db_type='sqlite')
+            print(f"[Multi-Tenant] Initialized database for user {created_user.User_ID}")
+        except Exception as e:
+            print(f"Warning: Could not initialize user database: {e}")
+    
     # Create student/instructor/TA record based on role
     if role == "student":
         from models.student import Student
@@ -118,6 +139,15 @@ def register():
 @auth_bp.route("/logout", methods=["POST"])
 def logout():
     """Handle user logout"""
+    # Clear user database context
+    if os.environ.get('MULTI_TENANT_MODE', 'false').lower() == 'true':
+        try:
+            db = DatabaseConnection.get_instance()
+            db.clear_user_context()
+            print("[Multi-Tenant] User database context cleared")
+        except Exception as e:
+            print(f"Warning: Could not clear user database context: {e}")
+    
     session.clear()
     return jsonify({"message": "Logout successful"}), 200
 
