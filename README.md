@@ -63,7 +63,7 @@
 - **Focus Session Tracking** - Track study sessions with statistics
 - **Smart Study Plans** - AI-powered personalized study plans
 
-### 🎯 **Smart Study Plan Generator (FR-AI-4)**
+### 🎯 **Smart Study Plan Generator**
 - **AI-Powered Task Decomposition** - Break complex assignments into manageable tasks
 - **Intelligent Schedule Generation** - Analyze deadlines and generate daily/weekly schedules
 - **Adaptive Planning** - Adjust plans based on productivity and completion rates
@@ -72,7 +72,7 @@
 - **Course Integration** - Link study plans to enrolled courses
 - **Time Estimation** - AI suggests optimal time allocations for tasks
 
-### 📊 **Focus Session Tracking (FR17)**
+### 📊 **Focus Session Tracking**
 - Track study sessions with duration and completion status
 - View statistics: Total sessions, total minutes, today's sessions, average duration
 - **AI-Powered Feedback** - Get personalized study recommendations based on patterns
