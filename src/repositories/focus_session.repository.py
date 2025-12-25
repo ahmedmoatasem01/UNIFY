@@ -6,6 +6,30 @@ class FocusSessionRepository:
     def __init__(self):
         self.db_connection = DatabaseConnection()
 
+    def create_table(self):
+        """Create Focus_Session table if it doesn't exist"""
+        conn = self.db_connection.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Focus_Session]') AND type in (N'U'))
+                BEGIN
+                    CREATE TABLE Focus_Session (
+                        Session_ID INT IDENTITY(1,1) PRIMARY KEY,
+                        Student_ID INT NOT NULL,
+                        Duration INT NOT NULL,
+                        Start_Time DATETIME NOT NULL,
+                        End_Time DATETIME,
+                        Completed BIT DEFAULT 0,
+                        FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID)
+                    )
+                END
+            """)
+            conn.commit()
+        finally:
+            cursor.close()
+            conn.close()
+
     def get_all(self):
         """Get all focus sessions"""
         conn = self.db_connection.get_connection()

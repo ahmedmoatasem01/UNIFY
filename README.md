@@ -60,6 +60,24 @@
 - Due date tracking
 - Status management (Pending, Completed)
 - **Pomodoro Focus Timer** integrated
+- **Focus Session Tracking** - Track study sessions with statistics
+- **Smart Study Plans** - AI-powered personalized study plans
+
+### 🎯 **Smart Study Plan Generator**
+- **AI-Powered Task Decomposition** - Break complex assignments into manageable tasks
+- **Intelligent Schedule Generation** - Analyze deadlines and generate daily/weekly schedules
+- **Adaptive Planning** - Adjust plans based on productivity and completion rates
+- **Resource Recommendations** - RAG-powered study material suggestions
+- **Progress Tracking** - Monitor completion rates and adjust plans dynamically
+- **Course Integration** - Link study plans to enrolled courses
+- **Time Estimation** - AI suggests optimal time allocations for tasks
+
+### 📊 **Focus Session Tracking**
+- Track study sessions with duration and completion status
+- View statistics: Total sessions, total minutes, today's sessions, average duration
+- **AI-Powered Feedback** - Get personalized study recommendations based on patterns
+- Integration with Pomodoro timer
+- Historical data tracking for productivity analysis
 
 ### 🤖 **AI Note Summarization**
 - Upload PDF, DOCX, or TXT files
@@ -67,6 +85,51 @@
 - AI-powered summarization using DistilBART model
 - Save summaries to database
 - View and manage AI-generated notes
+
+### 📋 **Assignment Management System**
+- **Instructor/TA Features:**
+  - Create and upload assignments with due dates
+  - Upload solution files for reference
+  - Provide correct answers for AI auto-grading
+  - View all student submissions
+  - Manual grading override when needed
+  - Review student requests for grade reconsideration
+- **Student Features:**
+  - View all assignments with due dates
+  - Submit assignments with file uploads
+  - View grades and feedback
+  - Request manual review of AI-graded assignments
+  - See assignment status (submitted, graded, pending review)
+- **AI Auto-Grading:**
+  - Automatic grading using LLM (Ollama/OpenAI/Anthropic)
+  - Confidence scoring for grades
+  - Always auto-applied (no manual approval needed)
+  - Fallback to simple comparison if LLM unavailable
+  - Grade notifications when updated
+
+### 🎓 **Advisor Appointment System**
+- **Student Features:**
+  - Schedule appointments with instructors/advisors
+  - View appointment status (pending, scheduled, rejected, completed)
+  - See instructor responses and feedback
+  - Track appointment history
+- **Instructor/TA Features:**
+  - View all student appointment requests
+  - Approve or reject appointments
+  - Provide feedback messages to students
+  - Manage appointment calendar
+- **Status Management:**
+  - Color-coded status indicators (green/yellow/red)
+  - Pending approval workflow
+  - Automatic notifications
+
+### 🔔 **Notification System**
+- Real-time notification bell icon
+- Unread notification badge
+- Dropdown notification list
+- Mark as read functionality
+- Role-based notifications
+- Database-backed notification storage
 
 ### 📅 **Schedule & Calendar**
 - Class schedule management
@@ -87,12 +150,19 @@
 - Upcoming events count
 - Today's class schedule
 - Latest notifications
+- **Academic Dashboard (Students Only)**:
+  - Cumulative GPA calculation and display
+  - Course grades overview
+  - Cohort comparison (rank, percentile, performance vs batch average)
+  - Graduation timeline prediction
+  - Credits progress tracking
 
 ### 👤 **User Management**
-- Role-based access (Student, Instructor, Admin)
+- Role-based access control (RBAC) for Students, Instructors, TAs
 - Secure authentication with SHA256 password hashing
 - User profiles with role-based avatars
 - Session management
+- Role-specific navigation and features
 
 ---
 
@@ -113,6 +183,10 @@
 ### **AI/ML**
 - **Transformers** (Hugging Face) - AI models
 - **DistilBART-CNN-12-6** - Summarization model
+- **Ollama** - Local LLM integration (llama3, mistral, phi)
+- **OpenAI API** - Cloud LLM support (optional)
+- **Anthropic Claude** - Alternative LLM provider (optional)
+- **RAG Engine** - Retrieval-Augmented Generation for resource recommendations
 - **PyPDF2** - PDF text extraction
 - **python-docx** - DOCX text extraction
 
@@ -396,6 +470,14 @@ For detailed testing documentation, see `PROJECT_DOCUMENTATION.txt` section 1.
 - `POST /tasks/api` - Create new task
 - `PUT /tasks/api/<id>` - Update task
 - `DELETE /tasks/api/<id>` - Delete task
+- `GET /tasks/api/focus-sessions/stats` - Get focus session statistics
+- `GET /tasks/api/study-plans` - Get all study plans for user
+- `POST /tasks/api/study-plans/generate` - Generate new AI study plan
+- `GET /tasks/api/study-plans/<id>` - Get study plan details
+- `GET /tasks/api/study-plans/<id>/tasks` - Get tasks for a study plan
+- `GET /tasks/api/study-plans/<id>/recommendations` - Get RAG-powered resource recommendations
+- `PUT /tasks/api/study-plans/tasks/<id>` - Update study task status
+- `GET /tasks/api/courses/enrolled` - Get enrolled courses for study plan
 
 ### **Course Registration**
 - `GET /course-registration/api/courses` - Get available courses
@@ -407,6 +489,28 @@ For detailed testing documentation, see `PROJECT_DOCUMENTATION.txt` section 1.
 - `GET /api/notes` - Get all AI notes
 - `GET /api/notes/<id>` - Get specific note
 - `DELETE /api/notes/<id>` - Delete note
+
+### **Assignments**
+- `GET /assignments` - Get all assignments (role-based)
+- `GET /assignments/<id>` - Get assignment details
+- `POST /assignments/create` - Create new assignment (Instructor/TA)
+- `PUT /assignments/<id>/edit` - Edit assignment (Instructor/TA)
+- `POST /assignments/<id>/submit` - Submit assignment (Student)
+- `GET /assignments/<id>/submissions` - View submissions (Instructor/TA)
+- `POST /assignments/api/submissions/<id>/grade` - Grade submission
+- `POST /assignments/api/submissions/<id>/request-review` - Request grade review (Student)
+
+### **Advisor Appointments**
+- `GET /advisor/appointments` - Get student appointments
+- `POST /advisor/appointments` - Create appointment request (Student)
+- `POST /api/<id>/approve` - Approve appointment (Instructor/TA)
+- `POST /api/<id>/reject` - Reject appointment (Instructor/TA)
+- `GET /api/advisor/appointments/student/<id>` - Get appointments by student
+
+### **Notifications**
+- `GET /api/notifications` - Get all notifications
+- `GET /api/notifications/unread` - Get unread notifications
+- `PUT /api/notifications/<id>/read` - Mark notification as read
 
 ### **Transcript**
 - `GET /transcript/api/data` - Get transcript data with GPA
@@ -431,33 +535,70 @@ UNIFY/
 │   ├── controllers/                # HTTP request handlers
 │   │   ├── auth_controller.py
 │   │   ├── task_controller.py
+│   │   ├── assignment_controller.py
+│   │   ├── appointment_controller.py
+│   │   ├── advisor_chatbot_controller.py
+│   │   ├── notification_controller.py
 │   │   ├── course_registration_controller.py
 │   │   ├── AI_Note_controller.py
 │   │   └── ...
 │   ├── services/                   # Business logic layer
 │   │   ├── ai_note_service.py
-│   │   └── course_optimization_service.py
+│   │   ├── ai_grading_service.py
+│   │   ├── ai_assistant_service.py
+│   │   ├── assignment_service.py
+│   │   ├── advisor_chatbot_service.py
+│   │   ├── notification_service.py
+│   │   ├── course_optimization_service.py
+│   │   └── llm_service.py
 │   ├── repositories/               # Data access layer
 │   │   ├── task.repository.py
+│   │   ├── assignment.repository.py
+│   │   ├── assignment_submission.repository.py
+│   │   ├── study_plan.repository.py
+│   │   ├── study_task.repository.py
+│   │   ├── focus_session.repository.py
+│   │   ├── advisor_appointment.repository.py
+│   │   ├── notification.repository.py
 │   │   ├── enrollment.repository.py
 │   │   └── ...
 │   ├── models/                     # Data models
 │   │   ├── task.py
+│   │   ├── assignment.py
+│   │   ├── assignment_submission.py
+│   │   ├── study_plan.py
+│   │   ├── study_task.py
+│   │   ├── focus_session.py
+│   │   ├── advisor_appointment.py
+│   │   ├── notification.py
 │   │   ├── student.py
 │   │   └── ...
 │   ├── database/
 │   │   ├── schema.sql              # Database schema
 │   │   └── import_schedule_from_excel.py
+│   ├── scripts/                    # Utility scripts
+│   │   ├── seed_notifications.py
+│   │   ├── seed_focus_sessions.py
+│   │   └── find_student.py
 │   ├── templates/                  # HTML templates
 │   │   ├── overview.html
 │   │   ├── tasks.html
+│   │   ├── student_assignments.html
+│   │   ├── assignment_detail.html
+│   │   ├── instructor_assignments.html
+│   │   ├── create_assignment.html
+│   │   ├── edit_assignment.html
+│   │   ├── view_submissions.html
+│   │   ├── advisor_chatbot.html
+│   │   ├── instructor_appointments.html
 │   │   └── ...
 │   ├── static/
 │   │   ├── styles/                 # CSS files
 │   │   └── scripts/                # JavaScript files
 │   └── core/
 │       ├── db_singleton.py         # Database connection singleton
-│       └── user_helper.py          # User data helper
+│       ├── user_helper.py          # User data helper
+│       └── role_auth.py             # RBAC decorators
 ├── database_sample_data_with_real_courses.sql
 ├── README.md
 └── requirements.txt
@@ -467,7 +608,7 @@ UNIFY/
 
 ## 🎨 Features in Detail
 
-### **🍅 Pomodoro Focus Timer**
+### **🍅 Pomodoro Focus Timer & Focus Sessions**
 
 Integrated into the Tasks page:
 - 25-minute focus sessions
@@ -476,6 +617,9 @@ Integrated into the Tasks page:
 - Progress tracking
 - Daily statistics
 - Keyboard shortcuts (Space = Start/Pause, R = Reset)
+- **Automatic session tracking** - Sessions saved to database
+- **Statistics dashboard** - View total sessions, minutes, averages
+- **AI feedback** - Personalized study recommendations based on patterns
 
 ### **🤖 AI Note Summarization**
 
@@ -500,6 +644,58 @@ Integrated into the Tasks page:
 - Pending tasks count
 - Upcoming events
 - Latest notifications
+
+### **🎯 Smart Study Plans**
+
+- **AI-Powered Generation** - Create personalized study plans based on courses and deadlines
+- **Task Decomposition** - Break assignments into manageable subtasks
+- **Resource Recommendations** - Get RAG-powered study material suggestions
+- **Progress Tracking** - Monitor completion with visual progress bars
+- **Adaptive Planning** - Plans adjust based on your productivity
+- **Course Integration** - Link plans to specific courses
+- **Time Estimation** - AI suggests optimal time allocations
+
+### **📋 Assignment Management**
+
+- **For Instructors/TAs:**
+  - Create assignments with due dates and instructions
+  - Upload solution files for reference
+  - Set correct answers for AI grading
+  - View and grade all student submissions
+  - Handle review requests from students
+  
+- **For Students:**
+  - View all assignments with due dates
+  - Submit assignments with file uploads
+  - Receive instant AI-graded feedback
+  - Request manual review if needed
+  - Track submission status
+
+- **AI Auto-Grading:**
+  - Uses LLM (Ollama/OpenAI) for intelligent grading
+  - Provides confidence scores
+  - Always auto-applied for instant feedback
+  - Fallback mechanisms for reliability
+
+### **🎓 Advisor Appointments**
+
+- **Student Features:**
+  - Schedule appointments with instructors
+  - View appointment status and instructor responses
+  - Track appointment history
+  
+- **Instructor Features:**
+  - View all appointment requests
+  - Approve or reject with feedback
+  - Manage appointment calendar
+
+### **🔔 Notification System**
+
+- Real-time notification bell with unread count
+- Dropdown list of all notifications
+- Mark as read functionality
+- Role-based notification delivery
+- Database-backed persistent storage
 
 ---
 
@@ -669,6 +865,12 @@ For comprehensive documentation including:
 
 ## 🚧 Roadmap
 
+- [x] Smart Study Plan Generator (FR-AI-4)
+- [x] Focus Session Tracking (FR17)
+- [x] AI-Powered Assignment Grading
+- [x] Resource Recommendations using RAG
+- [x] Advisor Appointment System
+- [x] Notification System
 - [ ] Email notifications
 - [ ] Mobile app (React Native)
 - [ ] Advanced analytics dashboard
@@ -677,6 +879,8 @@ For comprehensive documentation including:
 - [ ] Dark/Light theme toggle (enhanced)
 - [ ] Export transcript to PDF
 - [ ] Group study features
+- [ ] Advanced task decomposition with dependencies
+- [ ] Study plan templates library
 
 ---
 

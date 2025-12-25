@@ -22,6 +22,9 @@ from models.advisor_appointment import AdvisorAppointment
 from models.notification import Notification
 from models.assignment import Assignment
 from models.assignment_submission import AssignmentSubmission
+from models.study_plan import StudyPlan
+from models.study_task import StudyTask
+from models.study_recommendation import StudyRecommendation
 
 __all__ = [
     'User',
@@ -43,6 +46,9 @@ __all__ = [
     'AdvisorAppointment',
     'Notification',
     'Assignment',
-    'AssignmentSubmission'
+    'AssignmentSubmission',
+    'StudyPlan',
+    'StudyTask',
+    'StudyRecommendation'
 ]
 
