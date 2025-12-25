@@ -3,6 +3,8 @@
 <div align="center">
 
 ![Unify Logo](https://img.shields.io/badge/Unify-Student%20Assistant-blue?style=for-the-badge)
+![CI Pipeline](https://github.com/ahmedmoatasem01/UNIFY/actions/workflows/ci.yml/badge.svg)
+![Python Version](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11-blue)
 
 **A comprehensive student management system with AI-powered features**
 
@@ -63,7 +65,7 @@
 - **Focus Session Tracking** - Track study sessions with statistics
 - **Smart Study Plans** - AI-powered personalized study plans
 
-### 🎯 **Smart Study Plan Generator (FR-AI-4)**
+### 🎯 **Smart Study Plan Generator**
 - **AI-Powered Task Decomposition** - Break complex assignments into manageable tasks
 - **Intelligent Schedule Generation** - Analyze deadlines and generate daily/weekly schedules
 - **Adaptive Planning** - Adjust plans based on productivity and completion rates
@@ -72,7 +74,7 @@
 - **Course Integration** - Link study plans to enrolled courses
 - **Time Estimation** - AI suggests optimal time allocations for tasks
 
-### 📊 **Focus Session Tracking (FR17)**
+### 📊 **Focus Session Tracking**
 - Track study sessions with duration and completion status
 - View statistics: Total sessions, total minutes, today's sessions, average duration
 - **AI-Powered Feedback** - Get personalized study recommendations based on patterns
