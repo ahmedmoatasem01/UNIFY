@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Unify | Smart Study Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .tasks-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--cr-bg-panel);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--cr-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--cr-text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background: var(--cr-bg);
+            color: var(--cr-text-main);
+        }
+
+        .tab-btn.active {
+            background: var(--cr-accent);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* AI Feature Cards */
+        .ai-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .ai-feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .ai-feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .ai-feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+        }
+
+        .ai-feature-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .ai-feature-card p {
+            font-size: 0.875rem;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .ai-feature-card .feature-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .ai-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Study Plan Generator */
+        .task-input-section {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title-small {
+            font-size: 0.9rem;
+            color: var(--cr-text-muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-form {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .task-input {
+            padding: 14px 18px;
+            border: 1px solid var(--cr-border);
+            border-radius: 10px;
+            background: var(--cr-bg);
+            color: var(--cr-text-main);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: var(--cr-accent);
+            box-shadow: 0 0 0 4px var(--cr-accent-soft);
+            transform: translateY(-1px);
+        }
+
+        .priority-select {
+            padding: 14px 18px;
+            border: 1px solid var(--cr-border);
+            border-radius: 10px;
+            background: var(--cr-bg);
+            color: var(--cr-text-main);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .priority-select:hover {
+            border-color: var(--cr-accent);
+        }
+
+        .due-date-input {
+            padding: 14px 18px;
+            border: 1px solid var(--cr-border);
+            border-radius: 10px;
+            background: var(--cr-bg);
+            color: var(--cr-text-main);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .due-date-input:hover {
+            border-color: var(--cr-accent);
+        }
+
+        .add-task-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--cr-accent) 0%, #0ea5e9 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .add-task-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+        }
+
+        .add-task-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Motivational Message */
+        .motivation-banner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            animation: slideIn 0.5s ease;
+        }
+
+        .motivation-banner i {
+            font-size: 2rem;
+        }
+
+        .motivation-text {
+            flex: 1;
+        }
+
+        .motivation-text h4 {
+            margin: 0 0 4px 0;
+            font-size: 1rem;
+        }
+
+        .motivation-text p {
+            margin: 0;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .tasks-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg-panel);
+            color: var(--cr-text-main);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--cr-accent-soft);
+            border-color: var(--cr-accent);
+            color: var(--cr-accent);
+        }
+
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-card {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--cr-accent);
+            transform: scaleY(0);
+            transition: transform 0.3s;
+        }
+
+        .task-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .task-card:hover {
+            border-color: var(--cr-accent);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            transform: translateX(4px);
+        }
+
+        .task-card.completed {
+            opacity: 0.6;
+        }
+
+        .task-card.completed .task-text {
+            text-decoration: line-through;
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--cr-border);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            background: var(--cr-bg);
+        }
+
+        .task-checkbox:hover {
+            border-color: var(--cr-accent);
+        }
+
+        .task-checkbox.completed {
+            background: var(--cr-accent);
+            border-color: var(--cr-accent);
+            color: white;
+        }
+
+        .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .priority-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .priority-dot.priority-high {
+            background: var(--cr-danger);
+        }
+
+        .priority-dot.priority-medium {
+            background: #f59e0b;
+        }
+
+        .priority-dot.priority-low {
+            background: #22c55e;
+        }
+
+        .task-text {
+            font-size: 0.95rem;
+            color: var(--cr-text-main);
+            margin: 0;
+            word-break: break-word;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--cr-text-muted);
+            flex-wrap: wrap;
+        }
+
+        .task-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--cr-bg);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--cr-border);
+        }
+
+        .resource-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .task-action-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--cr-border);
+            border-radius: 6px;
+            background: var(--cr-bg);
+            color: var(--cr-text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .task-action-btn:hover {
+            border-color: var(--cr-accent);
+            color: var(--cr-accent);
+            background: var(--cr-accent-soft);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--cr-text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Progress Stats */
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--cr-accent);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--cr-text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .task-form {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body class="cr-body">
+    <div class="cr-app-layout">
+        <aside class="cr-sidebar">
+            <div class="cr-sidebar-header">
+                <div class="cr-brand-logo">U</div>
+                <div>
+                    <h2 class="cr-brand-title">Unify</h2>
+                    <p class="cr-brand-subtitle">Student Assistant</p>
+                </div>
+            </div>
+            <nav class="cr-sidebar-nav">
+                <a class="cr-nav-item" href="/overview"><i
+                        class="fa-solid fa-chart-column"></i><span>Overview</span></a>
+                <a class="cr-nav-item" href="/schedule"><i
+                        class="fa-solid fa-calendar-day"></i><span>Schedule</span></a>
+                <a class="cr-nav-item active"><i class="fa-solid fa-brain"></i><span>Study Planner</span></a>
+                <a class="cr-nav-item" href="/notes"><i class="fa-solid fa-note-sticky"></i><span>Notes</span></a>
+                <a class="cr-nav-item" href="/settings"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+            </nav>
+        </aside>
+        <main class="cr-main-panel">
+            <header class="cr-topbar">
+                <div class="cr-topbar-left">
+                    <h1><i class="fa-solid fa-brain"></i> Smart Study Planner</h1>
+                    <p>AI-powered personalized study planning</p>
+                </div>
+                <div class="cr-topbar-right">
+                    <div class="cr-user-info">
+                        <div class="cr-user-avatar">D</div>
+                        <div class="cr-user-details">
+                            <p class="cr-user-name">Demo Student</p>
+                            <p class="cr-user-role">Computer Science</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="cr-content">
+                <div class="tasks-container">
+                    <!-- Tab Navigation -->
+                    <div class="tab-navigation">
+                        <button class="tab-btn" data-tab="tasks">
+                            <i class="fa-solid fa-list-check"></i> Tasks
+                        </button>
+                        <button class="tab-btn active" data-tab="study-planner">
+                            <i class="fa-solid fa-brain"></i> Smart Study Planner
+                        </button>
+                    </div>
+
+                    <!-- Tasks Tab -->
+                    <div id="tasks-tab" class="tab-content">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-list-check"></i>
+                            <p>Tasks feature - Switch to Smart Study Planner to see AI features!</p>
+                        </div>
+                    </div>
+
+                    <!-- Smart Study Planner Tab -->
+                    <div id="study-planner-tab" class="tab-content active">
+                        <!-- AI Features Overview -->
+                        <div class="ai-features-grid">
+                            <div class="ai-feature-card">
+                                <h3><span class="feature-icon">📅</span> Intelligent Schedule Generation</h3>
+                                <p>Analyze deadlines and generate optimal daily/weekly study schedules automatically</p>
+                            </div>
+                            <div class="ai-feature-card">
+                                <h3><span class="feature-icon">🔄</span> Adaptive Planning</h3>
+                                <p>Adjust plans based on productivity patterns and optimize for peak performance hours
+                                </p>
+                            </div>
+                            <div class="ai-feature-card">
+                                <h3><span class="feature-icon">⚡</span> Task Decomposition</h3>
+                                <p>Break down complex assignments into manageable subtasks with time estimates</p>
+                            </div>
+                            <div class="ai-feature-card">
+                                <h3><span class="feature-icon">💡</span> Resource Recommendations</h3>
+                                <p>AI suggests relevant study materials using RAG from knowledge base</p>
+                            </div>
+                            <div class="ai-feature-card">
+                                <h3><span class="feature-icon">📊</span> Progress Tracking</h3>
+                                <p>Track completion rates and get automatic adjustments with motivational reminders</p>
+                            </div>
+                        </div>
+
+                        <!-- Progress Stats -->
+                        <div class="progress-stats">
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalPlans">0</div>
+                                <div class="stat-label">Study Plans</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="completedTasks">0</div>
+                                <div class="stat-label">Tasks Completed</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="studyHours">0h</div>
+                                <div class="stat-label">Study Hours</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="completionRate">0%</div>
+                                <div class="stat-label">Completion Rate</div>
+                            </div>
+                        </div>
+
+                        <!-- Generate Study Plan -->
+                        <div class="task-input-section">
+                            <form id="study-form" class="task-form">
+                                <input type="text" id="subject" class="task-input"
+                                    placeholder="Subject / Course (e.g., Data Structures)" required>
+                                <input type="date" id="examDate" class="due-date-input" required>
+                                <select id="load" class="priority-select">
+                                    <option value="low">Low Load (1h/day)</option>
+                                    <option value="medium" selected>Medium Load (1.5h/day)</option>
+                                    <option value="high">High Load (2h/day)</option>
+                                </select>
+                                <button type="submit" class="add-task-btn">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate AI Plan
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Study Sessions Header -->
+                        <div class="tasks-header">
+                            <h2 class="section-title">Your Study Sessions</h2>
+                            <div class="tasks-filters">
+                                <button class="filter-btn active" data-filter="all">All</button>
+                                <button class="filter-btn" data-filter="today">Today</button>
+                                <button class="filter-btn" data-filter="week">This Week</button>
+                                <button class="filter-btn" data-filter="completed">Completed</button>
+                            </div>
+                        </div>
+
+                        <!-- Study Sessions List -->
+                        <div id="study-list" class="tasks-list">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-brain"></i>
+                                <p>No study plan yet. Generate one above to see AI-powered features!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(tabName + '-tab').classList.add('active');
+            });
+        });
+
+        // Study sessions data
+        let sessions = [];
+        let currentFilter = 'all';
+        let stats = { plans: 0, completed: 0, hours: 0 };
+
+        // Generate study plan with AI features
+        document.getElementById("study-form").addEventListener("submit", e => {
+            e.preventDefault();
+            const subject = document.getElementById("subject").value;
+            const examDate = document.getElementById("examDate").value;
+            const load = document.getElementById("load").value;
+
+            sessions = generateAIPlan(subject, examDate, load);
+            updateStats();
+            renderSessions();
+
+            document.getElementById("study-form").reset();
+        });
+
+        function generateAIPlan(subject, exam, load) {
+            const hours = load === "high" ? 2 : load === "medium" ? 1.5 : 1;
+            const examDateObj = new Date(exam);
+            const today = new Date();
+            const daysUntilExam = Math.ceil((examDateObj - today) / (1000 * 60 * 60 * 24));
+
+            const plan = [];
+
+            // AI Feature 1: Intelligent Schedule Generation
+            const topics = [
+                { name: 'Introduction & Fundamentals', subtasks: ['Read chapter 1', 'Watch intro video', 'Take notes'] },
+                { name: 'Core Concepts & Theory', subtasks: ['Study main concepts', 'Create mind map', 'Practice examples'] },
+                { name: 'Practice Problems', subtasks: ['Solve easy problems', 'Solve medium problems', 'Review solutions'] },
+                { name: 'Advanced Topics', subtasks: ['Study advanced material', 'Work on projects', 'Deep dive exercises'] },
+                { name: 'Review & Exam Prep', subtasks: ['Review all notes', 'Practice past papers', 'Final revision'] }
+            ];
+
+            topics.forEach((topic, index) => {
+                const daysFromNow = Math.floor((daysUntilExam / topics.length) * index);
+                const sessionDate = new Date(today);
+                sessionDate.setDate(sessionDate.getDate() + daysFromNow);
+
+                // AI Feature 3: Task Decomposition
+                topic.subtasks.forEach((subtask, subIndex) => {
+                    const subtaskDate = new Date(sessionDate);
+                    subtaskDate.setDate(subtaskDate.getDate() + subIndex);
+
+                    plan.push({
+                        title: `${subject} – ${topic.name}`,
+                        subtask: subtask,
+                        time: formatSessionDate(subtaskDate),
+                        hours: hours / topic.subtasks.length,
+                        done: false,
+                        date: subtaskDate,
+                        // AI Feature 4: Resource Recommendations
+                        resources: generateResources(topic.name),
+                        // AI Feature 2: Adaptive Planning (optimal time based on patterns)
+                        optimalTime: getOptimalStudyTime(index)
+                    });
+                });
+            });
+
+            stats.plans++;
+            return plan;
+        }
+
+        function formatSessionDate(date) {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            if (date.toDateString() === today.toDateString()) {
+                return 'Today';
+            } else if (date.toDateString() === tomorrow.toDateString()) {
+                return 'Tomorrow';
+            } else {
+                const diffDays = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
+                return `In ${diffDays} days`;
+            }
+        }
+
+        // AI Feature 4: Resource Recommendations
+        function generateResources(topic) {
+            const resources = {
+                'Introduction & Fundamentals': ['📝 Intro Notes', '🎥 Tutorial Video', '📚 Textbook Ch.1'],
+                'Core Concepts & Theory': ['📝 Concept Map', '🎥 Lecture Recording', '✏️ Practice Quiz'],
+                'Practice Problems': ['✏️ Problem Set 1', '✏️ Problem Set 2', '📊 Solutions Guide'],
+                'Advanced Topics': ['📝 Advanced Notes', '🎥 Expert Tutorial', '🔬 Case Studies'],
+                'Review & Exam Prep': ['📝 Summary Sheet', '✏️ Past Papers', '🎯 Exam Tips']
+            };
+            return resources[topic] || ['📝 Study Material'];
+        }
+
+        // AI Feature 2: Adaptive Planning - Optimal study time
+        function getOptimalStudyTime(index) {
+            const times = ['6:00 PM', '5:00 PM', '7:00 PM', '4:00 PM', '8:00 PM'];
+            return times[index % times.length];
+        }
+
+        function renderSessions() {
+            const list = document.getElementById("study-list");
+            const filtered = filterSessions();
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+            <div class="empty-state">
+                <i class="fa-solid fa-brain"></i>
+                <p>No study sessions found. ${currentFilter === 'all' ? 'Generate a plan above!' : 'Try a different filter.'}</p>
+            </div>
+        `;
+                return;
+            }
+
+            list.innerHTML = filtered.map((s, i) => `
+        <div class="task-card ${s.done ? 'completed' : ''}">
+            <div class="task-checkbox ${s.done ? 'completed' : ''}" onclick="toggleSession(${sessions.indexOf(s)})">
+                ${s.done ? '<i class="fa-solid fa-check"></i>' : ''}
+            </div>
+            <div class="task-content">
+                <div class="task-header">
+                    <span class="priority-dot priority-medium"></span>
+                    <p class="task-text"><strong>${s.title}</strong> - ${s.subtask}</p>
+                </div>
+                <div class="task-meta">
+                    <div><i class="fa-solid fa-clock"></i> ${s.hours.toFixed(1)}h</div>
+                    <div><i class="fa-solid fa-calendar"></i> ${s.time} at ${s.optimalTime}</div>
+                    <div><i class="fa-solid fa-book"></i> ${s.resources.join(', ')}</div>
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="task-action-btn" title="Start session">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </div>
+        </div>
+    `).join("");
+        }
+
+        function filterSessions() {
+            if (currentFilter === 'all') return sessions;
+            if (currentFilter === 'completed') return sessions.filter(s => s.done);
+            if (currentFilter === 'today') {
+                const today = new Date().toDateString();
+                return sessions.filter(s => s.date.toDateString() === today);
+            }
+            if (currentFilter === 'week') {
+                const weekFromNow = new Date();
+                weekFromNow.setDate(weekFromNow.getDate() + 7);
+                return sessions.filter(s => s.date <= weekFromNow);
+            }
+            return sessions;
+        }
+
+        function toggleSession(index) {
+            sessions[index].done = !sessions[index].done;
+            updateStats();
+            renderSessions();
+        }
+
+        // AI Feature 5: Progress Tracking
+        function updateStats() {
+            const completed = sessions.filter(s => s.done).length;
+            const totalHours = sessions.reduce((sum, s) => sum + (s.done ? s.hours : 0), 0);
+            const rate = sessions.length > 0 ? Math.round((completed / sessions.length) * 100) : 0;
+
+            document.getElementById('totalPlans').textContent = stats.plans;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('studyHours').textContent = totalHours.toFixed(1) + 'h';
+            document.getElementById('completionRate').textContent = rate + '%';
+
+            stats.completed = completed;
+            stats.hours = totalHours;
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderSessions();
+            });
+        });
+
+        // Initialize
+        updateStats();
+    </script>
+</body>
+
+</html>

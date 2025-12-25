@@ -33,6 +33,10 @@ FocusSessionRepository = _import_repository('focus_session.repository', 'FocusSe
 TeachingAssistantRepository = _import_repository('teaching_assistant.repository', 'TeachingAssistantRepository')
 UserSettingsRepository = _import_repository('user_settings.repository', 'UserSettingsRepository')
 
+# Import Study Plan repositories
+StudyPlanRepository = _import_repository('study_plan.repository', 'StudyPlanRepository')
+StudyTaskRepository = _import_repository('study_task.repository', 'StudyTaskRepository')
+StudyRecommendationRepository = _import_repository('study_recommendation.repository', 'StudyRecommendationRepository')
 
 # Import CourseScheduleSlotRepository
 CourseScheduleSlotRepository = _import_repository('course_schedule_slot.repository', 'CourseScheduleSlotRepository')
@@ -77,5 +81,11 @@ class RepositoryFactory:
             return CourseScheduleSlotRepository()
         elif entity_type == "user_settings" or entity_type == "settings":
             return UserSettingsRepository()
+        elif entity_type == "study_plan" or entity_type == "studyplan":
+            return StudyPlanRepository()
+        elif entity_type == "study_task" or entity_type == "studytask":
+            return StudyTaskRepository()
+        elif entity_type == "study_recommendation" or entity_type == "studyrecommendation":
+            return StudyRecommendationRepository()
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")
