@@ -230,8 +230,7 @@ source venv/bin/activate
 ### **Step 3: Install Dependencies**
 
 ```bash
-cd src
-pip install -r requirements.txt
+pip install -r deployment/requirements.txt
 ```
 
 **If requirements.txt doesn't exist, install manually:**
@@ -253,7 +252,7 @@ pip install werkzeug
 For AI note summarization:
 
 ```bash
-python tests/utils/download_model.py
+python src/utils/download_model.py
 ```
 
 Or manually download from: https://huggingface.co/sshleifer/distilbart-cnn-12-6
@@ -379,6 +378,7 @@ Or check `database_sample_data_with_real_courses.sql` for all users.
 - **Messages:** `http://localhost:5000/messages`
 - **Schedule:** `http://localhost:5000/schedule`
 - **Calendar:** `http://localhost:5000/calendar`
+- **Notes & AI Summarizer:** `http://localhost:5000/notes`
 
 ---
 
@@ -416,14 +416,11 @@ python tests/run_tests.py
 
 ### **Test Evidence**
 
-- `tests/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test documentation
-- `tests/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test documentation
-- `tests/test_report.txt` - Latest test execution report
+- `docs/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test documentation
+- `docs/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test documentation
+- `docs/TESTING_VERIFICATION.txt` - Testing verification documentation
 
-For detailed testing documentation, see `PROJECT_DOCUMENTATION.txt` section 1.
-- **Notes & AI Summarizer:** `http://localhost:5000/notes`
-
----
+For detailed testing documentation, see `docs/README_TESTING.md`.
 
 ## 🏗️ Architecture
 
@@ -745,9 +742,9 @@ python tests/run_tests.py
 
 ### **Test Evidence**
 
-- `tests/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test documentation
-- `tests/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test documentation
-- `tests/test_report.txt` - Latest test execution report
+- `docs/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test documentation
+- `docs/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test documentation
+- `docs/TESTING_VERIFICATION.txt` - Testing verification documentation
 
 ### **Utility Scripts**
 
@@ -762,7 +759,7 @@ python src/utils/create_test_user.py
 python src/utils/add_student_to_test_user.py
 ```
 
-For detailed testing documentation, see `PROJECT_DOCUMENTATION.txt` section 1.
+For detailed testing documentation, see `docs/README_TESTING.md`.
 
 ---
 
@@ -789,7 +786,7 @@ sqlcmd -S localhost -d unify -i src/database/migrations/add_grade_semester_to_en
 ### **AI Model Not Loading**
 
 1. Ensure internet connection (first download)
-2. Run: `python tests/utils/download_model.py`
+2. Run: `python src/utils/download_model.py`
 3. Check disk space (models are large)
 4. Verify transformers library is installed
 
@@ -842,7 +839,7 @@ For comprehensive documentation including:
 - User documentation (installation, usage, configuration)
 - Technical documentation (architecture, MVC, API endpoints, database schema)
 
-**See: `PROJECT_DOCUMENTATION.txt`** (5-page comprehensive document)
+**See: `docs/README_TESTING.md`** for comprehensive testing documentation
 
 ### **Quick References**
 
@@ -859,10 +856,10 @@ For comprehensive documentation including:
   - Multi-tenant setup guides
   - Refactoring summaries
 
-- `tests/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test evidence
-- `tests/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test evidence
-- `FINAL_STRUCTURE_REPORT.md` - Project structure analysis
-REA
+- `docs/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test evidence
+- `docs/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test evidence
+- `docs/TESTING_VERIFICATION.txt` - Testing verification documentation
+
 ---
 
 ## 🚧 Roadmap
