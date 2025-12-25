@@ -11,6 +11,7 @@ from controllers.calendar_controller import calendar_bp
 from controllers.course_registration_controller import course_reg_bp
 from controllers.transcript_controller import transcript_bp
 from controllers.overview_controller import overview_bp
+from controllers.study_plan_controller import study_plan_bp
 from repositories.repository_factory import RepositoryFactory
 
 # Conditionally import AI Note controller (requires additional dependencies)
@@ -45,6 +46,7 @@ app.register_blueprint(calendar_bp)
 app.register_blueprint(course_reg_bp)
 app.register_blueprint(transcript_bp)
 app.register_blueprint(overview_bp)
+app.register_blueprint(study_plan_bp)  # Register study plan blueprint
 if ai_note_available and ai_note_bp:
     app.register_blueprint(ai_note_bp)
 app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
