@@ -16,6 +16,9 @@ from models.calendar import Calendar
 from models.reminder import Reminder
 from models.focus_session import FocusSession
 from models.teaching_assistant import TeachingAssistant
+from models.advisor_conversation import AdvisorConversation
+from models.advisor_message import AdvisorMessage
+from models.advisor_appointment import AdvisorAppointment
 
 __all__ = [
     'User',
@@ -31,6 +34,9 @@ __all__ = [
     'Calendar',
     'Reminder',
     'FocusSession',
-    'TeachingAssistant'
+    'TeachingAssistant',
+    'AdvisorConversation',
+    'AdvisorMessage',
+    'AdvisorAppointment'
 ]
 

@@ -2,26 +2,14 @@
 Course Registration Controller
 Handles course registration page and optimization API
 """
-import importlib.util
-import os
 from datetime import time
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from repositories.repository_factory import RepositoryFactory
-from services.course_optimization_service import CourseOptimizationService
+from services.course_optimization_service import get_course_optimization_service
 from core.user_helper import get_user_data
 
-# Import CourseScheduleSlotRepository using importlib to handle dots in filename
-_repo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'repositories')
-spec = importlib.util.spec_from_file_location(
-    'course_schedule_slot_repository',
-    os.path.join(_repo_dir, 'course_schedule_slot.repository.py')
-)
-course_schedule_slot_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(course_schedule_slot_module)
-CourseScheduleSlotRepository = course_schedule_slot_module.CourseScheduleSlotRepository
-
 course_reg_bp = Blueprint("course_registration", __name__, url_prefix="/course-registration")
-optimization_service = CourseOptimizationService()
+optimization_service = get_course_optimization_service()
 
 
 @course_reg_bp.route("/")
@@ -49,12 +37,12 @@ def api_courses():
     academic_year = request.args.get("academic_year", 2025, type=int)
     term = request.args.get("term", "SPRING", type=str)
     
-    # Get schedule slot repository
-    slot_repo = CourseScheduleSlotRepository()
+    # Get schedule slot repository using factory pattern
+    slot_repo = RepositoryFactory.get_repository('course_schedule_slot')
     
     # Get all unique courses from schedule slots
     from core.db_singleton import DatabaseConnection
-    db_connection = DatabaseConnection()
+    db_connection = DatabaseConnection.get_instance()
     conn = db_connection.get_connection()
     try:
         cursor = conn.cursor()

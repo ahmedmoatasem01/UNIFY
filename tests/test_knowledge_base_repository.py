@@ -10,8 +10,8 @@ from unittest.mock import Mock, patch, MagicMock
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
-from repositories.knowledge_base.repository import KnowledgeBaseRepository
-from models.knowledge_base import KnowledgeBase
+from src.repositories.knowledge_base.repository import KnowledgeBaseRepository
+from src.models.knowledge_base import KnowledgeBase
 
 
 class TestKnowledgeBaseRepository(unittest.TestCase):

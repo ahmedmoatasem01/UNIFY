@@ -10,12 +10,12 @@ from unittest.mock import MagicMock, patch, Mock
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
-from repositories.user.repository import UserRepository
-from models.user import User
+from src.repositories.user.repository import UserRepository
+from src.models.user import User
 from datetime import datetime
 
 
-@patch("repositories.user.repository.DatabaseConnection")
+@patch("src.repositories.user.repository.DatabaseConnection")
 def test_get_all_users(mock_db):
     """Test that UserRepository.get_all() returns list of users"""
     # Create mock database connection
@@ -50,7 +50,7 @@ def test_get_all_users(mock_db):
     fake_conn.close.assert_called_once()
 
 
-@patch("repositories.user.repository.DatabaseConnection")
+@patch("src.repositories.user.repository.DatabaseConnection")
 def test_get_by_id_user_found(mock_db):
     """Test that UserRepository.get_by_id() returns user when found"""
     fake_conn = MagicMock()
@@ -78,7 +78,7 @@ def test_get_by_id_user_found(mock_db):
     assert user.Email == "sara@example.com"
 
 
-@patch("repositories.user.repository.DatabaseConnection")
+@patch("src.repositories.user.repository.DatabaseConnection")
 def test_get_by_id_user_not_found(mock_db):
     """Test that UserRepository.get_by_id() returns None when user not found"""
     fake_conn = MagicMock()
@@ -100,7 +100,7 @@ def test_get_by_id_user_not_found(mock_db):
     assert user is None
 
 
-@patch("repositories.user.repository.DatabaseConnection")
+@patch("src.repositories.user.repository.DatabaseConnection")
 def test_get_by_email_user_found(mock_db):
     """Test that UserRepository.get_by_email() returns user when found"""
     fake_conn = MagicMock()
@@ -123,7 +123,7 @@ def test_get_by_email_user_found(mock_db):
     assert user.Email == "test@example.com"
 
 
-@patch("repositories.user.repository.DatabaseConnection")
+@patch("src.repositories.user.repository.DatabaseConnection")
 def test_get_all_users_empty_result(mock_db):
     """Test that UserRepository.get_all() handles empty result set"""
     fake_conn = MagicMock()

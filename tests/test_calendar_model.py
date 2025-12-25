@@ -10,7 +10,7 @@ from datetime import date, time
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
-from models.calendar import Calendar
+from src.models.calendar import Calendar
 
 
 class TestCalendarModel(unittest.TestCase):

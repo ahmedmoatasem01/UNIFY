@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
 from app import create_app
-from models.user import User
+from src.models.user import User
 from datetime import datetime
 
 
@@ -115,7 +115,7 @@ def test_integration_user_creation_flow(mock_db, client):
 @patch("repositories.user.repository.DatabaseConnection")
 def test_integration_factory_repository_interaction(mock_db):
     """Integration test: Verify Factory returns correct Repository that works with Database"""
-    from repositories.repository_factory import RepositoryFactory
+    from src.repositories.repository_factory import RepositoryFactory
     
     fake_conn = MagicMock()
     fake_cursor = MagicMock()
@@ -143,7 +143,7 @@ def test_integration_factory_repository_interaction(mock_db):
 @patch("repositories.user.repository.DatabaseConnection")
 def test_integration_model_creation_from_repository(mock_db):
     """Integration test: Verify Models are created correctly from Repository data"""
-    from repositories.repository_factory import RepositoryFactory
+    from src.repositories.repository_factory import RepositoryFactory
     
     fake_conn = MagicMock()
     fake_cursor = MagicMock()

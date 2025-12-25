@@ -166,3 +166,13 @@ class CourseOptimizationService:
             "message": "Schedule optimized successfully"
         }
 
+
+# Singleton instance
+_optimization_service_instance = None
+
+def get_course_optimization_service():
+    """Get singleton instance of Course Optimization Service"""
+    global _optimization_service_instance
+    if _optimization_service_instance is None:
+        _optimization_service_instance = CourseOptimizationService()
+    return _optimization_service_instance

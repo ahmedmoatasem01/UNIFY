@@ -35,6 +35,9 @@ UserSettingsRepository = _import_repository('user_settings.repository', 'UserSet
 KnowledgeBaseRepository = _import_repository('knowledge_base.repository', 'KnowledgeBaseRepository')
 ChatHistoryRepository = _import_repository('chat_history.repository', 'ChatHistoryRepository')
 UserDatabaseConfigRepository = _import_repository('user_database_config.repository', 'UserDatabaseConfigRepository')
+AdvisorConversationRepository = _import_repository('advisor_conversation.repository', 'AdvisorConversationRepository')
+AdvisorMessageRepository = _import_repository('advisor_message.repository', 'AdvisorMessageRepository')
+AdvisorAppointmentRepository = _import_repository('advisor_appointment.repository', 'AdvisorAppointmentRepository')
 
 
 # Import CourseScheduleSlotRepository
@@ -86,5 +89,11 @@ class RepositoryFactory:
             return ChatHistoryRepository()
         elif entity_type == "user_database_config" or entity_type == "user_db_config":
             return UserDatabaseConfigRepository()
+        elif entity_type == "advisor_conversation" or entity_type == "advisor_conv":
+            return AdvisorConversationRepository()
+        elif entity_type == "advisor_message" or entity_type == "advisor_msg":
+            return AdvisorMessageRepository()
+        elif entity_type == "advisor_appointment" or entity_type == "advisor_apt":
+            return AdvisorAppointmentRepository()
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")
