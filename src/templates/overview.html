@@ -204,6 +204,75 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Academic Dashboard Card - Only for Students, After Schedule and Quick Actions -->
+                {% if user_data.is_student %}
+                <div class="card academic-dashboard-card" id="academicDashboard">
+                    <div class="card-header">
+                        <h2><i class="fas fa-graduation-cap"></i> Academic Dashboard</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="dashboardLoading" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--cr-accent);"></i>
+                            <p style="margin-top: 16px; color: var(--cr-text-muted);">Loading academic data...</p>
+                        </div>
+                        <div id="dashboardContent" style="display: none;">
+                            <!-- GPA Section -->
+                            <div class="dashboard-section">
+                                <h3 style="margin: 0 0 16px 0; color: var(--cr-text); display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-chart-line"></i> GPA Overview
+                                </h3>
+                                <div class="gpa-display">
+                                    <div class="gpa-main">
+                                        <div class="gpa-value" id="cumulativeGPA">0.00</div>
+                                        <div class="gpa-label">Cumulative GPA</div>
+                                    </div>
+                                    <div class="gpa-details">
+                                        <div class="gpa-stat">
+                                            <span class="stat-label">Credits Completed</span>
+                                            <span class="stat-value" id="totalCredits">0</span>
+                                        </div>
+                                        <div class="gpa-stat">
+                                            <span class="stat-label">Courses Completed</span>
+                                            <span class="stat-value" id="coursesCompleted">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cohort Comparison Section -->
+                            <div class="dashboard-section" style="margin-top: 24px;">
+                                <h3 style="margin: 0 0 16px 0; color: var(--cr-text); display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-users"></i> Cohort Comparison
+                                </h3>
+                                <div class="cohort-comparison" id="cohortComparison">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <!-- Graduation Timeline Section -->
+                            <div class="dashboard-section" style="margin-top: 24px;">
+                                <h3 style="margin: 0 0 16px 0; color: var(--cr-text); display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-calendar-alt"></i> Graduation Timeline
+                                </h3>
+                                <div class="graduation-timeline" id="graduationTimeline">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <!-- Course Grades Section -->
+                            <div class="dashboard-section" style="margin-top: 24px;">
+                                <h3 style="margin: 0 0 16px 0; color: var(--cr-text); display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-book"></i> Recent Course Grades
+                                </h3>
+                                <div class="course-grades-list" id="courseGradesList">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </main>
@@ -223,6 +292,176 @@ async function handleLogout() {
         window.location.href = '/login';
     }
 }
+
+// Load Academic Dashboard Data (Only for Students)
+async function loadAcademicDashboard() {
+    // Check if user is a student and dashboard element exists
+    const dashboardElement = document.getElementById('academicDashboard');
+    if (!dashboardElement) {
+        console.log('Academic Dashboard: Not available for this user (instructor/TA)');
+        return; // Dashboard not available for this user (instructor/TA)
+    }
+    
+    console.log('Academic Dashboard: Loading data...');
+    
+    try {
+        const response = await fetch('/overview/api/academic-dashboard');
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({error: 'Unknown error'}));
+            console.error('Academic Dashboard: API error', errorData);
+            throw new Error(errorData.error || 'Failed to load dashboard data');
+        }
+        
+        const data = await response.json();
+        console.log('Academic Dashboard: Data loaded', data);
+        
+        // Hide loading, show content
+        const loadingEl = document.getElementById('dashboardLoading');
+        const contentEl = document.getElementById('dashboardContent');
+        
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (contentEl) contentEl.style.display = 'block';
+        
+        // Populate GPA
+        if (data.gpa) {
+            document.getElementById('cumulativeGPA').textContent = data.gpa.cumulative.toFixed(2);
+            document.getElementById('totalCredits').textContent = data.gpa.total_credits || 0;
+            document.getElementById('coursesCompleted').textContent = data.course_grades?.length || 0;
+        }
+        
+        // Populate Cohort Comparison
+        if (data.cohort_comparison) {
+            const cohort = data.cohort_comparison;
+            const comparisonColors = {
+                'excellent': '#22c55e',
+                'above_average': '#3b82f6',
+                'average': '#f59e0b',
+                'below_average': '#ef4444',
+                'no_data': '#9ca3af',
+                'insufficient_data': '#9ca3af'
+            };
+            const comparisonLabels = {
+                'excellent': 'Excellent',
+                'above_average': 'Above Average',
+                'average': 'Average',
+                'below_average': 'Below Average',
+                'no_data': 'No Data',
+                'insufficient_data': 'Insufficient Data'
+            };
+            
+            const color = comparisonColors[cohort.comparison] || '#9ca3af';
+            const label = comparisonLabels[cohort.comparison] || 'Unknown';
+            
+            document.getElementById('cohortComparison').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="background: var(--cr-bg-elevated); padding: 16px; border-radius: 8px; border-left: 4px solid ${color};">
+                        <div style="font-size: 0.85rem; color: var(--cr-text-muted); margin-bottom: 4px;">Your GPA</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cr-text);">${cohort.student_gpa.toFixed(2)}</div>
+                    </div>
+                    <div style="background: var(--cr-bg-elevated); padding: 16px; border-radius: 8px; border-left: 4px solid var(--cr-accent);">
+                        <div style="font-size: 0.85rem; color: var(--cr-text-muted); margin-bottom: 4px;">Cohort Average</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cr-text);">${cohort.cohort_avg_gpa.toFixed(2)}</div>
+                    </div>
+                </div>
+                <div style="background: var(--cr-bg-elevated); padding: 16px; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: var(--cr-text-muted); font-size: 0.9rem;">Rank in Cohort</span>
+                        <span style="font-weight: 600; color: var(--cr-text);">#${cohort.student_rank} of ${cohort.cohort_size}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: var(--cr-text-muted); font-size: 0.9rem;">Percentile</span>
+                        <span style="font-weight: 600; color: var(--cr-text);">${cohort.percentile}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--cr-text-muted); font-size: 0.9rem;">Status</span>
+                        <span style="padding: 4px 12px; background: ${color}20; color: ${color}; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">${label}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Populate Graduation Timeline
+        if (data.graduation_timeline) {
+            const timeline = data.graduation_timeline;
+            const onTrackColor = timeline.on_track ? '#22c55e' : '#f59e0b';
+            const onTrackIcon = timeline.on_track ? 'fa-check-circle' : 'fa-exclamation-triangle';
+            
+            document.getElementById('graduationTimeline').innerHTML = `
+                <div style="background: var(--cr-bg-elevated); padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="color: var(--cr-text-muted); font-size: 0.9rem;">Predicted Graduation</span>
+                        <span style="font-weight: 700; color: var(--cr-accent); font-size: 1.1rem;">${timeline.predicted_graduation || 'N/A'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: var(--cr-text-muted); font-size: 0.9rem;">Credits Completed</span>
+                        <span style="font-weight: 600; color: var(--cr-text);">${timeline.credits_completed} / ${timeline.credits_completed + timeline.credits_remaining}</span>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-size: 0.85rem; color: var(--cr-text-muted);">Progress</span>
+                            <span style="font-size: 0.85rem; font-weight: 600; color: var(--cr-text);">${timeline.progress_percentage}%</span>
+                        </div>
+                        <div style="height: 8px; background: var(--cr-bg); border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; width: ${timeline.progress_percentage}%; background: linear-gradient(90deg, var(--cr-accent), var(--cr-accent-dark)); transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: ${onTrackColor}20; padding: 12px; border-radius: 8px; border-left: 4px solid ${onTrackColor};">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas ${onTrackIcon}" style="color: ${onTrackColor};"></i>
+                        <span style="color: var(--cr-text); font-weight: 500;">
+                            ${timeline.on_track ? 'On track for graduation' : 'Slightly behind schedule'}
+                        </span>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 0.85rem; color: var(--cr-text-muted);">
+                        ${timeline.semesters_remaining} semester(s) remaining
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Populate Course Grades
+        if (data.course_grades && data.course_grades.length > 0) {
+            const gradesHtml = data.course_grades.slice(0, 5).map(course => {
+                const gradeColor = course.grade_point >= 3.0 ? '#22c55e' : course.grade_point >= 2.0 ? '#f59e0b' : '#ef4444';
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--cr-bg-elevated); border-radius: 8px; margin-bottom: 8px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--cr-text); margin-bottom: 4px;">${course.course_code}</div>
+                            <div style="font-size: 0.85rem; color: var(--cr-text-muted);">${course.course_name}</div>
+                            <div style="font-size: 0.75rem; color: var(--cr-text-muted); margin-top: 4px;">${course.semester || 'N/A'}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.2rem; font-weight: 700; color: ${gradeColor};">${course.grade}</div>
+                            <div style="font-size: 0.75rem; color: var(--cr-text-muted);">${course.credits} credits</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('courseGradesList').innerHTML = gradesHtml;
+        } else {
+            document.getElementById('courseGradesList').innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--cr-text-muted);">
+                    <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.5; margin-bottom: 8px;"></i>
+                    <p>No completed courses with grades yet</p>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Error loading academic dashboard:', error);
+        document.getElementById('dashboardLoading').innerHTML = `
+            <div style="text-align: center; padding: 20px; color: var(--cr-text-muted);">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 8px;"></i>
+                <p>Failed to load academic dashboard data</p>
+            </div>
+        `;
+    }
+}
+
+// Load dashboard on page load
+document.addEventListener('DOMContentLoaded', loadAcademicDashboard);
 </script>
 </body>
 </html>
