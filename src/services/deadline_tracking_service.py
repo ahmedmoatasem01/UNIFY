@@ -3,7 +3,7 @@ Deadline Tracking Service
 Handles automatic deadline tracking from tasks, assignments, and calendar events
 """
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict
 from repositories.repository_factory import RepositoryFactory
 from services.deadline_notification_service import DeadlineNotificationService
 

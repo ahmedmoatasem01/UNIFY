@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Academic Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/academic_dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <!-- Sidebar -->
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/reminders">
+                <i class="fa-solid fa-bell"></i>
+                <span>Smart Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item" href="/ai-assistant/">
+                <i class="fa-solid fa-robot"></i>
+                <span>AI Assistant</span>
+            </a>
+            <a class="cr-nav-item" href="/api/advisor/chat">
+                <i class="fa-solid fa-user-graduate"></i>
+                <span>Academic Advisor</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Transcript</span>
+            </a>
+            <a class="cr-nav-item active" href="/academic-dashboard">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Academic Dashboard</span>
+            </a>
+            <a class="cr-nav-item" href="/course-registration">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Course Registration</span>
+            </a>
+            <a class="cr-nav-item" href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <!-- Main Panel -->
+    <main class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-chart-line"></i> Academic Dashboard</h1>
+                <p>Track your academic performance and progress</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+        
+        <div class="cr-content" style="padding: 20px;">
+            <!-- Loading State -->
+            <div id="loadingState" class="ad-loading-state">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Loading dashboard data...</p>
+            </div>
+
+            <!-- Main Content (Hidden initially) -->
+            <div id="dashboardContent" style="display: none;">
+                <!-- Summary Cards -->
+                <div class="ad-summary-grid">
+                    <div class="ad-card ad-card-primary">
+                        <div class="ad-card-icon">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div class="ad-card-content">
+                            <div class="ad-card-label">Cumulative GPA</div>
+                            <div class="ad-card-value" id="cumulativeGPA">0.00</div>
+                            <div class="ad-card-trend" id="gpaTrend">
+                                <i class="fa-solid fa-minus"></i>
+                                <span>Stable</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ad-card ad-card-success">
+                        <div class="ad-card-icon">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                        <div class="ad-card-content">
+                            <div class="ad-card-label">Credits Completed</div>
+                            <div class="ad-card-value" id="creditsCompleted">0</div>
+                            <div class="ad-card-subtext" id="creditsProgress">0% of 120 required</div>
+                        </div>
+                    </div>
+                    
+                    <div class="ad-card ad-card-info">
+                        <div class="ad-card-icon">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div class="ad-card-content">
+                            <div class="ad-card-label">Estimated Graduation</div>
+                            <div class="ad-card-value" id="graduationYear">-</div>
+                            <div class="ad-card-subtext" id="semestersRemaining">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="ad-card ad-card-warning">
+                        <div class="ad-card-icon">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="ad-card-content">
+                            <div class="ad-card-label">Cohort Average GPA</div>
+                            <div class="ad-card-value" id="cohortGPA">-</div>
+                            <div class="ad-card-subtext" id="cohortComparison">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="ad-main-grid">
+                    <!-- Left Column -->
+                    <div class="ad-left-column">
+                        <!-- GPA Trend Chart -->
+                        <div class="ad-section-card">
+                            <div class="ad-section-header">
+                                <h3><i class="fa-solid fa-chart-line"></i> GPA Trend</h3>
+                            </div>
+                            <div class="ad-section-body">
+                                <canvas id="gpaTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Graduation Timeline -->
+                        <div class="ad-section-card">
+                            <div class="ad-section-header">
+                                <h3><i class="fa-solid fa-calendar-days"></i> Graduation Timeline</h3>
+                            </div>
+                            <div class="ad-section-body">
+                                <div class="ad-timeline-container">
+                                    <div class="ad-progress-bar-container">
+                                        <div class="ad-progress-bar">
+                                            <div class="ad-progress-fill" id="graduationProgress"></div>
+                                        </div>
+                                        <div class="ad-progress-labels">
+                                            <span>0 Credits</span>
+                                            <span id="progressPercentage">0%</span>
+                                            <span>120 Credits</span>
+                                        </div>
+                                    </div>
+                                    <div class="ad-timeline-info">
+                                        <div class="ad-timeline-item">
+                                            <i class="fa-solid fa-check-circle"></i>
+                                            <div>
+                                                <strong>Completed</strong>
+                                                <p id="timelineCompleted">0 credits</p>
+                                            </div>
+                                        </div>
+                                        <div class="ad-timeline-item">
+                                            <i class="fa-solid fa-clock"></i>
+                                            <div>
+                                                <strong>In Progress</strong>
+                                                <p id="timelineInProgress">0 credits</p>
+                                            </div>
+                                        </div>
+                                        <div class="ad-timeline-item">
+                                            <i class="fa-solid fa-hourglass-half"></i>
+                                            <div>
+                                                <strong>Remaining</strong>
+                                                <p id="timelineRemaining">0 credits</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="ad-graduation-prediction">
+                                        <i class="fa-solid fa-graduation-cap"></i>
+                                        <div>
+                                            <strong>Estimated Graduation</strong>
+                                            <p id="estimatedGraduation">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="ad-right-column">
+                        <!-- Cohort Comparison -->
+                        <div class="ad-section-card">
+                            <div class="ad-section-header">
+                                <h3><i class="fa-solid fa-users-line"></i> Cohort Performance</h3>
+                            </div>
+                            <div class="ad-section-body">
+                                <div class="ad-cohort-comparison">
+                                    <div class="ad-comparison-bar">
+                                        <div class="ad-bar-label">Your GPA</div>
+                                        <div class="ad-bar-container">
+                                            <div class="ad-bar-fill ad-bar-student" id="studentGPABar"></div>
+                                            <span class="ad-bar-value" id="studentGPAValue">0.00</span>
+                                        </div>
+                                    </div>
+                                    <div class="ad-comparison-bar">
+                                        <div class="ad-bar-label">Cohort Average</div>
+                                        <div class="ad-bar-container">
+                                            <div class="ad-bar-fill ad-bar-cohort" id="cohortGPABar"></div>
+                                            <span class="ad-bar-value" id="cohortGPAValue">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="ad-comparison-stats" id="cohortStats">
+                                        <div class="ad-stat-item">
+                                            <i class="fa-solid fa-chart-bar"></i>
+                                            <div>
+                                                <span class="ad-stat-label">Percentile</span>
+                                                <span class="ad-stat-value" id="percentileValue">-</span>
+                                            </div>
+                                        </div>
+                                        <div class="ad-stat-item">
+                                            <i class="fa-solid fa-arrow-up"></i>
+                                            <div>
+                                                <span class="ad-stat-label">Difference</span>
+                                                <span class="ad-stat-value" id="gpaDifference">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Course Grades -->
+                        <div class="ad-section-card">
+                            <div class="ad-section-header">
+                                <h3><i class="fa-solid fa-book-open"></i> Recent Course Grades</h3>
+                            </div>
+                            <div class="ad-section-body">
+                                <div class="ad-courses-list" id="coursesList">
+                                    <!-- Courses will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Semester GPA Breakdown -->
+                <div class="ad-section-card ad-full-width">
+                    <div class="ad-section-header">
+                        <h3><i class="fa-solid fa-calendar-alt"></i> Semester GPA Breakdown</h3>
+                    </div>
+                    <div class="ad-section-body">
+                        <div class="ad-semester-grid" id="semesterGrid">
+                            <!-- Semesters will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="ad-error-state" style="display: none;">
+                <i class="fa-solid fa-exclamation-triangle"></i>
+                <p id="errorMessage">Failed to load dashboard data</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script>
+    let dashboardData = null;
+    let gpaChart = null;
+
+    // Initialize - Fetch data from API
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadDashboardData();
+    });
+
+    async function loadDashboardData() {
+        try {
+            const response = await fetch('/academic-dashboard/api/data');
+            if (!response.ok) {
+                throw new Error('Failed to fetch dashboard data');
+            }
+            
+            dashboardData = await response.json();
+            
+            // Hide loading, show content
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'block';
+            
+            // Populate UI
+            populateSummaryCards();
+            populateGPATrendChart();
+            populateGraduationTimeline();
+            populateCohortComparison();
+            populateCourseGrades();
+            populateSemesterBreakdown();
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = error.message || 'Failed to load dashboard data';
+        }
+    }
+
+    function populateSummaryCards() {
+        if (!dashboardData) return;
+        
+        // Cumulative GPA
+        document.getElementById('cumulativeGPA').textContent = dashboardData.gpa.cumulative.toFixed(2);
+        
+        // GPA Trend
+        const trend = dashboardData.gpa.trend;
+        const trendElement = document.getElementById('gpaTrend');
+        const trendIcons = {
+            'improving': '<i class="fa-solid fa-arrow-up"></i>',
+            'declining': '<i class="fa-solid fa-arrow-down"></i>',
+            'stable': '<i class="fa-solid fa-minus"></i>'
+        };
+        const trendColors = {
+            'improving': '#22c55e',
+            'declining': '#ef4444',
+            'stable': '#9ca3af'
+        };
+        trendElement.innerHTML = trendIcons[trend] + ' <span>' + trend.charAt(0).toUpperCase() + trend.slice(1) + '</span>';
+        trendElement.style.color = trendColors[trend];
+        
+        // Credits
+        document.getElementById('creditsCompleted').textContent = dashboardData.credits.completed;
+        document.getElementById('creditsProgress').textContent = 
+            `${dashboardData.credits.progressPercentage}% of ${dashboardData.credits.required} required`;
+        
+        // Graduation
+        document.getElementById('graduationYear').textContent = dashboardData.graduation.estimatedYear || '-';
+        document.getElementById('semestersRemaining').textContent = 
+            `${dashboardData.graduation.semestersRemaining} semesters remaining`;
+        
+        // Cohort
+        if (dashboardData.cohort.averageGpa !== null) {
+            document.getElementById('cohortGPA').textContent = dashboardData.cohort.averageGpa.toFixed(2);
+            const comparison = dashboardData.cohort.comparison;
+            const comparisonText = comparison === 'above' ? 'Above average' : 
+                                 comparison === 'below' ? 'Below average' : 'At average';
+            document.getElementById('cohortComparison').textContent = comparisonText;
+        } else {
+            document.getElementById('cohortGPA').textContent = 'N/A';
+            document.getElementById('cohortComparison').textContent = 'No cohort data';
+        }
+    }
+
+    function populateGPATrendChart() {
+        if (!dashboardData || !dashboardData.gpa.semesterGpas.length) return;
+        
+        const ctx = document.getElementById('gpaTrendChart').getContext('2d');
+        
+        const semesters = dashboardData.gpa.semesterGpas.map(s => s.semester);
+        const gpas = dashboardData.gpa.semesterGpas.map(s => s.gpa);
+        
+        if (gpaChart) {
+            gpaChart.destroy();
+        }
+        
+        gpaChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: semesters,
+                datasets: [{
+                    label: 'Semester GPA',
+                    data: gpas,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        titleColor: '#e6eef8',
+                        bodyColor: '#9ca3af',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 0,
+                        max: 4.0,
+                        ticks: {
+                            color: '#9ca3af'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#9ca3af'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function populateGraduationTimeline() {
+        if (!dashboardData) return;
+        
+        const progress = dashboardData.credits.progressPercentage;
+        document.getElementById('graduationProgress').style.width = `${progress}%`;
+        document.getElementById('progressPercentage').textContent = `${progress}%`;
+        
+        document.getElementById('timelineCompleted').textContent = 
+            `${dashboardData.credits.completed} credits`;
+        document.getElementById('timelineInProgress').textContent = 
+            `${dashboardData.credits.inProgress} credits`;
+        document.getElementById('timelineRemaining').textContent = 
+            `${dashboardData.credits.remaining} credits`;
+        
+        const gradDate = new Date(dashboardData.graduation.estimatedDate);
+        document.getElementById('estimatedGraduation').textContent = 
+            gradDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    function populateCohortComparison() {
+        if (!dashboardData || dashboardData.cohort.averageGpa === null) {
+            document.getElementById('studentGPABar').style.width = '0%';
+            document.getElementById('cohortGPABar').style.width = '0%';
+            return;
+        }
+        
+        const studentGPA = dashboardData.cohort.studentGpa;
+        const cohortGPA = dashboardData.cohort.averageGpa;
+        
+        // Scale to percentage of 4.0
+        const studentPercent = (studentGPA / 4.0) * 100;
+        const cohortPercent = (cohortGPA / 4.0) * 100;
+        
+        document.getElementById('studentGPABar').style.width = `${studentPercent}%`;
+        document.getElementById('cohortGPABar').style.width = `${cohortPercent}%`;
+        
+        document.getElementById('studentGPAValue').textContent = studentGPA.toFixed(2);
+        document.getElementById('cohortGPAValue').textContent = cohortGPA.toFixed(2);
+        
+        if (dashboardData.cohort.percentile) {
+            document.getElementById('percentileValue').textContent = 
+                `${dashboardData.cohort.percentile}th percentile`;
+        }
+        
+        const diff = studentGPA - cohortGPA;
+        const diffElement = document.getElementById('gpaDifference');
+        if (diff > 0) {
+            diffElement.textContent = `+${diff.toFixed(2)} above`;
+            diffElement.style.color = '#22c55e';
+        } else if (diff < 0) {
+            diffElement.textContent = `${diff.toFixed(2)} below`;
+            diffElement.style.color = '#ef4444';
+        } else {
+            diffElement.textContent = 'Equal';
+            diffElement.style.color = '#9ca3af';
+        }
+    }
+
+    function populateCourseGrades() {
+        if (!dashboardData) return;
+        
+        const completedCourses = dashboardData.courses.completed.slice(-5).reverse(); // Last 5, most recent first
+        const container = document.getElementById('coursesList');
+        
+        if (completedCourses.length === 0) {
+            container.innerHTML = '<div class="ad-empty-state">No completed courses yet</div>';
+            return;
+        }
+        
+        container.innerHTML = completedCourses.map(course => `
+            <div class="ad-course-item">
+                <div class="ad-course-info">
+                    <strong>${course.name}</strong>
+                    <span class="ad-course-code">${course.code}</span>
+                </div>
+                <div class="ad-course-grade">
+                    <span class="ad-grade-badge ad-grade-${course.grade ? course.grade.charAt(0) : 'N'}">
+                        ${course.grade || 'N/A'}
+                    </span>
+                    <span class="ad-course-credits">${course.credits} credits</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function populateSemesterBreakdown() {
+        if (!dashboardData) return;
+        
+        const semesters = dashboardData.gpa.semesterGpas;
+        const container = document.getElementById('semesterGrid');
+        
+        if (semesters.length === 0) {
+            container.innerHTML = '<div class="ad-empty-state">No semester data available</div>';
+            return;
+        }
+        
+        container.innerHTML = semesters.map(semester => `
+            <div class="ad-semester-card">
+                <div class="ad-semester-header">
+                    <h4>${semester.semester}</h4>
+                    <span class="ad-semester-gpa">${semester.gpa.toFixed(2)}</span>
+                </div>
+                <div class="ad-semester-credits">${semester.credits} credits</div>
+            </div>
+        `).join('');
+    }
+
+    async function handleLogout() {
+        try {
+            const response = await fetch('/auth/logout', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = '/login';
+        }
+    }
+</script>
+</body>
+</html>
+

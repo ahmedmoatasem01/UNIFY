@@ -12,6 +12,7 @@ from controllers.course_registration_controller import course_reg_bp
 from controllers.transcript_controller import transcript_bp
 from controllers.overview_controller import overview_bp
 from controllers.deadline_notification_controller import deadline_notification_bp
+from controllers.academic_dashboard_controller import academic_dashboard_bp
 from repositories.repository_factory import RepositoryFactory
 
 # Conditionally import AI Note controller (requires additional dependencies)
@@ -85,6 +86,7 @@ def create_app(config=None):
     app.register_blueprint(transcript_bp)
     app.register_blueprint(overview_bp)
     app.register_blueprint(deadline_notification_bp)
+    app.register_blueprint(academic_dashboard_bp)
     if ai_note_available and ai_note_bp:
         app.register_blueprint(ai_note_bp)
     if ai_assistant_available and ai_assistant_bp:
