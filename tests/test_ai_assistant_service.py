@@ -11,7 +11,7 @@ from datetime import datetime, date
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
-from services.ai_assistant_service import RAGEngine, get_rag_engine
+from src.services.ai_assistant_service import RAGEngine, get_rag_engine
 
 
 class TestRAGEngine(unittest.TestCase):

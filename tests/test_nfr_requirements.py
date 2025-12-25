@@ -100,7 +100,7 @@ def test_nfr1_user_list_response_time(client):
 
 def test_nfr2_database_connection_reliability():
     """NFR2: Test database connection reliability and error handling"""
-    from core.db_singleton import DatabaseConnection
+    from src.core.db_singleton import DatabaseConnection
     
     # Test that connection can be established
     db = DatabaseConnection.get_instance()
