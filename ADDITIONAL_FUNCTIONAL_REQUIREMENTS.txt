@@ -581,6 +581,152 @@ Frontend Integration:
   - Badge showing unread count
 
 ================================================================================
+FR15: DEADLINE NOTIFICATION MECHANISM
+================================================================================
+
+Description:
+Dedicated notification system specifically designed to alert users about upcoming
+deadlines for tasks, assignments, exams, and other time-sensitive academic activities.
+This requirement focuses on proactive deadline tracking, customizable alert timing,
+and reliable notification delivery to help users stay on top of important dates.
+
+Features:
+1. Deadline Tracking and Monitoring
+   - Automatic deadline detection from tasks, assignments, and calendar events
+   - Continuous monitoring of all user deadlines across all enrolled courses
+   - Deadline categorization (task, assignment, exam, project, etc.)
+   - Support for both one-time and recurring deadlines
+   - Deadline status tracking (upcoming, approaching, passed, completed)
+
+2. Configurable Alert Timing
+   - Customizable notification intervals before deadline (e.g., 7 days, 3 days, 1 day)
+   - Multiple alert triggers (e.g., 24 hours, 12 hours, 1 hour, 30 minutes before)
+   - Urgent deadline alerts (within 24 hours)
+   - Critical deadline alerts (within 1 hour)
+   - Last-minute reminders (15 minutes before deadline)
+   - User-configurable alert schedules per deadline type
+
+3. Deadline Notification Delivery
+   - In-app notifications with deadline countdown timer
+   - Email notifications for critical deadlines (optional, user-configurable)
+   - Browser push notifications (future enhancement)
+   - Dashboard deadline widget showing upcoming deadlines
+   - Deadline notification history and tracking
+
+4. Deadline Notification Preferences
+   - User settings for deadline notification preferences
+   - Enable/disable notifications per deadline type
+   - Customize alert timing per category (tasks, assignments, exams)
+   - Quiet hours configuration (no notifications during specified times)
+   - Notification frequency settings (e.g., once per day summary vs. individual alerts)
+   - Do-not-disturb mode for completed or postponed deadlines
+
+5. Smart Deadline Management
+   - Automatic deadline aggregation (group similar deadlines)
+   - Priority-based deadline sorting (urgent first)
+   - Deadline conflict detection and notification
+   - Overdue deadline tracking and alerts
+   - Deadline completion tracking (mark as completed)
+   - Deadline extension requests (link to assignment system if applicable)
+
+6. Deadline Visualization
+   - Deadline calendar view showing all upcoming deadlines
+   - Deadline timeline (upcoming 7 days, 30 days view)
+   - Deadline progress indicators (days remaining, percentage complete)
+   - Color-coded deadline urgency (green: >7 days, yellow: 3-7 days, red: <3 days)
+   - Deadline countdown widgets on dashboard
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE DeadlineNotification (
+      Notification_ID INT IDENTITY(1,1) PRIMARY KEY,
+      User_ID INT NOT NULL,
+      Deadline_Type NVARCHAR(50) NOT NULL,  -- 'task', 'assignment', 'exam', 'project', 'calendar'
+      Source_ID INT NOT NULL,  -- ID of the task, assignment, or event
+      Source_Type NVARCHAR(50) NOT NULL,  -- 'task', 'assignment', 'calendar_event'
+      Deadline_Date DATETIME NOT NULL,
+      Title NVARCHAR(255) NOT NULL,
+      Description NVARCHAR(MAX),
+      Priority NVARCHAR(20) CHECK (Priority IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'medium',
+      Status NVARCHAR(20) CHECK (Status IN ('active', 'completed', 'overdue', 'cancelled')) DEFAULT 'active',
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (User_ID) REFERENCES [User](User_ID)
+  );
+
+  CREATE TABLE DeadlineAlertSchedule (
+      Schedule_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Notification_ID INT NOT NULL,
+      Alert_Time_Before_Deadline INT NOT NULL,  -- Minutes before deadline
+      Alert_Type NVARCHAR(50),  -- 'in_app', 'email', 'push'
+      Is_Sent BIT DEFAULT 0,
+      Sent_At DATETIME,
+      FOREIGN KEY (Notification_ID) REFERENCES DeadlineNotification(Notification_ID)
+  );
+
+  CREATE TABLE DeadlineNotificationPreference (
+      Preference_ID INT IDENTITY(1,1) PRIMARY KEY,
+      User_ID INT NOT NULL,
+      Deadline_Type NVARCHAR(50),  -- 'task', 'assignment', 'exam', 'all'
+      Alert_Intervals NVARCHAR(MAX),  -- JSON array: [4320, 1440, 60] (minutes before)
+      Email_Enabled BIT DEFAULT 0,
+      In_App_Enabled BIT DEFAULT 1,
+      Quiet_Hours_Start TIME,
+      Quiet_Hours_End TIME,
+      FOREIGN KEY (User_ID) REFERENCES [User](User_ID),
+      UNIQUE (User_ID, Deadline_Type)
+  );
+
+Files to Create:
+  - src/models/deadline_notification.py
+  - src/models/deadline_alert_schedule.py
+  - src/models/deadline_notification_preference.py
+  - src/repositories/deadline_notification.repository.py
+  - src/repositories/deadline_alert_schedule.repository.py
+  - src/repositories/deadline_notification_preference.repository.py
+  - src/services/deadline_notification_service.py
+  - src/services/deadline_tracking_service.py
+  - src/controllers/deadline_notification_controller.py
+  - src/templates/deadline_notifications.html
+  - src/static/styles/deadline_notifications.css
+  - src/static/scripts/deadline_notifications.js
+
+API Endpoints:
+  GET    /deadline-notifications/user/<user_id>
+  GET    /deadline-notifications/upcoming
+  GET    /deadline-notifications/urgent
+  GET    /deadline-notifications/<notification_id>
+  POST   /deadline-notifications/
+  PUT    /deadline-notifications/<notification_id>
+  DELETE /deadline-notifications/<notification_id>
+  PUT    /deadline-notifications/<notification_id>/complete
+  GET    /deadline-notifications/preferences/<user_id>
+  PUT    /deadline-notifications/preferences/<user_id>
+  GET    /deadline-notifications/calendar/<user_id>
+  POST   /deadline-notifications/check-deadlines
+
+Integration Points:
+  - Task system (track task due dates as deadlines)
+  - Assignment system (track assignment due dates as deadlines)
+  - Calendar system (track calendar event deadlines)
+  - Notification system (FR6 - use existing notification infrastructure for delivery)
+  - Overview dashboard (display upcoming deadlines widget)
+  - User preferences (integrate with user settings)
+
+Frontend Integration:
+  - Deadline countdown widget on dashboard
+  - Deadline calendar view
+  - Deadline notification center
+  - Deadline preferences settings page
+  - Real-time deadline updates
+  - Deadline alert badges and indicators
+
+Background Services:
+  - Deadline monitoring service (continuously check for approaching deadlines)
+  - Alert scheduler service (trigger alerts at configured times)
+  - Deadline synchronization service (sync deadlines from tasks, assignments, calendar)
+
+================================================================================
 IMPLEMENTATION PRIORITY
 ================================================================================
 
@@ -591,27 +737,33 @@ Recommended implementation order based on value and dependencies:
    - Relatively independent implementation
    - High user value
 
-2. FR1: Grade Management System (High Priority)
+2. FR15: Deadline Notification Mechanism (High Priority)
+   - Critical for student success and deadline management
+   - Depends on FR6 (Notification System) for delivery
+   - Integrates with existing task, assignment, and calendar systems
+   - High user value and engagement
+
+3. FR1: Grade Management System (High Priority)
    - Core academic functionality
    - Integrates with existing enrollment system
    - High student value
 
-3. FR3: Assignment Submission System (Medium Priority)
+4. FR3: Assignment Submission System (Medium Priority)
    - Complements grade management
    - Requires file upload infrastructure
    - High instructor value
 
-4. FR2: Attendance Tracking (Medium Priority)
+5. FR2: Attendance Tracking (Medium Priority)
    - Useful for both students and instructors
    - Integrates with schedule/calendar
    - Moderate complexity
 
-5. FR5: Academic Progress Tracking (Medium Priority)
+6. FR5: Academic Progress Tracking (Medium Priority)
    - Valuable for long-term planning
    - Requires degree requirement setup
    - Moderate complexity
 
-6. FR4: Study Group Management (Lower Priority)
+7. FR4: Study Group Management (Lower Priority)
    - Nice-to-have collaborative feature
    - Requires messaging infrastructure
    - Higher complexity
