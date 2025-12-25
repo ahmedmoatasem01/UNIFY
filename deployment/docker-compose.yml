@@ -1,25 +1,105 @@
 services:
   unify-app:
-    build: .
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
     container_name: unify-app
     ports:
       - "5000:5000"
     volumes:
-      # Mount source code for development (optional - remove in production)
-      - ./src:/app/src
-      # Persist database data
+      # Persist database data (no source code mounting in production)
       - unify-data:/app/src/data
       # Persist uploads
       - unify-uploads:/app/src/uploads
+      # Persist logs
+      - unify-logs:/app/logs
     environment:
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
-      - SECRET_KEY=unify-secret-key-change-in-production
+      # Flask Configuration
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - FLASK_APP=app.py
+      - PYTHONUNBUFFERED=1
+      
+      # Application Secrets (should be set via .env file or secrets)
+      - SECRET_KEY=${SECRET_KEY:-CHANGE_ME_IN_PRODUCTION}
+      
+      # Database Configuration
+      - DB_TYPE=${DB_TYPE:-sqlite}
+      - DB_HOST=${DB_HOST:-}
+      - DB_PORT=${DB_PORT:-}
+      - DB_NAME=${DB_NAME:-unify}
+      - DB_USER=${DB_USER:-}
+      - DB_PASSWORD=${DB_PASSWORD:-}
+      
+      # SQLite Configuration (if using SQLite)
       - SQLITE_DB_DIR=/app/src/data
-      - SQLITE_DB_NAME=unify_dev.db
+      - SQLITE_DB_NAME=${SQLITE_DB_NAME:-unify_prod.db}
+      
+      # Multi-Tenant Configuration
+      - MULTI_TENANT_MODE=${MULTI_TENANT_MODE:-false}
+      
+      # LLM Configuration (if using AI features)
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - OLLAMA_URL=${OLLAMA_URL:-http://ollama:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama2}
+      
+      # Logging Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FILE=/app/logs/app.log
+      
+      # Session Security
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-true}
+      - SESSION_COOKIE_HTTPONLY=true
+      - SESSION_COOKIE_SAMESITE=Lax
+      
+      # Gunicorn Configuration
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
+      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-120}
+      - GUNICORN_GRACEFUL_TIMEOUT=${GUNICORN_GRACEFUL_TIMEOUT:-30}
+    env_file:
+      # Load additional environment variables from .env file
+      # Create .env file with SECRET_KEY and other sensitive values
+      - ../.env
     restart: unless-stopped
+    
+    # Graceful shutdown period
+    stop_grace_period: 30s
+    
+    # Health check using Python (no external dependencies)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits (increased for ML workloads with torch/transformers)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G  # Increased from 2G for ML models
+        reservations:
+          cpus: '0.5'
+          memory: 1G  # Increased from 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+    networks:
+      - unify-network
+
+networks:
+  unify-network:
+    driver: bridge
 
 volumes:
   unify-data:
+    driver: local
   unify-uploads:
+    driver: local
+  unify-logs:
+    driver: local
 

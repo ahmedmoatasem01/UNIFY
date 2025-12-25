@@ -1,0 +1,249 @@
+# ============================================
+# Docker Ignore File - Project Root
+# ============================================
+# This file is used because the Docker build context is set to the project root (..)
+# in deployment/docker-compose.yml. Docker looks for .dockerignore in the build context.
+# 
+# The deployment/.dockerignore file has been removed to avoid confusion.
+# ============================================
+
+# ============================================
+# Python Cache and Compiled Files
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.Python
+
+# Why: Python bytecode and compiled extensions are platform-specific and will be
+# regenerated in the container. Including them increases image size unnecessarily
+# and can cause compatibility issues.
+
+# ============================================
+# Virtual Environments
+# ============================================
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+virtualenv/
+
+# Why: Virtual environments contain platform-specific binaries and are not needed
+# in Docker images. Dependencies are installed via requirements.txt during build.
+
+# ============================================
+# Development Database Files
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Why: Development databases should not be included in production images.
+# Database files should be persisted via Docker volumes, not baked into the image.
+
+# ============================================
+# Test Files and Directories
+# ============================================
+tests/
+test_*.py
+*_test.py
+pytest.ini
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+
+# Why: Test files are not needed in production containers. They increase image size
+# and may expose test data or credentials. Tests should run in CI/CD, not production.
+
+# ============================================
+# Documentation (except README)
+# ============================================
+docs/
+*.md
+!README.md
+*.pdf
+*.txt
+!requirements.txt
+!deployment/requirements.txt
+
+# Why: Documentation files (markdown, PDFs, etc.) are not needed at runtime and
+# increase image size. README.md is kept for reference. Requirements files are
+# needed for dependency installation.
+
+# ============================================
+# IDE and Editor Files
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# Why: IDE configuration files are editor-specific and not needed in containers.
+# They can also contain local paths and settings that don't apply to production.
+
+# ============================================
+# Version Control
+# ============================================
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+
+# Why: Git history is not needed in Docker images and significantly increases size.
+# Version control should be handled outside the container.
+
+# ============================================
+# Environment and Configuration Files
+# ============================================
+.env
+.env.*
+!.env.example
+ENV_TEMPLATE.txt
+*.local
+*.secret
+
+# Why: Environment files may contain sensitive credentials and should be provided
+# at runtime via docker-compose or environment variables, not baked into the image.
+# .env.example is kept as a template.
+
+# ============================================
+# Log Files
+# ============================================
+*.log
+logs/
+*.log.*
+
+# Why: Log files should be written to volumes or stdout/stderr in containers,
+# not included in the image. Old logs would bloat the image unnecessarily.
+
+# ============================================
+# User Uploads and Data
+# ============================================
+src/uploads/
+src/data/
+!src/data/Schedule 2025.xlsx
+
+# Why: User uploads and runtime data should be persisted via Docker volumes,
+# not included in the image. The Excel schedule file is kept if needed for
+# initial data import, but runtime uploads should be excluded.
+
+# ============================================
+# Temporary and Cache Files
+# ============================================
+*.tmp
+*.temp
+*.bak
+*.backup
+*.cache
+.cache/
+tmp/
+temp/
+
+# Why: Temporary files are not needed and can cause issues if stale data is
+# included in the image.
+
+# ============================================
+# OS-Specific Files
+# ============================================
+Thumbs.db
+.DS_Store
+.directory
+*.orig
+
+# Why: OS-specific metadata files (Windows thumbnails, macOS metadata) are not
+# needed in Linux containers and can cause issues.
+
+# ============================================
+# Deployment and CI/CD Files
+# ============================================
+.dockerignore
+docker-compose*.yml
+!deployment/docker-compose.yml
+Dockerfile*
+!deployment/Dockerfile
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Why: CI/CD configuration files are not needed in the container. Dockerfile
+# and docker-compose.yml in deployment/ are kept as they may be referenced.
+# Note: .dockerignore itself is needed during build but won't be copied.
+
+# ============================================
+# Development and Analysis Files
+# ============================================
+PRODUCTION_READINESS_ANALYSIS.md
+FACTORY_PATTERN_*.md
+*_ANALYSIS.md
+*_REQUIREMENTS.txt
+*_QUESTIONS.md
+
+# Why: Development analysis documents and requirement files are not needed
+# in production containers.
+
+# ============================================
+# Model Files (if large, consider excluding)
+# ============================================
+# Uncomment if AI models are downloaded separately or stored externally
+# *.bin
+# *.pt
+# *.pth
+# models/
+# checkpoints/
+
+# Why: AI model files can be very large (GBs). If models are downloaded at
+# runtime or stored externally, exclude them from the image to reduce size.
+# Keep commented if models are needed in the image.
+
+# ============================================
+# Node.js (if any frontend build tools)
+# ============================================
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Why: If there are any Node.js dependencies, they should be built separately
+# or excluded if not needed in the Python container.
+
+# ============================================
+# Jupyter Notebooks
+# ============================================
+*.ipynb
+.ipynb_checkpoints/
+
+# Why: Jupyter notebooks are for development/analysis and not needed in production.
+
+# ============================================
+# Coverage and Testing Reports
+# ============================================
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Why: Test coverage reports are generated during testing and not needed in
+# production containers.
+
