@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Academic Advisor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/advisor_chatbot.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <!-- Sidebar -->
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/reminders">
+                <i class="fa-solid fa-bell"></i>
+                <span>Smart Reminders</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item" href="/ai-assistant/">
+                <i class="fa-solid fa-robot"></i>
+                <span>AI Assistant</span>
+            </a>
+            <a class="cr-nav-item active" href="/api/advisor/chat">
+                <i class="fa-solid fa-user-graduate"></i>
+                <span>Academic Advisor</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Transcript</span>
+            </a>
+            <a class="cr-nav-item" href="/course-registration">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Course Registration</span>
+            </a>
+            <a class="cr-nav-item" href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <!-- Main Panel -->
+    <main class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-user-graduate"></i> Academic Advisor Chatbot</h1>
+                <p>Get 24/7 academic advising support and course guidance</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <!-- Content -->
+        <div class="cr-content" style="padding: 20px;">
+            <!-- Tab Navigation -->
+            <div class="advisor-tabs-nav">
+                <button class="advisor-tab-btn active" data-tab="chat">
+                    <i class="fas fa-comments"></i>
+                    Chat with Advisor
+                </button>
+                <button class="advisor-tab-btn" data-tab="conversations">
+                    <i class="fas fa-history"></i>
+                    Past Conversations
+                </button>
+                <button class="advisor-tab-btn" data-tab="appointments">
+                    <i class="fas fa-calendar-check"></i>
+                    Appointments
+                </button>
+                <button class="advisor-tab-btn" data-tab="progress">
+                    <i class="fas fa-chart-line"></i>
+                    Degree Progress
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="advisor-tabs-content">
+                <!-- Chat Tab -->
+                <div class="advisor-tab-pane active" id="chatTab">
+                    <div class="advisor-chat-container">
+                        <!-- Chat Messages -->
+                        <div class="advisor-chat-messages" id="chatMessages">
+                            <div class="advisor-welcome-message">
+                                <div class="advisor-welcome-icon">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <h2>Hello! I'm your Academic Advisor</h2>
+                                <p>I can help you with:</p>
+                                
+                                <div class="advisor-capabilities-grid">
+                                    <div class="advisor-capability-item">
+                                        <i class="fas fa-chart-line"></i>
+                                        <div>
+                                            <h4>Degree Planning</h4>
+                                            <p>Track progress and graduation requirements</p>
+                                        </div>
+                                    </div>
+                                    <div class="advisor-capability-item">
+                                        <i class="fas fa-lightbulb"></i>
+                                        <div>
+                                            <h4>Course Recommendations</h4>
+                                            <p>Personalized course selection advice</p>
+                                        </div>
+                                    </div>
+                                    <div class="advisor-capability-item">
+                                        <i class="fas fa-list-check"></i>
+                                        <div>
+                                            <h4>Prerequisites Check</h4>
+                                            <p>Verify eligibility and requirements</p>
+                                        </div>
+                                    </div>
+                                    <div class="advisor-capability-item">
+                                        <i class="fas fa-briefcase"></i>
+                                        <div>
+                                            <h4>Career Guidance</h4>
+                                            <p>Major exploration and career paths</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p class="advisor-start-hint">Start a conversation by typing a question below!</p>
+                            </div>
+                        </div>
+
+                        <!-- Chat Input -->
+                        <div class="advisor-chat-input-container">
+                            <div class="advisor-chat-input-wrapper">
+                                <textarea 
+                                    id="messageInput" 
+                                    class="advisor-chat-input" 
+                                    placeholder="Ask about degree requirements, course selection, prerequisites, or academic policies..."
+                                    rows="1"
+                                ></textarea>
+                                <button id="sendButton" class="advisor-send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            <div class="advisor-quick-actions">
+                                <button class="advisor-quick-btn" data-question="Show me the course catalog">
+                                    <i class="fas fa-book"></i> Course Catalog
+                                </button>
+                                <button class="advisor-quick-btn" data-question="What courses should I take next semester?">
+                                    <i class="fas fa-lightbulb"></i> Course Recommendations
+                                </button>
+                                <button class="advisor-quick-btn" data-question="How is my degree progress?">
+                                    <i class="fas fa-chart-line"></i> Degree Progress
+                                </button>
+                            </div>
+                            <div class="advisor-help-section">
+                                <details class="advisor-help-details">
+                                    <summary class="advisor-help-summary">
+                                        <i class="fas fa-question-circle"></i> What can I ask?
+                                    </summary>
+                                    <div class="advisor-help-content">
+                                        <p><strong>Example questions you can ask:</strong></p>
+                                        <ul>
+                                            <li><strong>Degree Planning:</strong> "How is my degree progress?", "What requirements am I missing?"</li>
+                                            <li><strong>Course Selection:</strong> "What courses should I take next semester?", "Recommend courses for me"</li>
+                                            <li><strong>Prerequisites:</strong> "What are the prerequisites for [course]?", "Can I take [course]?"</li>
+                                            <li><strong>Course Info:</strong> "Tell me about [course name]", "Who teaches [course]?"</li>
+                                            <li><strong>Policies:</strong> "What is the registration deadline?", "How do I withdraw from a course?"</li>
+                                            <li><strong>Career:</strong> "What can I do with my major?", "Career opportunities"</li>
+                                        </ul>
+                                        <p><em>You can ask naturally - the AI understands your intent!</em></p>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversations Tab -->
+                <div class="advisor-tab-pane" id="conversationsTab">
+                    <div class="advisor-conversations-list" id="conversationsList">
+                        <div class="advisor-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading conversations...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Tab -->
+                <div class="advisor-tab-pane" id="appointmentsTab">
+                    <div class="advisor-appointments-container">
+                        <div class="advisor-section-header">
+                            <h2>Your Appointments</h2>
+                            <button class="cr-btn-primary" id="newAppointmentBtn">
+                                <i class="fas fa-plus"></i> Schedule Appointment
+                            </button>
+                        </div>
+                        <div class="advisor-appointments-list" id="appointmentsList">
+                            <div class="advisor-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading appointments...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Tab -->
+                <div class="advisor-tab-pane" id="progressTab">
+                    <div class="advisor-progress-container" id="progressContainer">
+                        <div class="advisor-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading degree progress...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Global variables
+    const STUDENT_ID = {{ student_id }};
+    let currentConversationId = null;
+</script>
+<script src="{{ url_for('static', filename='scripts/advisor_chatbot.js') }}"></script>
+<script>
+    // Logout handler
+    function handleLogout() {
+        window.location.href = '/auth/logout';
+    }
+</script>
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+</body>
+</html>

@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch, MagicMock
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
-from services.llm_service import LLMService, get_llm_service
+from src.services.llm_service import LLMService, get_llm_service
 
 
 class TestLLMService(unittest.TestCase):

@@ -12,7 +12,7 @@ from flask import Flask
 src_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src')
 sys.path.insert(0, src_path)
 
-from controllers.ai_assistant_controller import ai_assistant_bp
+from src.controllers.ai_assistant_controller import ai_assistant_bp
 
 
 class TestAIAssistantController(unittest.TestCase):

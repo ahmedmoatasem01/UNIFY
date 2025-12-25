@@ -31,6 +31,15 @@ except ImportError as e:
     print(f"Warning: AI Assistant controller not available: {e}")
     ai_assistant_bp = None
     ai_assistant_available = False
+
+# Import Advisor Chatbot controller
+try:
+    from controllers.advisor_chatbot_controller import advisor_chatbot_bp
+    advisor_chatbot_available = True
+except ImportError as e:
+    print(f"Warning: Advisor Chatbot controller not available: {e}")
+    advisor_chatbot_bp = None
+    advisor_chatbot_available = False
 from core.user_helper import get_user_data
 import os
 import sys
@@ -80,6 +89,8 @@ def create_app(config=None):
         app.register_blueprint(ai_note_bp)
     if ai_assistant_available and ai_assistant_bp:
         app.register_blueprint(ai_assistant_bp)
+    if advisor_chatbot_available and advisor_chatbot_bp:
+        app.register_blueprint(advisor_chatbot_bp)
     app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
     
     return app
