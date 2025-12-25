@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Assignments</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .assignments-container {
+            padding: 20px;
+        }
+        .assignments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .assignments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .assignment-card {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .assignment-card:hover {
+            border-color: var(--cr-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+        }
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .assignment-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--cr-text-main);
+            margin-bottom: 4px;
+        }
+        .assignment-course {
+            font-size: 0.9rem;
+            color: var(--cr-text-muted);
+        }
+        .assignment-due {
+            font-size: 0.9rem;
+            color: var(--cr-text-muted);
+            margin-top: 8px;
+        }
+        .assignment-status {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .assignment-status.submitted {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--cr-success);
+        }
+        .assignment-status.graded {
+            background: var(--cr-accent-soft);
+            color: var(--cr-accent);
+        }
+        .assignment-status.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        .assignment-status.overdue {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--cr-danger);
+        }
+        .assignment-description {
+            color: var(--cr-text-muted);
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+        .assignment-grade {
+            margin-top: 8px;
+            font-weight: 600;
+            color: var(--cr-accent);
+        }
+    </style>
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        {% set active_page = 'assignments' %}
+        {% include 'components/sidebar_nav.html' %}
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <main class="cr-main-panel">
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-file-pen"></i> Assignments</h1>
+                <p>View and submit your assignments</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <div class="cr-content assignments-container">
+            {% if assignments %}
+            <div class="assignments-list">
+                {% for assignment in assignments %}
+                <div class="assignment-card" onclick="window.location.href='/assignments/student/{{ assignment.assignment_id }}'">
+                    <div class="assignment-header">
+                        <div style="flex: 1;">
+                            <div class="assignment-title">{{ assignment.title }}</div>
+                            <div class="assignment-course">
+                                <i class="fa-solid fa-book"></i> {{ assignment.course_name }}
+                            </div>
+                            <div class="assignment-due">
+                                <i class="fa-solid fa-calendar"></i> 
+                                Due: {{ assignment.due_date[:19].replace('T', ' ') if assignment.due_date else 'No due date' }}
+                                {% if assignment.is_past_due and not assignment.has_submission %}
+                                <span style="color: var(--cr-danger);">(Overdue)</span>
+                                {% endif %}
+                            </div>
+                            {% if assignment.submission_grade is not none %}
+                            <div class="assignment-grade">
+                                Grade: {{ assignment.submission_grade }}/{{ assignment.max_score }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <span class="assignment-status 
+                            {% if assignment.submission_status == 'graded' %}graded
+                            {% elif assignment.has_submission %}submitted
+                            {% elif assignment.is_past_due %}overdue
+                            {% else %}pending{% endif %}">
+                            {% if assignment.submission_status == 'graded' %}Graded
+                            {% elif assignment.has_submission %}Submitted
+                            {% elif assignment.is_past_due %}Overdue
+                            {% else %}Pending{% endif %}
+                        </span>
+                    </div>
+                    {% if assignment.description %}
+                    <div class="assignment-description">
+                        {{ assignment.description[:150] }}{% if assignment.description|length > 150 %}...{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 60px 20px; color: var(--cr-text-muted);">
+                <i class="fa-solid fa-file-circle-question" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                <h2>No Assignments</h2>
+                <p>You don't have any assignments yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/notifications.js') }}"></script>
+<script>
+        async function handleLogout() {
+            try {
+                const response = await fetch('/auth/logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    // Fallback to GET if POST fails
+                    window.location.href = '/auth/logout';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Fallback to GET if POST fails
+                window.location.href = '/auth/logout';
+            }
+        }
+</script>
+</body>
+</html>

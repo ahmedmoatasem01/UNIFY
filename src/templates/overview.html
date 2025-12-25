@@ -18,44 +18,8 @@
                 <p class="cr-brand-subtitle">Student Assistant</p>
             </div>
         </div>
-        <nav class="cr-sidebar-nav">
-            <a class="cr-nav-item active" href="/overview">
-                <i class="fa-solid fa-chart-column"></i>
-                <span>Overview</span>
-            </a>
-            <a class="cr-nav-item" href="/schedule">
-                <i class="fa-solid fa-calendar-day"></i>
-                <span>Schedule</span>
-            </a>
-            <a class="cr-nav-item" href="/tasks">
-                <i class="fa-solid fa-list-check"></i>
-                <span>Tasks</span>
-            </a>
-            <a class="cr-nav-item" href="/notes">
-                <i class="fa-solid fa-note-sticky"></i>
-                <span>Notes &amp; Summaries</span>
-            </a>
-            <a class="cr-nav-item" href="/reminders">
-                <i class="fa-solid fa-bell"></i>
-                <span>Smart Reminders</span>
-            </a>
-            <a class="cr-nav-item" href="/messages">
-                <i class="fa-solid fa-message"></i>
-                <span>Messages</span>
-            </a>
-            <a class="cr-nav-item" href="/transcript">
-                <i class="fa-solid fa-file-lines"></i>
-                <span>Transcript</span>
-            </a>
-            <a class="cr-nav-item" href="/course-registration">
-                <i class="fa-solid fa-book-open"></i>
-                <span>Course Registration</span>
-            </a>
-            <a class="cr-nav-item" href="/settings">
-                <i class="fa-solid fa-gear"></i>
-                <span>Settings</span>
-            </a>
-        </nav>
+        {% set active_page = 'overview' %}
+        {% include 'components/sidebar_nav.html' %}
         <div class="cr-sidebar-footer">
             <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -117,7 +81,7 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <a href="#" class="view-all-link">View all notifications <i class="fas fa-arrow-right"></i></a>
+                        <a href="/notifications/" class="view-all-link">View all notifications <i class="fas fa-arrow-right"></i></a>
                         {% else %}
                         <div class="empty-state">
                             <i class="fas fa-bell-slash"></i>
@@ -217,15 +181,15 @@
                                 <i class="fas fa-plus-circle"></i>
                                 <span>Add Course</span>
                             </a>
-                            <a href="/calendar" class="action-btn">
-                                <i class="fas fa-calendar-plus"></i>
-                                <span>New Event</span>
+                            <a href="/api/advisor/chat" class="action-btn">
+                                <i class="fas fa-user-graduate"></i>
+                                <span>Academic Advisor</span>
                             </a>
                             <a href="/notes" class="action-btn">
                                 <i class="fas fa-sticky-note"></i>
                                 <span>Create Note</span>
                             </a>
-                            <a href="#" class="action-btn" onclick="alert('AI Assistant coming soon!');">
+                            <a href="/ai-assistant/" class="action-btn">
                                 <i class="fas fa-robot"></i>
                                 <span>AI Assistant</span>
                             </a>
@@ -246,6 +210,7 @@
 </div>
 
 <script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/notifications.js') }}"></script>
 <script>
 async function handleLogout() {
     try {

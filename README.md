@@ -21,9 +21,11 @@
 - [Database Setup](#-database-setup)
 - [Configuration](#-configuration)
 - [Usage](#-usage)
+- [Testing](#-testing)
 - [Architecture](#-architecture)
 - [API Endpoints](#-api-endpoints)
 - [Project Structure](#-project-structure)
+- [Documentation](#-documentation)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -291,12 +293,58 @@ Or check `database_sample_data_with_real_courses.sql` for all users.
 
 ### **Access Pages**
 
-- **Login:** `http://localhost:5000/login`
+- **Login:** `http://localhost:5000/auth/login`
 - **Overview:** `http://localhost:5000/overview`
 - **Tasks:** `http://localhost:5000/tasks`
 - **Course Registration:** `http://localhost:5000/course-registration`
+- **AI Assistant:** `http://localhost:5000/ai-assistant`
 - **Transcript:** `http://localhost:5000/transcript`
 - **Smart Reminders:** `http://localhost:5000/reminders`
+- **Messages:** `http://localhost:5000/messages`
+- **Schedule:** `http://localhost:5000/schedule`
+- **Calendar:** `http://localhost:5000/calendar`
+
+---
+
+## 🧪 Testing
+
+### **Running Tests**
+
+```bash
+# Install test dependencies
+pip install pytest pytest-flask
+
+# Run all tests
+pytest tests/ -v
+
+# Run specific test categories
+pytest tests/test_factory.py tests/test_singleton.py -v
+pytest tests/test_nfr_requirements.py -v
+
+# Using unittest
+python tests/run_tests.py
+```
+
+### **Test Coverage**
+
+- **Functional Tests:** 59+ tests
+  - Models, Repositories, Factory, Singleton
+  - Controllers, Services, Integration
+  - Error Handling
+
+- **Non-Functional Tests:** 24 tests
+  - Performance, Reliability, Security
+  - Scalability, Integrity, Usability, Availability
+
+**Total:** 83+ automated tests
+
+### **Test Evidence**
+
+- `tests/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test documentation
+- `tests/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test documentation
+- `tests/test_report.txt` - Latest test execution report
+
+For detailed testing documentation, see `PROJECT_DOCUMENTATION.txt` section 1.
 - **Notes & AI Summarizer:** `http://localhost:5000/notes`
 
 ---
@@ -467,23 +515,56 @@ Integrated into the Tasks page:
 
 ## 🧪 Testing
 
-### **Test Database Connection**
+### **Running Tests**
 
 ```bash
-python tests/test_connection.py
+# Install test dependencies
+pip install pytest pytest-flask
+
+# Run all tests
+pytest tests/ -v
+
+# Run specific test categories
+pytest tests/test_factory.py tests/test_singleton.py -v
+pytest tests/test_nfr_requirements.py -v
+
+# Using unittest
+python tests/run_tests.py
 ```
 
-### **Test AI Model**
+### **Test Coverage**
+
+- **Functional Tests:** 59+ tests
+  - Models, Repositories, Factory, Singleton
+  - Controllers, Services, Integration
+  - Error Handling
+
+- **Non-Functional Tests:** 24 tests
+  - Performance, Reliability, Security
+  - Scalability, Integrity, Usability, Availability
+
+**Total:** 83+ automated tests
+
+### **Test Evidence**
+
+- `tests/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test documentation
+- `tests/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test documentation
+- `tests/test_report.txt` - Latest test execution report
+
+### **Utility Scripts**
 
 ```bash
-python tests/test_huggingface_connection.py
+# Test database connection
+python src/utils/test_db_connection.py
+
+# Create test user
+python src/utils/create_test_user.py
+
+# Add student to test user
+python src/utils/add_student_to_test_user.py
 ```
 
-### **Create Test User**
-
-```bash
-python tests/create_test_user.py
-```
+For detailed testing documentation, see `PROJECT_DOCUMENTATION.txt` section 1.
 
 ---
 
@@ -556,13 +637,33 @@ This project is part of **CSAI 203 - Team 27** coursework.
 
 ## 📚 Documentation
 
-Additional documentation:
+### **Complete Project Documentation**
 
-- [AI Note Service Architecture](AI_NOTE_SERVICE_ARCHITECTURE.md)
-- [Overview Database Connection](OVERVIEW_DATABASE_CONNECTED.md)
-- [Pomodoro Timer Feature](POMODORO_TIMER_FEATURE.md)
-- [Smart Reminders Summary](SMART_REMINDERS_SUMMARY.md)
-- [Course Import Guide](IMPORT_COURSES_GUIDE.md)
+For comprehensive documentation including:
+- Testing methodology (manual + automated)
+- User documentation (installation, usage, configuration)
+- Technical documentation (architecture, MVC, API endpoints, database schema)
+
+**See: `PROJECT_DOCUMENTATION.txt`** (5-page comprehensive document)
+
+### **Quick References**
+
+- [API Endpoints](#-api-endpoints)
+- [Architecture Guide](#-architecture)
+- [Testing Guide](#-testing)
+- [Installation Guide](#-installation)
+
+### **Additional Documentation**
+
+- `docs/guides/` - Feature-specific guides
+  - AI Assistant guides
+  - LLM Integration guides
+  - Multi-tenant setup guides
+  - Refactoring summaries
+
+- `tests/FUNCTIONAL_TESTING_EVIDENCE.txt` - Functional test evidence
+- `tests/NON_FUNCTIONAL_TESTING_EVIDENCE.txt` - NFR test evidence
+- `FINAL_STRUCTURE_REPORT.md` - Project structure analysis
 
 ---
 

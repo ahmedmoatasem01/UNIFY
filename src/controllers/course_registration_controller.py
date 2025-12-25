@@ -2,36 +2,23 @@
 Course Registration Controller
 Handles course registration page and optimization API
 """
-import importlib.util
-import os
 from datetime import time
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from repositories.repository_factory import RepositoryFactory
-from services.course_optimization_service import CourseOptimizationService
+from services.course_optimization_service import get_course_optimization_service
 from core.user_helper import get_user_data
-
-# Import CourseScheduleSlotRepository using importlib to handle dots in filename
-_repo_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'repositories')
-spec = importlib.util.spec_from_file_location(
-    'course_schedule_slot_repository',
-    os.path.join(_repo_dir, 'course_schedule_slot.repository.py')
-)
-course_schedule_slot_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(course_schedule_slot_module)
-CourseScheduleSlotRepository = course_schedule_slot_module.CourseScheduleSlotRepository
+from core.role_auth import requires_student
 
 course_reg_bp = Blueprint("course_registration", __name__, url_prefix="/course-registration")
-optimization_service = CourseOptimizationService()
+optimization_service = get_course_optimization_service()
 
 
 @course_reg_bp.route("/")
+@requires_student
 def course_registration_page():
-    """Render course registration page"""
-    if 'user_id' not in session:
-        return redirect(url_for('login_page'))
-    
-    # Get user data from database
-    user_data = get_user_data(session.get('user_id'))
+    """Render course registration page - STUDENT ONLY"""
+    user_id = session.get('user_id')
+    user_data = get_user_data(user_id)
     return render_template('course_registration.html', user_data=user_data)
 
 
@@ -49,12 +36,12 @@ def api_courses():
     academic_year = request.args.get("academic_year", 2025, type=int)
     term = request.args.get("term", "SPRING", type=str)
     
-    # Get schedule slot repository
-    slot_repo = CourseScheduleSlotRepository()
+    # Get schedule slot repository using factory pattern
+    slot_repo = RepositoryFactory.get_repository('course_schedule_slot')
     
     # Get all unique courses from schedule slots
     from core.db_singleton import DatabaseConnection
-    db_connection = DatabaseConnection()
+    db_connection = DatabaseConnection.get_instance()
     conn = db_connection.get_connection()
     try:
         cursor = conn.cursor()
@@ -249,15 +236,65 @@ def api_enroll():
             enrollments.append(created.to_dict())
         
         # Save the optimized schedule with specific sections to Schedule table
-        # This allows us to filter which sections to show later
+        # IMPORTANT: Build complete schedule from ALL enrolled courses, not just new ones
         import json
-        schedule_json = json.dumps(schedule)
+        
+        # Get ALL enrolled courses for this student
+        all_enrollments = enrollment_repo.get_by_student(student_id)
+        enrolled_course_ids = [e.Course_ID for e in all_enrollments if e.Status == "enrolled"]
         
         # Check if student already has a schedule
         existing_schedule = schedule_repo.get_by_student(student_id)
+        existing_schedule_dict = {}
+        enrolled_course_codes = set()
+        
+        # Build a map of course_code -> course_id for enrolled courses
+        cursor2 = conn.cursor()
+        for course_id in enrolled_course_ids:
+            cursor2.execute("""
+                SELECT DISTINCT Course_Code FROM Course_Schedule_Slot 
+                WHERE Course_ID = ?
+            """, (course_id,))
+            row = cursor2.fetchone()
+            if row:
+                enrolled_course_codes.add(row[0])
+        cursor2.close()
+        
+        if existing_schedule and existing_schedule.Course_List:
+            try:
+                existing_schedule_list = json.loads(existing_schedule.Course_List)
+                # Create a map of existing courses by course_code for quick lookup
+                for slot in existing_schedule_list:
+                    course_code = slot.get("course_code")
+                    if course_code:
+                        # Use (course_code, section) as key to preserve all sections
+                        key = (course_code, slot.get("section", ""))
+                        existing_schedule_dict[key] = slot
+            except (json.JSONDecodeError, AttributeError) as e:
+                print(f"Error parsing existing schedule: {e}")
+                existing_schedule_dict = {}
+        
+        # Build merged schedule: keep existing courses, add/update new ones
+        merged_schedule = []
+        
+        # First, add all slots from the new optimized schedule (these are the newly enrolled courses)
+        for slot in schedule:
+            course_code = slot.get("course_code")
+            section = slot.get("section", "")
+            if course_code:
+                key = (course_code, section)
+                existing_schedule_dict[key] = slot  # Update or add
+        
+        # Then, add all existing courses that are still enrolled
+        for key, slot in existing_schedule_dict.items():
+            course_code = slot.get("course_code")
+            # Only include if this course is still enrolled
+            if course_code and course_code in enrolled_course_codes:
+                merged_schedule.append(slot)
+        
+        # Update schedule with merged list (contains all enrolled courses)
         if existing_schedule:
-            # Update existing schedule
-            existing_schedule.Course_List = schedule_json
+            existing_schedule.Course_List = json.dumps(merged_schedule)
             existing_schedule.Optimized = True
             schedule_repo.update(existing_schedule)
         else:
@@ -265,7 +302,7 @@ def api_enroll():
             from models.schedule import Schedule
             new_schedule = Schedule(
                 Student_ID=student_id,
-                Course_List=schedule_json,
+                Course_List=json.dumps(merged_schedule),
                 Optimized=True
             )
             schedule_repo.create(new_schedule)

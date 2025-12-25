@@ -19,6 +19,57 @@
                 <li><a href="{{ url_for('overview') }}" class="nav-link {% if request.endpoint == 'overview' %}active{% endif %}">
                     <i class="fas fa-home"></i> Overview
                 </a></li>
+                
+                <!-- AI Assistant Dropdown -->
+                <li class="nav-dropdown">
+                    <a href="#" class="nav-link {% if 'ai_assistant' in request.endpoint %}active{% endif %}" id="aiDropdownToggle">
+                        <i class="fas fa-robot"></i> AI Assistant
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </a>
+                    <div class="dropdown-menu" id="aiDropdownMenu">
+                        <div class="dropdown-header">
+                            <i class="fas fa-brain"></i>
+                            <span>Intelligent Assistant</span>
+                        </div>
+                        <a href="{{ url_for('ai_assistant.index') }}" class="dropdown-item">
+                            <i class="fas fa-comments"></i>
+                            <div class="dropdown-item-content">
+                                <span class="dropdown-item-title">Ask Question</span>
+                                <span class="dropdown-item-desc">Chat with AI assistant</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('ai_assistant.get_history') }}" class="dropdown-item">
+                            <i class="fas fa-history"></i>
+                            <div class="dropdown-item-content">
+                                <span class="dropdown-item-title">Chat History</span>
+                                <span class="dropdown-item-desc">View past conversations</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('ai_assistant.get_knowledge_base') }}" class="dropdown-item">
+                            <i class="fas fa-book"></i>
+                            <div class="dropdown-item-content">
+                                <span class="dropdown-item-title">Knowledge Base</span>
+                                <span class="dropdown-item-desc">Browse available info</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('ai_assistant.get_categories') }}" class="dropdown-item">
+                            <i class="fas fa-tags"></i>
+                            <div class="dropdown-item-content">
+                                <span class="dropdown-item-title">Categories</span>
+                                <span class="dropdown-item-desc">Browse by topic</span>
+                            </div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item dropdown-item-danger" id="clearHistoryNav">
+                            <i class="fas fa-trash-alt"></i>
+                            <div class="dropdown-item-content">
+                                <span class="dropdown-item-title">Clear History</span>
+                                <span class="dropdown-item-desc">Remove all chats</span>
+                            </div>
+                        </a>
+                    </div>
+                </li>
+                
                 <li><a href="{{ url_for('settings') }}" class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}">
                     <i class="fas fa-cog"></i> Settings
                 </a></li>
@@ -38,6 +89,7 @@
         {% block content %}{% endblock %}
     </main>
 
+    <script src="{{ url_for('static', filename='scripts/navbar.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/accessibility.js') }}"></script>
     {% block extra_js %}{% endblock %}

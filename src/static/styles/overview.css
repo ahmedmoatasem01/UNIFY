@@ -68,6 +68,10 @@
     transition: all 0.2s ease;
 }
 
+.cr-light-mode .stat-card {
+    background: rgba(255, 255, 255, 0.96);
+}
+
 .stat-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-soft);
@@ -130,6 +134,11 @@
     border: 1px solid var(--border-subtle);
     border-radius: 16px;
     overflow: hidden;
+}
+
+.cr-light-mode .schedule-card,
+.cr-light-mode .notifications-card {
+    background: rgba(255, 255, 255, 0.96);
 }
 
 /* Schedule Styles */
@@ -753,3 +762,44 @@
     }
 }
 
+
+/* Additional Light Mode Support for Overview */
+.cr-light-mode .schedule-item {
+    background: var(--cr-bg-elevated);
+}
+
+.cr-light-mode .schedule-item:hover {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.cr-light-mode .schedule-details h4 {
+    color: var(--cr-text-main);
+}
+
+.cr-light-mode .schedule-details p {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .notification-item {
+    background: var(--cr-bg-elevated);
+}
+
+.cr-light-mode .notification-item.unread {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.cr-light-mode .notification-content h4 {
+    color: var(--cr-text-main);
+}
+
+.cr-light-mode .notification-content p {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .notification-time {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .empty-state {
+    color: var(--cr-text-muted);
+}

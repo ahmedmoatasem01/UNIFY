@@ -1,0 +1,858 @@
+================================================================================
+AI-POWERED FUNCTIONAL REQUIREMENTS - PROPOSED ENHANCEMENTS
+================================================================================
+Project: Unify Student Management System
+Date: December 2024
+
+Based on the current system architecture, existing AI Assistant infrastructure,
+and role-based access control, here are 6 AI-powered functional requirements
+that would significantly enhance the Unify platform with intelligent automation,
+personalization, and predictive capabilities:
+
+================================================================================
+FR-AI-1: AI-POWERED ACADEMIC PERFORMANCE PREDICTOR
+================================================================================
+
+Description:
+An intelligent system that predicts student academic performance and provides
+early intervention recommendations using machine learning and the existing RAG
+(Retrieval-Augmented Generation) infrastructure.
+
+Features:
+1. Performance Prediction
+   - Analyze historical grade data, assignment completion rates, attendance
+     patterns, and study session data
+   - Generate risk scores (Low, Medium, High) for each enrolled course
+   - Predict final course grades based on current performance trends
+   - Identify at-risk students before grades drop significantly
+
+2. Personalized Recommendations
+   - AI-generated improvement suggestions (e.g., "Focus on assignments in Week 5-6",
+     "Attend office hours for MATH 301")
+   - Study strategy recommendations based on learning patterns
+   - Course-specific advice using RAG knowledge base
+   - Resource recommendations (notes, videos, practice problems)
+
+3. Proactive Alerts
+   - Send alerts when performance drops below predicted thresholds
+   - Early warning system for potential course failures
+   - Weekly performance summaries with trends
+   - Customizable alert thresholds per student
+
+4. Instructor/TA Analytics
+   - AI-generated reports highlighting at-risk students in their courses
+   - Class-wide performance predictions
+   - Intervention recommendations for struggling students
+   - Performance trend analysis across semesters
+
+5. Learning Pattern Analysis
+   - Identify optimal study times based on focus session data
+   - Analyze assignment submission patterns
+   - Detect correlation between attendance and performance
+   - Personalized learning style insights
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE PerformancePrediction (
+      Prediction_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Course_ID INT NOT NULL,
+      Predicted_Grade DECIMAL(3,2),
+      Risk_Score NVARCHAR(20) CHECK (Risk_Score IN ('low', 'medium', 'high')),
+      Confidence_Score DECIMAL(3,2),
+      Prediction_Date DATETIME DEFAULT GETDATE(),
+      Actual_Grade DECIMAL(3,2),  -- Updated when course completes
+      Accuracy_Score DECIMAL(3,2),  -- Calculated after completion
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+  );
+
+  CREATE TABLE AIRecommendation (
+      Recommendation_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Course_ID INT,
+      Recommendation_Type NVARCHAR(50),  -- 'study', 'resource', 'intervention'
+      Title NVARCHAR(255) NOT NULL,
+      Description NVARCHAR(MAX),
+      Priority NVARCHAR(20) CHECK (Priority IN ('low', 'medium', 'high')),
+      Status NVARCHAR(20) CHECK (Status IN ('pending', 'viewed', 'dismissed', 'completed')) DEFAULT 'pending',
+      Generated_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+  );
+
+Files to Create:
+  - src/models/performance_prediction.py
+  - src/models/ai_recommendation.py
+  - src/repositories/performance_prediction.repository.py
+  - src/repositories/ai_recommendation.repository.py
+  - src/services/performance_prediction_service.py
+  - src/services/recommendation_service.py
+  - src/controllers/performance_controller.py
+  - src/templates/performance_predictor.html
+  - src/static/styles/performance_predictor.css
+  - src/static/scripts/performance_predictor.js
+
+API Endpoints:
+  GET    /api/performance/student/<student_id>/predictions
+  GET    /api/performance/course/<course_id>/at-risk-students
+  GET    /api/performance/student/<student_id>/recommendations
+  POST   /api/performance/generate-predictions
+  POST   /api/performance/recommendations/<recommendation_id>/dismiss
+  GET    /api/performance/student/<student_id>/trends
+
+Integration Points:
+  - Enrollment table (link predictions to course enrollment)
+  - Grade system (use historical grades for predictions)
+  - Task system (analyze assignment completion patterns)
+  - Focus Session table (analyze study patterns)
+  - AI Assistant (use RAG for personalized recommendations)
+  - Overview dashboard (display risk scores and predictions)
+
+AI Components:
+  - Machine Learning Model: Time-series analysis of grade progression
+  - RAG Integration: Uses knowledge base of academic success patterns
+  - LLM Service: Generate personalized recommendations using existing Ollama/Unify Model
+
+Access Control:
+  - Students: View their own predictions and recommendations
+  - Instructors/TAs: View predictions for all students in their courses
+  - Administrators: System-wide analytics and model performance metrics
+
+================================================================================
+FR-AI-2: INTELLIGENT COURSE SCHEDULE OPTIMIZER WITH AI RECOMMENDATIONS
+================================================================================
+
+Description:
+An AI-enhanced version of the existing course registration system that suggests
+optimal course combinations based on learning patterns, workload analysis, and
+historical success rates. Extends the current course optimization service.
+
+Features:
+1. Smart Course Recommendations
+   - Analyze historical data to identify course combinations that lead to better
+     academic outcomes
+   - Consider student's past performance, course difficulty ratings, and time
+     commitments
+   - Recommend personalized schedules based on learning style
+   - Suggest alternative course sections or courses when conflicts occur
+
+2. Workload Prediction
+   - Predict workload intensity for different course combinations
+   - Warn students about potential overload scenarios
+   - Analyze assignment due dates across courses
+   - Estimate weekly time commitment per course
+
+3. Success Rate Analysis
+   - Show historical success rates for course combinations
+   - Identify courses that complement each other well
+   - Warn about difficult course combinations
+   - Suggest prerequisite completion timing
+
+4. Adaptive Learning
+   - Learn from student feedback to improve recommendation accuracy
+   - Track which recommendations led to successful outcomes
+   - Adjust recommendations based on student's academic performance trends
+   - Personalize suggestions based on major and career goals
+
+5. Conflict Resolution
+   - AI-powered optimization algorithm for schedule conflicts
+   - Suggest alternative sections automatically
+   - Consider instructor preferences and ratings
+   - Optimize for commute time and location preferences
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE CourseRecommendation (
+      Recommendation_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Recommended_Course_ID INT NOT NULL,
+      Recommended_Section INT,
+      Reason NVARCHAR(MAX),
+      Confidence_Score DECIMAL(3,2),
+      Alternative_Courses NVARCHAR(MAX),  -- JSON array of alternative course IDs
+      Generated_At DATETIME DEFAULT GETDATE(),
+      Status NVARCHAR(20) CHECK (Status IN ('pending', 'accepted', 'rejected', 'enrolled')) DEFAULT 'pending',
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Recommended_Course_ID) REFERENCES Course(Course_ID)
+  );
+
+  CREATE TABLE WorkloadPrediction (
+      Prediction_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Course_Combination NVARCHAR(MAX),  -- JSON array of course IDs
+      Predicted_Weekly_Hours DECIMAL(4,1),
+      Difficulty_Score DECIMAL(3,2),
+      Success_Probability DECIMAL(3,2),
+      Predicted_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID)
+  );
+
+Files to Create:
+  - src/models/course_recommendation.py
+  - src/models/workload_prediction.py
+  - src/repositories/course_recommendation.repository.py
+  - src/repositories/workload_prediction.repository.py
+  - src/services/ai_course_optimizer_service.py
+  - src/services/workload_analysis_service.py
+  - src/controllers/ai_course_optimizer_controller.py
+  - src/templates/ai_course_optimizer.html
+  - src/static/styles/ai_course_optimizer.css
+  - src/static/scripts/ai_course_optimizer.js
+
+API Endpoints:
+  GET    /api/ai-optimizer/recommendations/student/<student_id>
+  POST   /api/ai-optimizer/analyze-workload
+  POST   /api/ai-optimizer/generate-schedule
+  GET    /api/ai-optimizer/course-combinations/success-rates
+  POST   /api/ai-optimizer/recommendations/<recommendation_id>/feedback
+  GET    /api/ai-optimizer/student/<student_id>/preferences
+
+Integration Points:
+  - Course Registration system (extend existing optimization)
+  - Enrollment table (analyze historical enrollments)
+  - Grade system (use grades to determine success rates)
+  - Schedule table (optimize based on time slots)
+  - AI Assistant (use RAG for course descriptions and requirements)
+
+AI Components:
+  - Recommendation Engine: Collaborative filtering based on similar students
+  - Workload Prediction: NLP analysis of course descriptions and historical data
+  - Conflict Resolution: Constraint satisfaction algorithm with AI suggestions
+
+Access Control:
+  - Students: View and accept AI-recommended schedules
+  - Instructors/TAs: Manage course availability and view recommendation analytics
+  - Advisors: Override AI recommendations when needed
+
+================================================================================
+FR-AI-3: AI-POWERED ASSIGNMENT GRADING ASSISTANT
+================================================================================
+
+Description:
+An intelligent assistant that helps Instructors and TAs grade assignments more
+efficiently and consistently using natural language processing and pattern recognition.
+
+Features:
+1. Automated Grading Suggestions
+   - Analyze submitted assignments and provide preliminary grading suggestions
+     based on rubric criteria
+   - Score assignments automatically for objective questions
+   - Provide grade range suggestions for subjective assignments
+   - Maintain consistency across multiple graders
+
+2. Feedback Generation
+   - Generate personalized feedback comments for each student
+   - Identify common errors and suggest corrections
+   - Provide constructive criticism and improvement suggestions
+   - Use LLM to create natural, helpful feedback text
+
+3. Plagiarism and Anomaly Detection
+   - Detect potential plagiarism patterns
+   - Flag assignments that require manual review
+   - Identify unusual submission patterns
+   - Compare submissions for similarity
+
+4. Rubric-Based Analysis
+   - Analyze submissions against defined rubric criteria
+   - Provide scores per rubric item
+   - Suggest rubric improvements based on grading patterns
+   - Track rubric compliance across graders
+
+5. Learning from Grading History
+   - Learn from instructor's grading patterns
+   - Adapt suggestions based on past grading decisions
+   - Improve accuracy over time with feedback
+   - Maintain grading consistency across semesters
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE GradingSuggestion (
+      Suggestion_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Submission_ID INT NOT NULL,
+      Suggested_Grade DECIMAL(5,2),
+      Confidence_Score DECIMAL(3,2),
+      Rubric_Scores NVARCHAR(MAX),  -- JSON object with rubric item scores
+      Feedback_Suggestions NVARCHAR(MAX),
+      Flagged_For_Review BIT DEFAULT 0,
+      Flag_Reason NVARCHAR(500),
+      Generated_At DATETIME DEFAULT GETDATE(),
+      Accepted BIT,  -- Whether instructor accepted the suggestion
+      FOREIGN KEY (Submission_ID) REFERENCES Assignment_Submission(Submission_ID)
+  );
+
+  CREATE TABLE GradingPattern (
+      Pattern_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Instructor_ID INT NOT NULL,
+      Course_ID INT NOT NULL,
+      Assignment_Type NVARCHAR(50),
+      Average_Grade DECIMAL(5,2),
+      Grading_Strictness DECIMAL(3,2),  -- Calculated from historical data
+      Common_Feedback_Patterns NVARCHAR(MAX),  -- JSON array
+      Updated_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Instructor_ID) REFERENCES Instructor(Instructor_ID),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+  );
+
+Files to Create:
+  - src/models/grading_suggestion.py
+  - src/models/grading_pattern.py
+  - src/repositories/grading_suggestion.repository.py
+  - src/repositories/grading_pattern.repository.py
+  - src/services/ai_grading_service.py
+  - src/services/feedback_generator_service.py
+  - src/controllers/ai_grading_controller.py
+  - src/templates/ai_grading_assistant.html
+  - src/static/styles/ai_grading_assistant.css
+  - src/static/scripts/ai_grading_assistant.js
+
+API Endpoints:
+  POST   /api/ai-grading/analyze-submission/<submission_id>
+  GET    /api/ai-grading/suggestions/<submission_id>
+  POST   /api/ai-grading/suggestions/<suggestion_id>/accept
+  POST   /api/ai-grading/suggestions/<suggestion_id>/reject
+  POST   /api/ai-grading/generate-feedback/<submission_id>
+  GET    /api/ai-grading/patterns/instructor/<instructor_id>
+  POST   /api/ai-grading/bulk-analyze
+
+Integration Points:
+  - Assignment Submission system (analyze submitted files)
+  - Grade system (link suggestions to final grades)
+  - Instructor/TA access (role-based access control)
+  - File upload system (process submitted documents)
+  - AI Assistant (use LLM for feedback generation)
+
+AI Components:
+  - Natural Language Processing: Analysis of written assignments
+  - Pattern Recognition: Learning from historical grading data
+  - Feedback Generation: LLM-powered comment generation using Ollama/Unify Model
+  - Plagiarism Detection: Text similarity analysis
+
+Access Control:
+  - Instructors/TAs: Full access to grading assistant features
+  - Students: View AI-generated feedback on their submissions (after grading)
+  - Administrators: Monitor grading assistant accuracy and usage
+
+================================================================================
+FR-AI-4: SMART STUDY PLAN GENERATOR
+================================================================================
+
+Description:
+An AI-powered system that creates personalized study plans based on course content,
+deadlines, and student's learning patterns. Integrates with existing task and
+focus session systems.
+
+Features:
+1. Intelligent Schedule Generation
+   - Analyze upcoming deadlines, exam dates, and course content
+   - Generate daily/weekly study schedules automatically
+   - Break down large assignments into manageable tasks
+   - Suggest optimal study times based on focus session history
+
+2. Adaptive Planning
+   - Adapt study plans based on student's productivity patterns
+   - Adjust plans when deadlines change or new assignments are added
+   - Learn from student's completion rates
+   - Optimize for student's peak performance hours
+
+3. Task Decomposition
+   - Break down complex assignments into smaller subtasks
+   - Suggest time allocations for each subtask
+   - Create dependencies between tasks
+   - Estimate completion times based on historical data
+
+4. Resource Recommendations
+   - Suggest study materials (notes, videos, practice problems) based on course topics
+   - Use RAG to retrieve relevant content from knowledge base
+   - Recommend external resources (textbooks, online courses)
+   - Link to related course materials
+
+5. Progress Tracking and Adjustments
+   - Track study plan completion rates
+   - Automatically adjust plans when student falls behind
+   - Send reminders for upcoming study sessions
+   - Provide motivation and encouragement messages
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE StudyPlan (
+      Plan_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Course_ID INT,
+      Plan_Name NVARCHAR(255) NOT NULL,
+      Start_Date DATE NOT NULL,
+      End_Date DATE NOT NULL,
+      Status NVARCHAR(20) CHECK (Status IN ('active', 'paused', 'completed', 'archived')) DEFAULT 'active',
+      Completion_Percentage DECIMAL(5,2) DEFAULT 0,
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+  );
+
+  CREATE TABLE StudyTask (
+      Task_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Plan_ID INT NOT NULL,
+      Parent_Task_ID INT,  -- For subtasks
+      Task_Title NVARCHAR(255) NOT NULL,
+      Description NVARCHAR(MAX),
+      Estimated_Hours DECIMAL(4,1),
+      Actual_Hours DECIMAL(4,1),
+      Due_Date DATETIME,
+      Priority NVARCHAR(10) CHECK (Priority IN ('low', 'medium', 'high')),
+      Status NVARCHAR(20) CHECK (Status IN ('pending', 'in_progress', 'completed', 'skipped')) DEFAULT 'pending',
+      Suggested_Resources NVARCHAR(MAX),  -- JSON array of resource links
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Plan_ID) REFERENCES StudyPlan(Plan_ID),
+      FOREIGN KEY (Parent_Task_ID) REFERENCES StudyTask(Task_ID)
+  );
+
+  CREATE TABLE StudyRecommendation (
+      Recommendation_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Course_ID INT,
+      Topic NVARCHAR(255),
+      Resource_Type NVARCHAR(50),  -- 'note', 'video', 'practice', 'textbook'
+      Resource_Link NVARCHAR(500),
+      Reason NVARCHAR(MAX),
+      Relevance_Score DECIMAL(3,2),
+      Generated_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+  );
+
+Files to Create:
+  - src/models/study_plan.py
+  - src/models/study_task.py
+  - src/models/study_recommendation.py
+  - src/repositories/study_plan.repository.py
+  - src/repositories/study_task.repository.py
+  - src/repositories/study_recommendation.repository.py
+  - src/services/study_plan_service.py
+  - src/services/task_decomposition_service.py
+  - src/controllers/study_plan_controller.py
+  - src/templates/study_plans.html
+  - src/templates/study_plan_detail.html
+  - src/static/styles/study_plans.css
+  - src/static/scripts/study_plans.js
+
+API Endpoints:
+  GET    /api/study-plans/student/<student_id>
+  POST   /api/study-plans/generate
+  GET    /api/study-plans/<plan_id>
+  PUT    /api/study-plans/<plan_id>
+  DELETE /api/study-plans/<plan_id>
+  GET    /api/study-plans/<plan_id>/tasks
+  POST   /api/study-plans/<plan_id>/tasks
+  PUT    /api/study-plans/tasks/<task_id>
+  GET    /api/study-plans/recommendations/student/<student_id>
+  POST   /api/study-plans/<plan_id>/adjust
+
+Integration Points:
+  - Task system (create tasks from study plan)
+  - Focus Session table (analyze productivity patterns)
+  - Course schedule (consider class times in planning)
+  - Assignment system (break down assignments into study tasks)
+  - Notes system (recommend relevant notes)
+  - AI Assistant (use RAG for resource recommendations)
+  - Calendar (schedule study sessions)
+
+AI Components:
+  - Task Decomposition: AI-powered breakdown of complex assignments
+  - Time Estimation: ML models trained on historical task completion data
+  - Resource Recommendation: RAG-based retrieval of relevant study materials
+  - Schedule Optimization: Constraint satisfaction for optimal time allocation
+
+Access Control:
+  - Students: Create and manage their study plans
+  - Instructors/TAs: View aggregated study plan analytics for their courses
+  - Advisors: View student study plans and provide guidance
+
+================================================================================
+FR-AI-5: AI-POWERED ACADEMIC ADVISOR CHATBOT
+================================================================================
+
+Description:
+An intelligent chatbot that provides 24/7 academic advising support, course
+selection guidance, and degree planning assistance. Extends the existing AI
+Assistant with specialized academic advising capabilities.
+
+Features:
+1. Degree Planning Assistance
+   - Answer questions about degree requirements, course prerequisites, and
+     graduation planning
+   - Track degree progress and alert students about missing requirements
+   - Provide semester-by-semester course recommendations
+   - Calculate time to graduation based on current progress
+
+2. Course Selection Guidance
+   - Provide personalized course recommendations based on major, interests, and
+     career goals
+   - Explain course prerequisites and their importance
+   - Suggest course sequences for optimal learning
+   - Warn about difficult course combinations
+
+3. Academic Policy Questions
+   - Answer questions about university policies, registration deadlines, and
+     academic procedures
+   - Explain grading policies and GPA calculation
+   - Provide information about academic support resources
+   - Guide students through administrative processes
+
+4. Career and Major Guidance
+   - Discuss career paths related to student's major
+   - Suggest electives based on career interests
+   - Provide information about internship and research opportunities
+   - Connect students with relevant resources
+
+5. Human Advisor Escalation
+   - Schedule appointments with human advisors when complex issues arise
+   - Flag conversations that require human intervention
+   - Provide conversation history to human advisors
+   - Learn from advisor-student interactions to improve responses
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE AdvisorConversation (
+      Conversation_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Conversation_Type NVARCHAR(50),  -- 'degree_planning', 'course_selection', 'policy', 'career'
+      Started_At DATETIME DEFAULT GETDATE(),
+      Last_Message_At DATETIME,
+      Status NVARCHAR(20) CHECK (Status IN ('active', 'resolved', 'escalated', 'archived')) DEFAULT 'active',
+      Escalated_To_Advisor_ID INT,  -- If escalated to human advisor
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Escalated_To_Advisor_ID) REFERENCES Instructor(Instructor_ID)
+  );
+
+  CREATE TABLE AdvisorMessage (
+      Message_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Conversation_ID INT NOT NULL,
+      Sender_Type NVARCHAR(20) CHECK (Sender_Type IN ('student', 'ai', 'advisor')),
+      Message_Text NVARCHAR(MAX) NOT NULL,
+      Intent NVARCHAR(100),  -- Detected intent (e.g., 'course_recommendation', 'prerequisite_check')
+      Confidence_Score DECIMAL(3,2),
+      Sent_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Conversation_ID) REFERENCES AdvisorConversation(Conversation_ID)
+  );
+
+  CREATE TABLE AdvisorAppointment (
+      Appointment_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Advisor_ID INT NOT NULL,
+      Scheduled_Date DATETIME NOT NULL,
+      Reason NVARCHAR(MAX),
+      Status NVARCHAR(20) CHECK (Status IN ('scheduled', 'completed', 'cancelled')) DEFAULT 'scheduled',
+      Created_From_Conversation_ID INT,  -- If created from chatbot escalation
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Advisor_ID) REFERENCES Instructor(Instructor_ID),
+      FOREIGN KEY (Created_From_Conversation_ID) REFERENCES AdvisorConversation(Conversation_ID)
+  );
+
+Files to Create:
+  - src/models/advisor_conversation.py
+  - src/models/advisor_message.py
+  - src/models/advisor_appointment.py
+  - src/repositories/advisor_conversation.repository.py
+  - src/repositories/advisor_message.repository.py
+  - src/repositories/advisor_appointment.repository.py
+  - src/services/advisor_chatbot_service.py
+  - src/services/intent_recognition_service.py
+  - src/controllers/advisor_chatbot_controller.py
+  - src/templates/advisor_chatbot.html
+  - src/static/styles/advisor_chatbot.css
+  - src/static/scripts/advisor_chatbot.js
+
+API Endpoints:
+  GET    /api/advisor/chat/conversations/student/<student_id>
+  POST   /api/advisor/chat/conversations
+  GET    /api/advisor/chat/conversations/<conversation_id>/messages
+  POST   /api/advisor/chat/conversations/<conversation_id>/messages
+  POST   /api/advisor/chat/escalate/<conversation_id>
+  GET    /api/advisor/appointments/student/<student_id>
+  POST   /api/advisor/appointments
+  GET    /api/advisor/degree-progress/student/<student_id>
+  GET    /api/advisor/course-recommendations/student/<student_id>
+
+Integration Points:
+  - AI Assistant (extend existing chatbot infrastructure)
+  - RAG Engine (use knowledge base for academic policies and requirements)
+  - Enrollment table (analyze course history for recommendations)
+  - Degree Requirements (track progress and missing requirements)
+  - Calendar (schedule advisor appointments)
+  - Message system (notify students about appointments)
+
+AI Components:
+  - Conversational AI: Advanced chatbot using RAG for knowledge retrieval
+  - Intent Recognition: Understanding student queries and routing appropriately
+  - Degree Planning: Rule-based system combined with LLM for natural explanations
+  - Recommendation Engine: Course recommendations based on student profile
+
+Access Control:
+  - Students: Full access to chatbot
+  - Advisors: View chatbot interactions and intervene when needed
+  - Administrators: Monitor chatbot performance and update knowledge base
+
+================================================================================
+FR-AI-6: PREDICTIVE ANALYTICS DASHBOARD FOR INSTRUCTORS
+================================================================================
+
+Description:
+An AI-powered dashboard that provides instructors and TAs with predictive insights
+about their courses and students, enabling proactive intervention and course
+improvement.
+
+Features:
+1. Student Performance Predictions
+   - Predict course completion rates and identify students at risk of dropping
+   - Analyze assignment submission patterns to predict late submissions
+   - Forecast final grades based on current performance
+   - Identify students who may need additional support
+
+2. Course Analytics
+   - Analyze course difficulty and suggest content adjustments
+   - Compare current semester performance to historical data
+   - Identify topics where students struggle most
+   - Recommend optimal assignment due dates and exam scheduling
+
+3. Intervention Recommendations
+   - Suggest optimal timing for interventions based on prediction models
+   - Recommend specific support actions (office hours, study groups, resources)
+   - Identify which students would benefit most from outreach
+   - Track intervention effectiveness
+
+4. Automated Reports
+   - Generate weekly/monthly performance reports automatically
+   - Create mid-semester progress reports
+   - Export analytics data for department review
+   - Compare course performance across different sections
+
+5. Workload Optimization
+   - Analyze student workload across all courses
+   - Recommend optimal assignment due dates to avoid overload
+   - Suggest exam scheduling to minimize conflicts
+   - Predict peak workload periods
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE CourseAnalytics (
+      Analytics_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Instructor_ID INT NOT NULL,
+      Semester NVARCHAR(50),
+      Academic_Year INT,
+      Total_Enrollments INT,
+      Predicted_Completion_Rate DECIMAL(5,2),
+      Actual_Completion_Rate DECIMAL(5,2),
+      Average_Predicted_Grade DECIMAL(3,2),
+      Average_Actual_Grade DECIMAL(3,2),
+      At_Risk_Student_Count INT,
+      Difficulty_Score DECIMAL(3,2),
+      Generated_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Instructor_ID) REFERENCES Instructor(Instructor_ID)
+  );
+
+  CREATE TABLE InterventionRecommendation (
+      Recommendation_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Student_ID INT NOT NULL,
+      Recommendation_Type NVARCHAR(50),  -- 'office_hours', 'study_group', 'tutoring', 'resource'
+      Title NVARCHAR(255) NOT NULL,
+      Description NVARCHAR(MAX),
+      Urgency NVARCHAR(20) CHECK (Urgency IN ('low', 'medium', 'high', 'critical')),
+      Suggested_Date DATETIME,
+      Status NVARCHAR(20) CHECK (Status IN ('pending', 'scheduled', 'completed', 'dismissed')) DEFAULT 'pending',
+      Generated_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID)
+  );
+
+  CREATE TABLE PerformanceTrend (
+      Trend_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Metric_Name NVARCHAR(100),  -- 'average_grade', 'completion_rate', 'attendance'
+      Week_Number INT,
+      Value DECIMAL(5,2),
+      Predicted_Value DECIMAL(5,2),
+      Recorded_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+  );
+
+Files to Create:
+  - src/models/course_analytics.py
+  - src/models/intervention_recommendation.py
+  - src/models/performance_trend.py
+  - src/repositories/course_analytics.repository.py
+  - src/repositories/intervention_recommendation.repository.py
+  - src/repositories/performance_trend.repository.py
+  - src/services/predictive_analytics_service.py
+  - src/services/intervention_service.py
+  - src/controllers/predictive_analytics_controller.py
+  - src/templates/predictive_dashboard.html
+  - src/static/styles/predictive_dashboard.css
+  - src/static/scripts/predictive_dashboard.js
+
+API Endpoints:
+  GET    /api/analytics/course/<course_id>/predictions
+  GET    /api/analytics/course/<course_id>/at-risk-students
+  GET    /api/analytics/course/<course_id>/trends
+  GET    /api/analytics/instructor/<instructor_id>/courses
+  GET    /api/analytics/course/<course_id>/interventions
+  POST   /api/analytics/generate-predictions
+  GET    /api/analytics/course/<course_id>/workload-analysis
+  GET    /api/analytics/course/<course_id>/comparison
+
+Integration Points:
+  - Enrollment table (track student enrollment and completion)
+  - Grade system (analyze performance data)
+  - Assignment system (analyze submission patterns)
+  - Attendance system (correlate attendance with performance)
+  - Overview dashboard (display key metrics for instructors)
+  - Message system (send intervention messages to students)
+
+AI Components:
+  - Predictive Modeling: Time-series forecasting for student performance
+  - Anomaly Detection: Identifying unusual patterns in student behavior
+  - Recommendation System: Suggesting course improvements based on data analysis
+  - Pattern Recognition: Learning from historical course data
+
+Access Control:
+  - Instructors/TAs: Full access to predictive analytics for their courses
+  - Department Heads: Aggregated analytics across all courses in department
+  - Students: View anonymized course performance trends (optional)
+  - Administrators: System-wide analytics and model performance monitoring
+
+================================================================================
+IMPLEMENTATION PRIORITY
+================================================================================
+
+Recommended implementation order based on value, dependencies, and AI complexity:
+
+1. FR-AI-4: Smart Study Plan Generator (High Priority)
+   - Directly improves student productivity
+   - Integrates well with existing task and focus session systems
+   - Moderate AI complexity (task decomposition and scheduling)
+   - High student value and engagement
+
+2. FR-AI-1: Academic Performance Predictor (High Priority)
+   - Directly impacts student success and retention
+   - Uses existing grade and enrollment data
+   - Moderate AI complexity (time-series prediction)
+   - High value for both students and instructors
+
+3. FR-AI-5: Academic Advisor Chatbot (Medium Priority)
+   - Reduces advisor workload significantly
+   - Extends existing AI Assistant infrastructure
+   - High AI complexity (conversational AI + intent recognition)
+   - High user value but requires careful implementation
+
+4. FR-AI-2: Intelligent Course Schedule Optimizer (Medium Priority)
+   - Enhances existing course registration system
+   - Moderate AI complexity (recommendation engine)
+   - High value during registration periods
+   - Can be built incrementally
+
+5. FR-AI-6: Predictive Analytics Dashboard (Medium Priority)
+   - Valuable for instructors and course improvement
+   - High AI complexity (multiple prediction models)
+   - Requires significant data collection
+   - Best implemented after other features provide data
+
+6. FR-AI-3: AI-Powered Assignment Grading Assistant (Lower Priority)
+   - Requires careful implementation for accuracy
+   - High AI complexity (NLP + pattern recognition)
+   - Potential for errors requires human oversight
+   - Best implemented after testing with smaller scope
+
+================================================================================
+TECHNICAL CONSIDERATIONS
+================================================================================
+
+AI Infrastructure:
+- All features leverage existing AI Assistant service and RAG Engine
+- Use existing Ollama/Unify Model infrastructure for LLM capabilities
+- Extend knowledge base with academic policies, study strategies, and course data
+- Implement ML models using scikit-learn or similar (for predictions)
+- Store model training data and predictions in database
+
+Data Requirements:
+- Historical grade data (minimum 2-3 semesters for accurate predictions)
+- Student behavior data (focus sessions, task completion, attendance)
+- Course metadata (descriptions, prerequisites, difficulty ratings)
+- Instructor grading patterns (for grading assistant)
+
+Performance Considerations:
+- Cache predictions to avoid recalculating frequently
+- Batch process predictions during off-peak hours
+- Use async processing for heavy AI computations
+- Implement rate limiting for AI API calls
+
+Privacy and Ethics:
+- Anonymize data used for training models
+- Get student consent for using their data in predictions
+- Allow students to opt-out of AI recommendations
+- Ensure transparency in how predictions are generated
+- Maintain human oversight for critical decisions
+
+Testing Requirements:
+- Unit tests for all AI services
+- Integration tests for AI feature workflows
+- Accuracy tests for prediction models (target: >80% accuracy)
+- Performance tests for AI response times
+- User acceptance testing for AI recommendations
+
+================================================================================
+INTEGRATION WITH EXISTING SYSTEMS
+================================================================================
+
+Role-Based Access Control:
+- All AI features respect existing role-based access control
+- Students: View their own predictions and recommendations
+- Instructors/TAs: Access to course-wide analytics and student data
+- Administrators: System-wide analytics and model management
+
+AI Assistant Integration:
+- Extend existing AI Assistant with specialized advisors
+- Use existing RAG infrastructure for knowledge retrieval
+- Leverage existing LLM service (Ollama/Unify Model)
+- Maintain consistent UI/UX with existing AI Assistant page
+
+Database Integration:
+- All new tables follow existing naming conventions
+- Use existing Repository Pattern for data access
+- Integrate with existing models (Student, Course, Enrollment, etc.)
+- Maintain referential integrity with foreign keys
+
+Frontend Integration:
+- Follow existing dark/light theme design system
+- Use existing CSS classes (cr-* prefix)
+- Maintain responsive design patterns
+- Integrate with existing sidebar navigation
+
+================================================================================
+SUCCESS METRICS
+================================================================================
+
+For each AI feature, track:
+- Accuracy: Prediction accuracy vs. actual outcomes
+- Adoption: Percentage of users using the feature
+- Satisfaction: User ratings and feedback
+- Performance: Impact on student success (GPA improvement, retention)
+- Efficiency: Time saved for instructors/advisors
+
+Target Metrics:
+- AI predictions within 10% of actual outcomes
+- 80% of students using at least one AI feature
+- 4.0+ rating on AI feature usefulness
+- 0.2+ GPA improvement for students using AI recommendations
+- 30% reduction in advisor workload through chatbot automation
+
+================================================================================
+END OF AI-POWERED FUNCTIONAL REQUIREMENTS
+================================================================================
