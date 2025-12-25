@@ -498,6 +498,395 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Tab Navigation Styles */
+        .tasks-tabs-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 6px;
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+        }
+
+        .tasks-tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--cr-text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tasks-tab-btn i {
+            font-size: 1rem;
+        }
+
+        .tasks-tab-btn:hover {
+            background: var(--cr-accent-soft);
+            color: var(--cr-accent);
+        }
+
+        .tasks-tab-btn.active {
+            background: var(--cr-accent);
+            color: white;
+        }
+
+        .tasks-tabs-content {
+            position: relative;
+        }
+
+        .tasks-tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tasks-tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .study-plans-container,
+        .focus-sessions-container {
+            padding: 20px;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--cr-text-muted);
+        }
+
+        .loading-state i {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            color: var(--cr-accent);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--cr-text);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--cr-text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--cr-bg-elevated);
+            color: var(--cr-text);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: var(--cr-text);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg);
+            color: var(--cr-text);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--cr-accent);
+            box-shadow: 0 0 0 3px var(--cr-accent-soft);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        .inline-message {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1001;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+        }
+
+        .inline-message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+        }
+
+        .inline-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .task-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .task-input-row input {
+            flex: 1;
+        }
+
+        .task-input-row select {
+            width: 120px;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px;
+            background: var(--cr-bg-elevated);
+            border-radius: 8px;
+            border: 1px solid var(--cr-border);
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--cr-bg-panel);
+            border-radius: 6px;
+            border: 1px solid var(--cr-border);
+        }
+
+        .task-item-info {
+            flex: 1;
+        }
+
+        .task-item-name {
+            font-weight: 500;
+            color: var(--cr-text);
+            font-size: 0.9rem;
+        }
+
+        .task-item-priority {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .task-item-priority.high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .task-item-priority.medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .task-item-priority.low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .remove-task-btn {
+            background: transparent;
+            border: none;
+            color: var(--cr-danger);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .remove-task-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .focus-feedback {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .focus-feedback h3 {
+            margin: 0 0 12px 0;
+            color: var(--cr-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feedback-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-message.encouraging {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+        }
+
+        .feedback-message.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid #f59e0b;
+            color: #f59e0b;
+        }
+
+        .study-plan-card {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .study-plan-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--cr-accent);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body class="cr-body">
@@ -510,44 +899,7 @@
                 <p class="cr-brand-subtitle">Student Assistant</p>
             </div>
         </div>
-        <nav class="cr-sidebar-nav">
-            <a class="cr-nav-item" href="/overview">
-                <i class="fa-solid fa-chart-column"></i>
-                <span>Overview</span>
-            </a>
-            <a class="cr-nav-item" href="/schedule">
-                <i class="fa-solid fa-calendar-day"></i>
-                <span>Schedule</span>
-            </a>
-            <a class="cr-nav-item active" href="/tasks">
-                <i class="fa-solid fa-list-check"></i>
-                <span>Tasks</span>
-            </a>
-            <a class="cr-nav-item" href="/notes">
-                <i class="fa-solid fa-note-sticky"></i>
-                <span>Notes &amp; Summaries</span>
-            </a>
-            <a class="cr-nav-item" href="/reminders">
-                <i class="fa-solid fa-bell"></i>
-                <span>Smart Reminders</span>
-            </a>
-            <a class="cr-nav-item" href="/messages">
-                <i class="fa-solid fa-message"></i>
-                <span>Messages</span>
-            </a>
-            <a class="cr-nav-item" href="/transcript">
-                <i class="fa-solid fa-file-lines"></i>
-                <span>Transcript</span>
-            </a>
-            <a class="cr-nav-item" href="/course-registration">
-                <i class="fa-solid fa-book-open"></i>
-                <span>Course Registration</span>
-            </a>
-            <a class="cr-nav-item" href="/settings">
-                <i class="fa-solid fa-gear"></i>
-                <span>Settings</span>
-            </a>
-        </nav>
+        {% include 'components/sidebar_nav.html' %}
         <div class="cr-sidebar-footer">
             <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -566,7 +918,27 @@
             {% include 'components/topbar_right.html' %}
         </header>
         
-        <div class="cr-content">
+        <div class="cr-content" style="padding: 20px;">
+            <!-- Tab Navigation -->
+            <div class="tasks-tabs-nav">
+                <button class="tasks-tab-btn active" data-tab="tasks">
+                    <i class="fa-solid fa-list-check"></i>
+                    Tasks
+                </button>
+                <button class="tasks-tab-btn" data-tab="study-plans">
+                    <i class="fa-solid fa-brain"></i>
+                    Study Plans
+                </button>
+                <button class="tasks-tab-btn" data-tab="focus-sessions">
+                    <i class="fa-solid fa-clock"></i>
+                    Focus Sessions
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tasks-tabs-content">
+                <!-- Tasks Tab (Default) -->
+                <div class="tasks-tab-pane active" id="tasksTab">
             <div class="tasks-container">
                 <!-- Pomodoro Focus Timer -->
                 <div class="pomodoro-section">
@@ -676,11 +1048,115 @@
                     </button>
                 </div>
             </div>
+                </div>
+
+                <!-- Study Plans Tab -->
+                <div class="tasks-tab-pane" id="studyPlansTab">
+                    <div class="study-plans-container">
+                        <div id="studyPlansContent">
+                            <div class="loading-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                <p>Loading study plans...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Focus Sessions Tab -->
+                <div class="tasks-tab-pane" id="focusSessionsTab">
+                    <div class="focus-sessions-container">
+                        <h2 style="color: var(--cr-text); margin-bottom: 20px;">
+                            <i class="fa-solid fa-chart-line"></i> Focus Session Statistics
+                        </h2>
+                        <p style="color: var(--cr-text-muted); margin-bottom: 24px;">
+                            Track your productivity and study durations over time.
+                        </p>
+                        <div id="focusSessionsStats">
+                            <div class="loading-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                <p>Loading statistics...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
 
+<!-- Study Plan Generation Modal -->
+<div class="modal-overlay" id="studyPlanModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>
+                <i class="fa-solid fa-brain"></i>
+                Generate AI Study Plan
+            </h3>
+            <button class="modal-close" onclick="closeStudyPlanModal()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="planName">Plan Name *</label>
+                <input type="text" id="planName" placeholder="e.g., Final Exam Preparation" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="planCourse">Course (Optional)</label>
+                <select id="planCourse">
+                    <option value="">Select a course...</option>
+                </select>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="startDate">Start Date *</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date *</label>
+                    <input type="date" id="endDate" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Study Tasks (Add tasks you need to complete)</label>
+                <div class="task-input-row">
+                    <input type="text" id="taskInput" placeholder="Enter task name...">
+                    <select id="taskPriority">
+                        <option value="high">High Priority</option>
+                        <option value="medium" selected>Medium Priority</option>
+                        <option value="low">Low Priority</option>
+                    </select>
+                    <button type="button" class="cr-btn-primary" onclick="addTaskToList()" style="padding: 12px 20px;">
+                        <i class="fa-solid fa-plus"></i> Add
+                    </button>
+                </div>
+                <div class="task-list" id="taskList">
+                    <p style="text-align: center; color: var(--cr-text-muted); padding: 20px; margin: 0;">
+                        No tasks added yet. Add tasks above.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="planNotes">Additional Notes (Optional)</label>
+                <textarea id="planNotes" placeholder="Any specific requirements or goals for this study plan..."></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button class="cr-btn-ghost" onclick="closeStudyPlanModal()">Cancel</button>
+                <button class="cr-btn-primary" onclick="generateStudyPlanFromForm()" id="generateBtn">
+                    <i class="fa-solid fa-magic"></i> Generate AI Plan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/notifications.js') }}"></script>
 <script>
     // =============== STATE ===============
     let allTasks = [];
@@ -1044,7 +1520,7 @@
     }
 
     // Complete timer
-    function completeTimer() {
+    async function completeTimer() {
         clearInterval(timerInterval);
         timerRunning = false;
         timerLabel.textContent = 'Complete! 🎉';
@@ -1062,9 +1538,24 @@
         // Update stats if it was a focus session
         if (currentMode === 'pomodoro') {
             pomodorosToday++;
-            totalMinutesToday += 25;
+            const focusDuration = parseInt(document.querySelector('.mode-btn.active').dataset.duration);
+            totalMinutesToday += focusDuration;
             updateStatsDisplay();
             saveStats();
+            
+            // Save focus session to database (FR17)
+            try {
+                await fetch('/tasks/api/focus-sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        duration: focusDuration,
+                        completed: true
+                    })
+                });
+            } catch (error) {
+                console.error('Error saving focus session:', error);
+            }
         }
         
         // Auto-switch to break
@@ -1132,6 +1623,743 @@
     // Initialize timer
     loadStats();
     updateDisplay();
+
+    // =============== TAB NAVIGATION ===============
+    const tabButtons = document.querySelectorAll('.tasks-tab-btn');
+    const tabPanes = document.querySelectorAll('.tasks-tab-pane');
+    let currentTab = 'tasks';
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.getAttribute('data-tab');
+            switchTab(tab);
+        });
+    });
+
+    function switchTab(tab) {
+        // Update tab buttons
+        tabButtons.forEach(btn => {
+            if (btn.getAttribute('data-tab') === tab) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Update tab panes - map tab names to pane IDs
+        const tabToPaneId = {
+            'tasks': 'tasksTab',
+            'study-plans': 'studyPlansTab',
+            'focus-sessions': 'focusSessionsTab'
+        };
+        const targetPaneId = tabToPaneId[tab];
+        
+        tabPanes.forEach(pane => {
+            if (pane.id === targetPaneId) {
+                pane.classList.add('active');
+            } else {
+                pane.classList.remove('active');
+            }
+        });
+
+        currentTab = tab;
+
+        // Load data for active tab
+        if (tab === 'focus-sessions') {
+            loadFocusSessions();
+        } else if (tab === 'study-plans') {
+            loadStudyPlans();
+        }
+    }
+
+    // =============== FOCUS SESSIONS ===============
+    async function loadFocusSessions() {
+        const container = document.getElementById('focusSessionsStats');
+        if (!container) {
+            console.error('Focus sessions container not found');
+            return;
+        }
+        
+        container.innerHTML = '<div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading statistics...</p></div>';
+        
+        try {
+            const response = await fetch('/tasks/api/focus-sessions/stats');
+            if (response.ok) {
+                const stats = await response.json();
+                
+                // Calculate study recommendations
+                const feedback = getStudyFeedback(stats);
+                
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div class="stat-card" style="background: var(--cr-bg-panel); border: 1px solid var(--cr-border); border-radius: 12px; padding: 20px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--cr-accent); margin-bottom: 8px;">${stats.total_sessions || 0}</div>
+                            <div style="color: var(--cr-text-muted); font-size: 0.9rem;">Total Sessions</div>
+                        </div>
+                        <div class="stat-card" style="background: var(--cr-bg-panel); border: 1px solid var(--cr-border); border-radius: 12px; padding: 20px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--cr-success); margin-bottom: 8px;">${stats.total_minutes || 0}</div>
+                            <div style="color: var(--cr-text-muted); font-size: 0.9rem;">Total Minutes</div>
+                        </div>
+                        <div class="stat-card" style="background: var(--cr-bg-panel); border: 1px solid var(--cr-border); border-radius: 12px; padding: 20px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #f59e0b; margin-bottom: 8px;">${stats.today_sessions || 0}</div>
+                            <div style="color: var(--cr-text-muted); font-size: 0.9rem;">Today</div>
+                        </div>
+                        <div class="stat-card" style="background: var(--cr-bg-panel); border: 1px solid var(--cr-border); border-radius: 12px; padding: 20px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--cr-accent); margin-bottom: 8px;">${stats.avg_duration || 0}</div>
+                            <div style="color: var(--cr-text-muted); font-size: 0.9rem;">Avg Duration (min)</div>
+                        </div>
+                    </div>
+                    
+                    ${feedback ? `
+                    <div class="focus-feedback">
+                        <h3>
+                            <i class="fa-solid fa-lightbulb"></i>
+                            AI Study Recommendation
+                        </h3>
+                        <div class="feedback-message ${feedback.type}">
+                            <i class="fa-solid fa-${feedback.type === 'encouraging' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                            <div>
+                                <strong>${feedback.title}</strong>
+                                <p style="margin: 4px 0 0 0; font-size: 0.9rem;">${feedback.message}</p>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+            } else {
+                const error = await response.json().catch(() => ({error: 'Unknown error'}));
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <p>Unable to load statistics: ${error.error || 'Unknown error'}</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading focus sessions:', error);
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <p>Error loading statistics. Please try again.</p>
+                </div>
+            `;
+        }
+    }
+
+    function getStudyFeedback(stats) {
+        const todayMinutes = (stats.today_sessions || 0) * (stats.avg_duration || 25);
+        const weeklyMinutes = (stats.total_minutes || 0) / 7; // Approximate weekly average
+        
+        // If no sessions today
+        if (stats.today_sessions === 0) {
+            return {
+                type: 'warning',
+                title: 'Start Your Study Session!',
+                message: 'You haven\'t studied today. Start a focus session to build your study habit!'
+            };
+        }
+        
+        // If studying less than 30 minutes today
+        if (todayMinutes < 30) {
+            return {
+                type: 'warning',
+                title: 'Keep Going!',
+                message: `You've studied ${todayMinutes} minutes today. Try to reach at least 60 minutes for better results!`
+            };
+        }
+        
+        // If studying 30-90 minutes (good)
+        if (todayMinutes >= 30 && todayMinutes < 90) {
+            return {
+                type: 'encouraging',
+                title: 'Great Progress!',
+                message: `You've studied ${Math.round(todayMinutes)} minutes today. Keep up the excellent work!`
+            };
+        }
+        
+        // If studying more than 90 minutes (excellent)
+        if (todayMinutes >= 90) {
+            return {
+                type: 'encouraging',
+                title: 'Outstanding! 🎉',
+                message: `Amazing! You've studied ${Math.round(todayMinutes)} minutes today. You're on fire!`
+            };
+        }
+        
+        // Weekly analysis
+        if (weeklyMinutes < 300) {
+            return {
+                type: 'warning',
+                title: 'Increase Weekly Study Time',
+                message: `Your weekly average is ${Math.round(weeklyMinutes)} minutes. Aim for at least 5 hours per week for better results.`
+            };
+        }
+        
+        return null;
+    }
+
+    // =============== STUDY PLANS ===============
+    async function loadStudyPlans() {
+        const container = document.getElementById('studyPlansContent');
+        if (!container) {
+            console.error('Study plans container not found');
+            return;
+        }
+        
+        container.innerHTML = '<div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading study plans...</p></div>';
+        
+        try {
+            const response = await fetch('/tasks/api/study-plans');
+            if (response.ok) {
+                const plans = await response.json();
+                
+                if (plans.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-brain" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5; color: var(--cr-accent);"></i>
+                            <h2 style="color: var(--cr-text); margin-bottom: 12px;">AI-Powered Study Plans</h2>
+                            <p style="color: var(--cr-text-muted); margin-bottom: 24px;">
+                                Get personalized study schedules based on your courses, deadlines, and learning patterns.
+                            </p>
+                            <button class="cr-btn-primary" id="generateStudyPlanBtn" style="padding: 12px 24px; font-size: 1rem;">
+                                <i class="fa-solid fa-plus"></i> Generate Study Plan
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('generateStudyPlanBtn')?.addEventListener('click', showGeneratePlanModal);
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2 style="color: var(--cr-text); margin: 0;">
+                            <i class="fa-solid fa-brain"></i> Your Study Plans
+                        </h2>
+                        <button class="cr-btn-primary" id="generateStudyPlanBtn" style="padding: 10px 20px;">
+                            <i class="fa-solid fa-plus"></i> Generate New Plan
+                        </button>
+                    </div>
+                    <div style="display: grid; gap: 16px;">
+                        ${plans.map(plan => `
+                            <div class="study-plan-card" style="background: var(--cr-bg-panel); border: 1px solid var(--cr-border); border-radius: 12px; padding: 20px; transition: all 0.2s; cursor: pointer;" 
+                                 onclick="viewStudyPlanDetail(${plan.Plan_ID})"
+                                 onmouseover="this.style.borderColor='var(--cr-accent)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                                 onmouseout="this.style.borderColor='var(--cr-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                    <div style="flex: 1;">
+                                        <h3 style="margin: 0 0 8px 0; color: var(--cr-text); font-size: 1.2rem; display: flex; align-items: center;">
+                                            ${escapeHtml(plan.Plan_Name)}
+                                            <span class="ai-badge">
+                                                <i class="fa-solid fa-robot"></i> AI
+                                            </span>
+                                        </h3>
+                                        <p style="margin: 0; color: var(--cr-text-muted); font-size: 0.9rem;">
+                                            <i class="fa-solid fa-calendar"></i> ${plan.Start_Date} - ${plan.End_Date}
+                                        </p>
+                                    </div>
+                                    <span style="padding: 6px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; 
+                                        background: ${plan.Status === 'active' ? 'rgba(34, 197, 94, 0.2)' : plan.Status === 'completed' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(156, 163, 175, 0.2)'}; 
+                                        color: ${plan.Status === 'active' ? '#22c55e' : plan.Status === 'completed' ? '#38bdf8' : '#9ca3af'};">
+                                        ${plan.Status.charAt(0).toUpperCase() + plan.Status.slice(1)}
+                                    </span>
+                                </div>
+                                <div style="margin-top: 16px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <span style="font-size: 0.9rem; color: var(--cr-text-muted); font-weight: 500;">Progress</span>
+                                        <span style="font-weight: 600; color: var(--cr-text);">${plan.Completion_Percentage || 0}%</span>
+                                    </div>
+                                    <div style="height: 10px; background: var(--cr-bg-elevated); border-radius: 5px; overflow: hidden;">
+                                        <div style="height: 100%; width: ${plan.Completion_Percentage || 0}%; background: linear-gradient(90deg, var(--cr-accent), var(--cr-accent-dark)); transition: width 0.3s;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                document.getElementById('generateStudyPlanBtn')?.addEventListener('click', showGeneratePlanModal);
+            } else {
+                const error = await response.json().catch(() => ({error: 'Unknown error'}));
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <p>Unable to load study plans: ${error.error || 'Unknown error'}</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading study plans:', error);
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <p>Error loading study plans. Please try again.</p>
+                    <p style="font-size: 0.85rem; margin-top: 8px; color: var(--cr-text-muted);">${error.message || ''}</p>
+                </div>
+            `;
+        }
+    }
+
+    // Study Plan Tasks List
+    let studyPlanTasks = [];
+
+    async function showGeneratePlanModal() {
+        const modal = document.getElementById('studyPlanModal');
+        modal.classList.add('active');
+        
+        // Reset form
+        document.getElementById('planName').value = '';
+        document.getElementById('planCourse').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        document.getElementById('planNotes').value = '';
+        studyPlanTasks = [];
+        updateTaskList();
+        
+        // Set minimum dates
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').min = today;
+        document.getElementById('endDate').min = today;
+        
+        // Load courses
+        await loadCoursesForPlan();
+    }
+
+    function closeStudyPlanModal() {
+        const modal = document.getElementById('studyPlanModal');
+        modal.classList.remove('active');
+    }
+
+    async function loadCoursesForPlan() {
+        try {
+            const response = await fetch('/tasks/api/courses/enrolled');
+            if (response.ok) {
+                const courses = await response.json();
+                const select = document.getElementById('planCourse');
+                select.innerHTML = '<option value="">Select a course (optional)...</option>';
+                
+                if (courses.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No enrolled courses found';
+                    option.disabled = true;
+                    select.appendChild(option);
+                } else {
+                    courses.forEach(course => {
+                        const option = document.createElement('option');
+                        option.value = course.Course_ID || course.course_id;
+                        option.textContent = `${course.Course_Code || course.course_code} - ${course.Course_Name || course.course_name}`;
+                        select.appendChild(option);
+                    });
+                }
+            } else {
+                console.error('Failed to load courses:', response.status);
+                const select = document.getElementById('planCourse');
+                select.innerHTML = '<option value="">Unable to load courses</option>';
+            }
+        } catch (error) {
+            console.error('Error loading courses:', error);
+            const select = document.getElementById('planCourse');
+            select.innerHTML = '<option value="">Error loading courses</option>';
+        }
+    }
+
+    function addTaskToList() {
+        const taskInput = document.getElementById('taskInput');
+        const taskPriority = document.getElementById('taskPriority');
+        const taskName = taskInput.value.trim();
+        
+        if (!taskName) {
+            showMessage('Please enter a task name', true);
+            return;
+        }
+        
+        studyPlanTasks.push({
+            name: taskName,
+            priority: taskPriority.value
+        });
+        
+        taskInput.value = '';
+        updateTaskList();
+    }
+
+    function removeTaskFromList(index) {
+        studyPlanTasks.splice(index, 1);
+        updateTaskList();
+    }
+
+    function updateTaskList() {
+        const taskList = document.getElementById('taskList');
+        
+        if (studyPlanTasks.length === 0) {
+            taskList.innerHTML = '<p style="text-align: center; color: var(--cr-text-muted); padding: 20px; margin: 0;">No tasks added yet. Add tasks above.</p>';
+            return;
+        }
+        
+        taskList.innerHTML = studyPlanTasks.map((task, index) => `
+            <div class="task-item">
+                <div class="task-item-info">
+                    <span class="task-item-name">${escapeHtml(task.name)}</span>
+                    <span class="task-item-priority ${task.priority}">${task.priority.toUpperCase()}</span>
+                </div>
+                <button class="remove-task-btn" onclick="removeTaskFromList(${index})" title="Remove task">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `).join('');
+    }
+
+    async function generateStudyPlanFromForm() {
+        const planName = document.getElementById('planName').value.trim();
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const courseId = document.getElementById('planCourse').value;
+        const notes = document.getElementById('planNotes').value.trim();
+        
+        if (!planName || !startDate || !endDate) {
+            showMessage('Please fill in all required fields', true);
+            return;
+        }
+        
+        if (new Date(endDate) < new Date(startDate)) {
+            showMessage('End date must be after start date', true);
+            return;
+        }
+        
+        const generateBtn = document.getElementById('generateBtn');
+        const originalText = generateBtn.innerHTML;
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+        
+        try {
+            const response = await fetch('/tasks/api/study-plans/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    plan_name: planName,
+                    start_date: startDate,
+                    end_date: endDate,
+                    course_id: courseId || null,
+                    tasks: studyPlanTasks,
+                    notes: notes
+                })
+            });
+            
+            if (response.ok) {
+                const plan = await response.json();
+                closeStudyPlanModal();
+                await loadStudyPlans();
+                showMessage('Study plan created successfully! 🎉', false);
+                
+                // If tasks were provided, show message about AI decomposition
+                if (studyPlanTasks.length > 0) {
+                    setTimeout(() => {
+                        showMessage('AI is analyzing your tasks and will create subtasks automatically', false);
+                    }, 2000);
+                }
+            } else {
+                const error = await response.json();
+                showMessage('Error: ' + (error.error || 'Failed to create study plan'), true);
+            }
+        } catch (error) {
+            console.error('Error generating study plan:', error);
+            showMessage('Error creating study plan. Please try again.', true);
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = originalText;
+        }
+    }
+
+    async function generateStudyPlan(planName, startDate, endDate) {
+        try {
+            const response = await fetch('/tasks/api/study-plans/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    plan_name: planName,
+                    start_date: startDate,
+                    end_date: endDate
+                })
+            });
+            
+            if (response.ok) {
+                await loadStudyPlans();
+                showMessage('Study plan created successfully!', false);
+            } else {
+                const error = await response.json();
+                showMessage('Error: ' + (error.error || 'Failed to create study plan'), true);
+            }
+        } catch (error) {
+            console.error('Error generating study plan:', error);
+            showMessage('Error creating study plan. Please try again.', true);
+        }
+    }
+
+    function showMessage(message, isError = false) {
+        // Remove existing messages
+        document.querySelectorAll('.inline-message').forEach(el => el.remove());
+        
+        // Create message element
+        const messageEl = document.createElement('div');
+        messageEl.className = `inline-message ${isError ? 'error' : 'success'}`;
+        messageEl.innerHTML = `<i class="fa-solid fa-${isError ? 'exclamation-circle' : 'check-circle'}"></i> ${message}`;
+        document.body.appendChild(messageEl);
+        
+        setTimeout(() => {
+            messageEl.remove();
+        }, 5000);
+    }
+
+    async function viewStudyPlanDetail(planId) {
+        try {
+            console.log('Loading study plan detail for plan ID:', planId);
+            
+            // Fetch plan details
+            const planResponse = await fetch(`/tasks/api/study-plans/${planId}`);
+            if (!planResponse.ok) {
+                const errorData = await planResponse.json().catch(() => ({error: `HTTP ${planResponse.status}`}));
+                console.error('Failed to load plan:', planResponse.status, errorData);
+                showMessage('Failed to load study plan details: ' + (errorData.error || `HTTP ${planResponse.status}`), true);
+                return;
+            }
+            
+            const plan = await planResponse.json();
+            console.log('Plan loaded:', plan);
+            
+            // Fetch tasks for this plan
+            const tasksResponse = await fetch(`/tasks/api/study-plans/${planId}/tasks`);
+            const tasks = tasksResponse.ok ? await tasksResponse.json() : [];
+            console.log('Tasks loaded:', tasks.length);
+            
+            // Create detail modal
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h3>
+                            <i class="fa-solid fa-brain"></i>
+                            ${escapeHtml(plan.Plan_Name)}
+                        </h3>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                            <div>
+                                <label style="color: var(--cr-text-muted); font-size: 0.85rem;">Start Date</label>
+                                <p style="margin: 4px 0 0 0; color: var(--cr-text); font-weight: 500;">${plan.Start_Date}</p>
+                            </div>
+                            <div>
+                                <label style="color: var(--cr-text-muted); font-size: 0.85rem;">End Date</label>
+                                <p style="margin: 4px 0 0 0; color: var(--cr-text); font-weight: 500;">${plan.End_Date}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <label style="color: var(--cr-text-muted); font-size: 0.85rem;">Progress</label>
+                            <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+                                <div style="flex: 1; height: 12px; background: var(--cr-bg-elevated); border-radius: 6px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${plan.Completion_Percentage || 0}%; background: linear-gradient(90deg, var(--cr-accent), var(--cr-accent-dark));"></div>
+                                </div>
+                                <span style="font-weight: 600; color: var(--cr-text); min-width: 50px; text-align: right;">${plan.Completion_Percentage || 0}%</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 style="margin: 0 0 16px 0; color: var(--cr-text); display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-list-check"></i>
+                                Study Tasks (${tasks.length})
+                            </h4>
+                            ${tasks.length === 0 ? `
+                                <div style="text-align: center; padding: 40px; color: var(--cr-text-muted);">
+                                    <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+                                    <p>No tasks yet. Tasks will be generated automatically.</p>
+                                </div>
+                            ` : `
+                                <div style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
+                                    ${tasks.map(task => `
+                                        <div style="background: var(--cr-bg-elevated); border: 1px solid var(--cr-border); border-radius: 8px; padding: 12px;">
+                                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                                <div style="flex: 1;">
+                                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                                        <span style="font-weight: 500; color: var(--cr-text);">${escapeHtml(task.Task_Title)}</span>
+                                                        <span class="task-item-priority ${task.Priority}">${task.Priority.toUpperCase()}</span>
+                                                        <span style="padding: 2px 8px; background: ${task.Status === 'completed' ? 'rgba(34, 197, 94, 0.2)' : task.Status === 'in_progress' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(156, 163, 175, 0.2)'}; color: ${task.Status === 'completed' ? '#22c55e' : task.Status === 'in_progress' ? '#38bdf8' : '#9ca3af'}; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                                            ${task.Status.charAt(0).toUpperCase() + task.Status.slice(1)}
+                                                        </span>
+                                                    </div>
+                                                    ${task.Due_Date ? `<p style="margin: 0; color: var(--cr-text-muted); font-size: 0.85rem;"><i class="fa-solid fa-calendar"></i> Due: ${new Date(task.Due_Date).toLocaleDateString()}</p>` : ''}
+                                                    ${task.Estimated_Hours ? `<p style="margin: 4px 0 0 0; color: var(--cr-text-muted); font-size: 0.85rem;"><i class="fa-solid fa-clock"></i> Estimated: ${task.Estimated_Hours}h</p>` : ''}
+                                                </div>
+                                                ${task.Status !== 'completed' ? `
+                                                    <button onclick="updateTaskStatus(${task.Task_ID}, 'completed', ${planId})" style="padding: 6px 12px; background: var(--cr-accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                                        <i class="fa-solid fa-check"></i> Complete
+                                                    </button>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `}
+                        </div>
+                        
+                        <div style="margin-top: 24px;">
+                            <h4 style="margin: 0 0 16px 0; color: var(--cr-text); display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-lightbulb"></i>
+                                AI Resource Recommendations
+                                <span class="ai-badge">
+                                    <i class="fa-solid fa-robot"></i> RAG
+                                </span>
+                            </h4>
+                            <div id="recommendations-${planId}" style="min-height: 100px;">
+                                <div class="loading-state" style="padding: 20px;">
+                                    <i class="fa-solid fa-spinner fa-spin"></i>
+                                    <p>Loading recommendations...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Load recommendations
+            loadRecommendations(planId);
+            
+            // Close on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error loading study plan detail:', error);
+            showMessage('Error loading study plan details', true);
+        }
+    }
+
+    async function loadRecommendations(planId) {
+        const container = document.getElementById(`recommendations-${planId}`);
+        if (!container) return;
+        
+        try {
+            const response = await fetch(`/tasks/api/study-plans/${planId}/recommendations`);
+            if (response.ok) {
+                const recommendations = await response.json();
+                
+                if (recommendations.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--cr-text-muted);">
+                            <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;"></i>
+                            <p>No recommendations available at this time.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto;">
+                        ${recommendations.map(rec => `
+                            <div style="background: var(--cr-bg-elevated); border: 1px solid var(--cr-border); border-radius: 8px; padding: 12px; transition: all 0.2s; cursor: pointer;"
+                                 onmouseover="this.style.borderColor='var(--cr-accent)'; this.style.transform='translateY(-2px)';"
+                                 onmouseout="this.style.borderColor='var(--cr-border)'; this.style.transform='translateY(0)';">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                            <i class="fa-solid fa-${rec.Resource_Type === 'note' ? 'file-lines' : rec.Resource_Type === 'practice' ? 'dumbbell' : 'book'}" 
+                                               style="color: var(--cr-accent);"></i>
+                                            <span style="font-weight: 600; color: var(--cr-text);">${escapeHtml(rec.Title)}</span>
+                                            <span style="padding: 2px 8px; background: rgba(56, 189, 248, 0.2); color: var(--cr-accent); border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                                ${rec.Resource_Type.toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <p style="margin: 4px 0 0 0; color: var(--cr-text-muted); font-size: 0.85rem; line-height: 1.4;">
+                                            ${escapeHtml(rec.Content)}
+                                        </p>
+                                        ${rec.Category ? `
+                                            <p style="margin: 8px 0 0 0; color: var(--cr-text-muted); font-size: 0.75rem;">
+                                                <i class="fa-solid fa-tag"></i> ${rec.Category}
+                                            </p>
+                                        ` : ''}
+                                    </div>
+                                    <div style="text-align: right; margin-left: 12px;">
+                                        <div style="font-size: 0.75rem; color: var(--cr-text-muted);">
+                                            ${Math.round(rec.Relevance_Score * 100)}% match
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--cr-text-muted);">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <p style="margin-top: 8px;">Unable to load recommendations</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading recommendations:', error);
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--cr-text-muted);">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <p style="margin-top: 8px;">Error loading recommendations</p>
+                </div>
+            `;
+        }
+    }
+
+    async function updateTaskStatus(taskId, status, planId) {
+        try {
+            const response = await fetch(`/tasks/api/study-plans/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Status: status })
+            });
+            
+            if (response.ok) {
+                showMessage('Task updated successfully!', false);
+                // Reload the detail view
+                if (planId) {
+                    setTimeout(() => {
+                        document.querySelector('.modal-overlay.active')?.remove();
+                        viewStudyPlanDetail(planId);
+                    }, 500);
+                }
+            } else {
+                const error = await response.json().catch(() => ({error: 'Unknown error'}));
+                showMessage('Failed to update task: ' + (error.error || 'Unknown error'), true);
+            }
+        } catch (error) {
+            console.error('Error updating task:', error);
+            showMessage('Error updating task: ' + error.message, true);
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('studyPlanModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'studyPlanModal') {
+            closeStudyPlanModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeStudyPlanModal();
+        }
+    });
+
+    // Enter key to add task
+    document.getElementById('taskInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            addTaskToList();
+        }
+    });
 
     // Logout handler
     async function handleLogout() {

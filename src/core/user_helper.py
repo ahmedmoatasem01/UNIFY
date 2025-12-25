@@ -43,6 +43,10 @@ def get_user_data(user_id):
     instructor_repo = RepositoryFactory.get_repository("instructor")
     instructor = instructor_repo.get_by_user_id(user_id)
     
+    # Get TA data if user is a TA
+    ta_repo = RepositoryFactory.get_repository("teaching_assistant")
+    ta = ta_repo.get_by_user_id(user_id) if ta_repo else None
+    
     # Determine role and get major/department
     if student:
         role = 'Student'
@@ -54,6 +58,11 @@ def get_user_data(user_id):
         department = instructor.Department if instructor.Department else 'Zewail City'
         major = instructor.Department if instructor.Department else 'Computer Science'  # Use Department as Major
         avatar_letter = 'I'  # I for Instructor
+    elif ta:
+        role = 'TA'
+        department = 'Zewail City'
+        major = 'Computer Science'
+        avatar_letter = 'T'  # T for TA
     else:
         role = 'User'
         department = 'Zewail City'
@@ -66,7 +75,11 @@ def get_user_data(user_id):
         'role': role,
         'department': department,
         'major': major,
-        'avatar_letter': avatar_letter
+        'avatar_letter': avatar_letter,
+        'is_student': student is not None,
+        'is_instructor': instructor is not None,
+        'is_ta': ta is not None,
+        'is_instructor_or_ta': (instructor is not None) or (ta is not None)
     }
 
 

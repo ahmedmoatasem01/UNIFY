@@ -1,0 +1,650 @@
+================================================================================
+ADDITIONAL FUNCTIONAL REQUIREMENTS - PROPOSED ENHANCEMENTS
+================================================================================
+Project: Unify Student Management System
+Date: December 2024
+
+Based on the current system architecture and user needs, here are 6 additional
+functional requirements that would significantly enhance the Unify platform:
+
+================================================================================
+FR1: GRADE MANAGEMENT SYSTEM
+================================================================================
+
+Description:
+Comprehensive grade tracking, calculation, and visualization system for students
+and instructors.
+
+Features:
+1. Grade Entry and Management
+   - Instructors can enter grades for assignments, quizzes, exams
+   - Support for different assignment types (homework, project, exam, etc.)
+   - Weight-based grade calculation
+   - Grade modification with history tracking
+
+2. GPA Calculation
+   - Automatic semester GPA calculation
+   - Cumulative GPA tracking
+   - Major GPA (courses in student's department)
+   - GPA trends over time (charts/graphs)
+
+3. Grade Visualization
+   - Grade distribution charts per course
+   - Performance comparison with class average
+   - Grade history timeline
+   - Progress indicators
+
+4. Grade Reports
+   - Detailed grade breakdown per course
+   - Semester summary reports
+   - Export transcript with grades as PDF
+   - Grade predictions based on current performance
+
+5. Grade Alerts
+   - Low grade warnings
+   - Missing assignment notifications
+   - Grade improvement suggestions
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE Grade (
+      Grade_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Enrollment_ID INT NOT NULL,
+      Assignment_Type NVARCHAR(50) NOT NULL,
+      Assignment_Name NVARCHAR(255),
+      Score DECIMAL(5,2),
+      Max_Score DECIMAL(5,2) DEFAULT 100,
+      Weight DECIMAL(5,2) DEFAULT 1.0,
+      Graded_Date DATETIME DEFAULT GETDATE(),
+      Graded_By INT,  -- Instructor_ID
+      Notes NVARCHAR(MAX),
+      FOREIGN KEY (Enrollment_ID) REFERENCES Enrollment(Enrollment_ID),
+      FOREIGN KEY (Graded_By) REFERENCES Instructor(Instructor_ID)
+  );
+
+Files to Create:
+  - src/models/grade.py
+  - src/repositories/grade.repository.py
+  - src/services/grade_calculation_service.py
+  - src/controllers/grade_controller.py
+  - src/templates/grades.html
+  - src/static/styles/grades.css
+  - src/static/scripts/grades.js
+
+API Endpoints:
+  GET    /grades/student/<student_id>
+  GET    /grades/course/<course_id>
+  POST   /grades/
+  PUT    /grades/<grade_id>
+  GET    /grades/gpa/student/<student_id>
+  GET    /grades/report/<student_id>
+
+Integration Points:
+  - Enrollment table (link grades to course enrollment)
+  - Transcript page (display grades)
+  - Overview dashboard (show GPA)
+
+================================================================================
+FR2: ATTENDANCE TRACKING SYSTEM
+================================================================================
+
+Description:
+Track and manage class attendance with reporting and analytics.
+
+Features:
+1. Attendance Recording
+   - Mark attendance for each class session
+   - Support for: Present, Absent, Late, Excused
+   - Bulk attendance entry for instructors
+   - QR code check-in (future enhancement)
+
+2. Attendance Analytics
+   - Attendance percentage per course
+   - Overall attendance rate
+   - Attendance trends over time
+   - Comparison with class average
+
+3. Attendance Alerts
+   - Low attendance warnings (<75%)
+   - Critical attendance alerts (<50%)
+   - Email notifications to students
+   - Parent/advisor notifications (optional)
+
+4. Attendance Reports
+   - Student attendance report
+   - Course attendance summary (for instructors)
+   - Export attendance data (CSV/PDF)
+   - Attendance history
+
+5. Integration Features
+   - Automatic attendance from schedule
+   - Calendar integration (mark attendance on class dates)
+   - Link to course schedule
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE Attendance (
+      Attendance_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Course_ID INT NOT NULL,
+      Attendance_Date DATE NOT NULL,
+      Status NVARCHAR(20) CHECK (Status IN ('present', 'absent', 'late', 'excused')),
+      Notes NVARCHAR(500),
+      Marked_By INT,  -- Instructor_ID
+      Marked_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Marked_By) REFERENCES Instructor(Instructor_ID),
+      UNIQUE (Student_ID, Course_ID, Attendance_Date)
+  );
+
+Files to Create:
+  - src/models/attendance.py
+  - src/repositories/attendance.repository.py
+  - src/services/attendance_service.py
+  - src/controllers/attendance_controller.py
+  - src/templates/attendance.html
+  - src/static/styles/attendance.css
+  - src/static/scripts/attendance.js
+
+API Endpoints:
+  GET    /attendance/student/<student_id>
+  GET    /attendance/course/<course_id>
+  GET    /attendance/student/<student_id>/course/<course_id>
+  POST   /attendance/
+  PUT    /attendance/<attendance_id>
+  GET    /attendance/percentage/student/<student_id>
+  GET    /attendance/report/<student_id>
+
+Integration Points:
+  - Schedule table (link to class sessions)
+  - Calendar (display attendance dates)
+  - Overview dashboard (show attendance percentage)
+
+================================================================================
+FR3: ASSIGNMENT SUBMISSION SYSTEM
+================================================================================
+
+Description:
+Complete assignment management system for submitting, tracking, and grading
+assignments.
+
+Features:
+1. Assignment Management
+   - Instructors create assignments with:
+     * Title, description, instructions
+     * Due date and time
+     * Maximum score
+     * Allowed file types
+     * Submission requirements
+   - Assignment categories (homework, project, lab, etc.)
+   - Assignment templates
+
+2. File Submission
+   - Upload assignment files (PDF, DOCX, ZIP, etc.)
+   - Multiple file uploads per assignment
+   - File size validation
+   - File type validation
+   - Submission timestamp tracking
+
+3. Submission Tracking
+   - View submission status (submitted, pending, late)
+   - Submission history
+   - Resubmission capability (if allowed)
+   - Download submitted files
+
+4. Grading Integration
+   - Link submissions to grades
+   - Instructor feedback on submissions
+   - Grade assignment directly from submission
+   - Return graded assignments to students
+
+5. Plagiarism Detection (Optional)
+   - Integration with plagiarism detection API
+   - Similarity score reporting
+   - Flag suspicious submissions
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE Assignment (
+      Assignment_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Title NVARCHAR(255) NOT NULL,
+      Description NVARCHAR(MAX),
+      Instructions NVARCHAR(MAX),
+      Due_Date DATETIME NOT NULL,
+      Max_Score DECIMAL(5,2) DEFAULT 100,
+      Assignment_Type NVARCHAR(50),
+      Allowed_File_Types NVARCHAR(200),
+      Max_File_Size_MB INT DEFAULT 10,
+      Created_By INT,  -- Instructor_ID
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Created_By) REFERENCES Instructor(Instructor_ID)
+  );
+
+  CREATE TABLE Assignment_Submission (
+      Submission_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Assignment_ID INT NOT NULL,
+      Student_ID INT NOT NULL,
+      File_Path NVARCHAR(500),
+      File_Name NVARCHAR(255),
+      Submitted_At DATETIME DEFAULT GETDATE(),
+      Status NVARCHAR(20) CHECK (Status IN ('submitted', 'late', 'graded')),
+      Grade DECIMAL(5,2),
+      Feedback NVARCHAR(MAX),
+      Graded_By INT,  -- Instructor_ID
+      Graded_At DATETIME,
+      FOREIGN KEY (Assignment_ID) REFERENCES Assignment(Assignment_ID),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Graded_By) REFERENCES Instructor(Instructor_ID)
+  );
+
+Files to Create:
+  - src/models/assignment.py
+  - src/models/assignment_submission.py
+  - src/repositories/assignment.repository.py
+  - src/repositories/assignment_submission.repository.py
+  - src/services/assignment_service.py
+  - src/controllers/assignment_controller.py
+  - src/templates/assignments.html
+  - src/templates/assignment_submit.html
+  - src/static/styles/assignments.css
+  - src/static/scripts/assignments.js
+
+API Endpoints:
+  GET    /assignments/course/<course_id>
+  GET    /assignments/student/<student_id>
+  GET    /assignments/<assignment_id>
+  POST   /assignments/
+  PUT    /assignments/<assignment_id>
+  DELETE /assignments/<assignment_id>
+  POST   /assignments/<assignment_id>/submit
+  GET    /assignments/<assignment_id>/submissions
+  GET    /assignments/submissions/<submission_id>
+  PUT    /assignments/submissions/<submission_id>/grade
+
+Integration Points:
+  - Course table (assignments belong to courses)
+  - Task system (create task from assignment due date)
+  - Grade system (link to grades)
+  - File upload system (reuse upload infrastructure)
+
+================================================================================
+FR4: STUDY GROUP MANAGEMENT
+================================================================================
+
+Description:
+Create and manage study groups for collaborative learning.
+
+Features:
+1. Group Creation and Management
+   - Create study groups for specific courses
+   - Set group name, description, capacity
+   - Group privacy settings (public/private)
+   - Group member roles (admin, member)
+
+2. Member Management
+   - Invite students to groups
+   - Accept/reject invitations
+   - Remove members (admin only)
+   - Member list with roles
+
+3. Group Communication
+   - Group chat/messaging
+   - Announcements board
+   - Discussion threads
+   - File sharing within group
+
+4. Collaborative Features
+   - Shared notes and resources
+   - Group calendar (study sessions)
+   - Group task assignments
+   - Meeting scheduler
+
+5. Group Analytics
+   - Group activity statistics
+   - Member participation tracking
+   - Study session history
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE StudyGroup (
+      Group_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT,
+      Group_Name NVARCHAR(255) NOT NULL,
+      Description NVARCHAR(MAX),
+      Capacity INT DEFAULT 10,
+      Is_Public BIT DEFAULT 1,
+      Created_By INT NOT NULL,  -- Student_ID
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Created_By) REFERENCES Student(Student_ID)
+  );
+
+  CREATE TABLE GroupMember (
+      Member_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Group_ID INT NOT NULL,
+      Student_ID INT NOT NULL,
+      Role NVARCHAR(20) CHECK (Role IN ('admin', 'member')) DEFAULT 'member',
+      Joined_At DATETIME DEFAULT GETDATE(),
+      Status NVARCHAR(20) CHECK (Status IN ('pending', 'active', 'left')) DEFAULT 'pending',
+      FOREIGN KEY (Group_ID) REFERENCES StudyGroup(Group_ID),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      UNIQUE (Group_ID, Student_ID)
+  );
+
+  CREATE TABLE GroupMessage (
+      Message_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Group_ID INT NOT NULL,
+      Sender_ID INT NOT NULL,  -- Student_ID
+      Message_Text NVARCHAR(MAX) NOT NULL,
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Group_ID) REFERENCES StudyGroup(Group_ID),
+      FOREIGN KEY (Sender_ID) REFERENCES Student(Student_ID)
+  );
+
+Files to Create:
+  - src/models/study_group.py
+  - src/models/group_member.py
+  - src/repositories/study_group.repository.py
+  - src/repositories/group_member.repository.py
+  - src/services/study_group_service.py
+  - src/controllers/study_group_controller.py
+  - src/templates/study_groups.html
+  - src/templates/study_group_detail.html
+  - src/static/styles/study_groups.css
+  - src/static/scripts/study_groups.js
+
+API Endpoints:
+  GET    /study-groups/
+  GET    /study-groups/course/<course_id>
+  GET    /study-groups/<group_id>
+  POST   /study-groups/
+  PUT    /study-groups/<group_id>
+  DELETE /study-groups/<group_id>
+  POST   /study-groups/<group_id>/invite
+  POST   /study-groups/<group_id>/join
+  POST   /study-groups/<group_id>/leave
+  GET    /study-groups/<group_id>/members
+  GET    /study-groups/<group_id>/messages
+  POST   /study-groups/<group_id>/messages
+
+Integration Points:
+  - Course table (groups can be course-specific)
+  - Message system (group messaging)
+  - Calendar (group study sessions)
+  - Task system (group tasks)
+
+================================================================================
+FR5: ACADEMIC PROGRESS TRACKING
+================================================================================
+
+Description:
+Track student progress toward degree completion with requirement tracking
+and graduation planning.
+
+Features:
+1. Degree Requirements Management
+   - Define degree requirements (core courses, electives, credits)
+   - Prerequisite tracking
+   - Credit hour requirements
+   - Department-specific requirements
+
+2. Progress Calculation
+   - Track completed requirements
+   - Calculate progress percentage
+   - Identify remaining requirements
+   - Show completed vs. remaining credits
+
+3. Graduation Planning
+   - Graduation timeline estimation
+   - Semester-by-semester plan
+   - Prerequisite fulfillment tracking
+   - Course recommendation based on requirements
+
+4. Progress Visualization
+   - Progress bars per requirement category
+   - Overall degree completion percentage
+   - Requirement checklist
+   - Timeline visualization
+
+5. Alerts and Recommendations
+   - Missing requirement alerts
+   - Prerequisite completion reminders
+   - Course recommendations
+   - Graduation readiness assessment
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE DegreeRequirement (
+      Requirement_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Department NVARCHAR(100),
+      Requirement_Type NVARCHAR(50),  -- 'core', 'elective', 'general_ed'
+      Requirement_Name NVARCHAR(255) NOT NULL,
+      Description NVARCHAR(MAX),
+      Credits_Required INT,
+      Course_ID INT,  -- If specific course required
+      Prerequisite_Requirement_ID INT,  -- If has prerequisite requirement
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Prerequisite_Requirement_ID) REFERENCES DegreeRequirement(Requirement_ID)
+  );
+
+  CREATE TABLE StudentProgress (
+      Progress_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Requirement_ID INT NOT NULL,
+      Status NVARCHAR(20) CHECK (Status IN ('not_started', 'in_progress', 'completed')) DEFAULT 'not_started',
+      Completed_Date DATETIME,
+      Completion_Method NVARCHAR(50),  -- 'course', 'transfer', 'exam'
+      Notes NVARCHAR(500),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Requirement_ID) REFERENCES DegreeRequirement(Requirement_ID),
+      UNIQUE (Student_ID, Requirement_ID)
+  );
+
+Files to Create:
+  - src/models/degree_requirement.py
+  - src/models/student_progress.py
+  - src/repositories/degree_requirement.repository.py
+  - src/repositories/student_progress.repository.py
+  - src/services/progress_tracking_service.py
+  - src/controllers/progress_controller.py
+  - src/templates/progress.html
+  - src/static/styles/progress.css
+  - src/static/scripts/progress.js
+
+API Endpoints:
+  GET    /progress/student/<student_id>
+  GET    /progress/requirements
+  GET    /progress/student/<student_id>/percentage
+  GET    /progress/student/<student_id>/remaining
+  POST   /progress/requirements/
+  PUT    /progress/student/<student_id>/requirement/<requirement_id>
+  GET    /progress/student/<student_id>/graduation-plan
+
+Integration Points:
+  - Enrollment table (track completed courses)
+  - Course table (link to requirements)
+  - Transcript (display progress)
+  - Overview dashboard (show progress percentage)
+
+================================================================================
+FR6: NOTIFICATION SYSTEM
+================================================================================
+
+Description:
+Real-time notification system for important updates and alerts.
+
+Features:
+1. Notification Types
+   - Task reminders (due dates approaching)
+   - Assignment deadlines
+   - Grade updates
+   - Course announcements
+   - System notifications
+   - Group invitations
+   - Message notifications
+
+2. Notification Delivery
+   - In-app notifications (real-time)
+   - Email notifications (optional)
+   - Push notifications (future - mobile app)
+   - Notification history
+
+3. Notification Management
+   - Mark as read/unread
+   - Delete notifications
+   - Notification preferences
+   - Filter by type
+   - Priority-based sorting
+
+4. Smart Notifications
+   - Urgent task alerts
+   - Low attendance warnings
+   - Grade drop alerts
+   - Upcoming deadlines (24h, 1h before)
+   - Custom notification rules
+
+5. Notification Center
+   - Centralized notification view
+   - Notification categories
+   - Unread count badge
+   - Bulk actions (mark all as read)
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE Notification (
+      Notification_ID INT IDENTITY(1,1) PRIMARY KEY,
+      User_ID INT NOT NULL,
+      Title NVARCHAR(255) NOT NULL,
+      Message NVARCHAR(MAX) NOT NULL,
+      Type NVARCHAR(50),  -- 'task', 'assignment', 'grade', 'announcement', 'system'
+      Priority NVARCHAR(20) CHECK (Priority IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'medium',
+      Is_Read BIT DEFAULT 0,
+      Action_URL NVARCHAR(500),  -- Link to related page
+      Created_At DATETIME DEFAULT GETDATE(),
+      Read_At DATETIME,
+      FOREIGN KEY (User_ID) REFERENCES [User](User_ID)
+  );
+
+  CREATE TABLE NotificationPreference (
+      Preference_ID INT IDENTITY(1,1) PRIMARY KEY,
+      User_ID INT NOT NULL,
+      Notification_Type NVARCHAR(50),
+      Email_Enabled BIT DEFAULT 0,
+      In_App_Enabled BIT DEFAULT 1,
+      FOREIGN KEY (User_ID) REFERENCES [User](User_ID),
+      UNIQUE (User_ID, Notification_Type)
+  );
+
+Files to Create:
+  - src/models/notification.py
+  - src/models/notification_preference.py
+  - src/repositories/notification.repository.py
+  - src/repositories/notification_preference.repository.py
+  - src/services/notification_service.py
+  - src/controllers/notification_controller.py
+  - src/templates/notifications.html
+  - src/static/styles/notifications.css
+  - src/static/scripts/notifications.js
+
+API Endpoints:
+  GET    /notifications/
+  GET    /notifications/unread
+  GET    /notifications/<notification_id>
+  POST   /notifications/
+  PUT    /notifications/<notification_id>/read
+  DELETE /notifications/<notification_id>
+  POST   /notifications/mark-all-read
+  GET    /notifications/preferences
+  PUT    /notifications/preferences
+
+Integration Points:
+  - Task system (task due date notifications)
+  - Assignment system (deadline notifications)
+  - Grade system (grade update notifications)
+  - Message system (new message notifications)
+  - Attendance system (low attendance alerts)
+  - Top bar (notification bell icon with count)
+
+Frontend Integration:
+  - Notification bell icon in top bar
+  - Dropdown notification list
+  - Real-time updates (polling or WebSocket)
+  - Badge showing unread count
+
+================================================================================
+IMPLEMENTATION PRIORITY
+================================================================================
+
+Recommended implementation order based on value and dependencies:
+
+1. FR6: Notification System (High Priority)
+   - Enhances user experience across all features
+   - Relatively independent implementation
+   - High user value
+
+2. FR1: Grade Management System (High Priority)
+   - Core academic functionality
+   - Integrates with existing enrollment system
+   - High student value
+
+3. FR3: Assignment Submission System (Medium Priority)
+   - Complements grade management
+   - Requires file upload infrastructure
+   - High instructor value
+
+4. FR2: Attendance Tracking (Medium Priority)
+   - Useful for both students and instructors
+   - Integrates with schedule/calendar
+   - Moderate complexity
+
+5. FR5: Academic Progress Tracking (Medium Priority)
+   - Valuable for long-term planning
+   - Requires degree requirement setup
+   - Moderate complexity
+
+6. FR4: Study Group Management (Lower Priority)
+   - Nice-to-have collaborative feature
+   - Requires messaging infrastructure
+   - Higher complexity
+
+================================================================================
+TECHNICAL CONSIDERATIONS
+================================================================================
+
+Common Implementation Patterns:
+- All features follow existing MVC architecture
+- Use Repository Pattern for data access
+- Use Service Layer for business logic
+- Follow existing controller blueprint pattern
+- Reuse existing UI components and styling
+
+Database Considerations:
+- All new tables follow existing naming conventions
+- Use IDENTITY for auto-increment (SQL Server)
+- Foreign keys maintain referential integrity
+- Indexes on frequently queried columns
+
+Frontend Considerations:
+- Follow existing dark theme design system
+- Use existing CSS classes (cr-* prefix)
+- Maintain responsive design
+- Consistent with existing UI patterns
+
+Testing Requirements:
+- Unit tests for all new repositories
+- Unit tests for all new services
+- Integration tests for new controllers
+- NFR tests for performance-critical features
+
+================================================================================
+END OF ADDITIONAL FUNCTIONAL REQUIREMENTS
+================================================================================

@@ -1,0 +1,832 @@
+================================================================================
+INSTRUCTOR/TA EXCLUSIVE FEATURES - PROPOSED ENHANCEMENTS
+================================================================================
+Project: Unify Student Management System
+Date: December 2024
+
+Based on role-based access control implementation, here are 6 exclusive features
+that only Instructors and Teaching Assistants can access. Students will be
+redirected with an access denied message if they attempt to access these pages.
+
+================================================================================
+FR-IT-1: GRADEBOOK MANAGEMENT SYSTEM
+================================================================================
+
+Description:
+Comprehensive gradebook system for Instructors and TAs to manage student grades,
+assignments, and course performance. Only accessible to Instructors and TAs.
+
+Features:
+1. Grade Entry and Management
+   - Enter grades for assignments, quizzes, exams, projects
+   - Support for different assignment types with weight-based calculations
+   - Bulk grade entry (import from CSV/Excel)
+   - Grade modification with history tracking and audit log
+   - Curve grades for entire class or specific assignments
+
+2. Assignment Management
+   - Create assignments with due dates, max scores, and weights
+   - Set assignment categories (homework, quiz, exam, project, participation)
+   - Define grading rubrics for each assignment
+   - Track assignment submission status
+   - Send reminders for missing submissions
+
+3. Grade Calculation
+   - Automatic weighted grade calculation per student
+   - Real-time course grade updates as grades are entered
+   - Support for dropped lowest scores
+   - Extra credit assignment handling
+   - Final grade calculation with customizable formulas
+
+4. Grade Analytics
+   - Class average and distribution charts
+   - Grade trends over time
+   - Identify struggling students automatically
+   - Compare performance across different sections
+   - Export grade reports (CSV, PDF)
+
+5. Student Performance Dashboard
+   - View individual student grade breakdowns
+   - Track student progress throughout semester
+   - Identify students at risk of failing
+   - Generate performance reports for advisors
+   - Historical grade comparison
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE Assignment (
+      Assignment_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Instructor_ID INT NOT NULL,
+      Assignment_Name NVARCHAR(255) NOT NULL,
+      Assignment_Type NVARCHAR(50),  -- 'homework', 'quiz', 'exam', 'project', 'participation'
+      Max_Score DECIMAL(5,2) DEFAULT 100,
+      Weight DECIMAL(5,2) DEFAULT 1.0,
+      Due_Date DATETIME,
+      Created_At DATETIME DEFAULT GETDATE(),
+      Drop_Lowest INT DEFAULT 0,  -- Number of lowest scores to drop
+      Is_Extra_Credit BIT DEFAULT 0,
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Instructor_ID) REFERENCES Instructor(Instructor_ID)
+  );
+
+  CREATE TABLE Grade (
+      Grade_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Assignment_ID INT NOT NULL,
+      Student_ID INT NOT NULL,
+      Score DECIMAL(5,2),
+      Max_Score DECIMAL(5,2),
+      Percentage DECIMAL(5,2),
+      Letter_Grade NVARCHAR(5),
+      Graded_By INT,  -- Instructor_ID or TA_ID
+      Graded_At DATETIME DEFAULT GETDATE(),
+      Notes NVARCHAR(MAX),
+      Is_Dropped BIT DEFAULT 0,
+      FOREIGN KEY (Assignment_ID) REFERENCES Assignment(Assignment_ID),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Graded_By) REFERENCES Instructor(Instructor_ID)
+  );
+
+  CREATE TABLE GradeHistory (
+      History_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Grade_ID INT NOT NULL,
+      Old_Score DECIMAL(5,2),
+      New_Score DECIMAL(5,2),
+      Changed_By INT,  -- Instructor_ID
+      Changed_At DATETIME DEFAULT GETDATE(),
+      Reason NVARCHAR(500),
+      FOREIGN KEY (Grade_ID) REFERENCES Grade(Grade_ID)
+  );
+
+Files to Create:
+  - src/models/assignment.py
+  - src/models/grade.py
+  - src/models/grade_history.py
+  - src/repositories/assignment.repository.py
+  - src/repositories/grade.repository.py
+  - src/repositories/grade_history.repository.py
+  - src/services/gradebook_service.py
+  - src/services/grade_calculation_service.py
+  - src/controllers/gradebook_controller.py
+  - src/templates/gradebook.html
+  - src/templates/gradebook_student_detail.html
+  - src/static/styles/gradebook.css
+  - src/static/scripts/gradebook.js
+
+API Endpoints:
+  GET    /api/gradebook/course/<course_id>
+  GET    /api/gradebook/course/<course_id>/assignments
+  POST   /api/gradebook/assignments
+  PUT    /api/gradebook/assignments/<assignment_id>
+  DELETE /api/gradebook/assignments/<assignment_id>
+  GET    /api/gradebook/assignments/<assignment_id>/grades
+  POST   /api/gradebook/grades
+  PUT    /api/gradebook/grades/<grade_id>
+  POST   /api/gradebook/grades/bulk-import
+  GET    /api/gradebook/course/<course_id>/student/<student_id>
+  GET    /api/gradebook/course/<course_id>/analytics
+  GET    /api/gradebook/course/<course_id>/export
+
+Integration Points:
+  - Course table (link to courses)
+  - Enrollment table (get enrolled students)
+  - Transcript system (update final grades)
+  - Overview dashboard (show grade statistics for instructors)
+
+Access Control:
+  - Instructors/TAs: Full access to gradebook for their courses
+  - Students: Cannot access (redirected with error message)
+
+================================================================================
+FR-IT-2: STUDENT ATTENDANCE TRACKING SYSTEM
+================================================================================
+
+Description:
+Comprehensive attendance tracking system for Instructors and TAs to record and
+monitor student class attendance. Only accessible to Instructors and TAs.
+
+Features:
+1. Attendance Recording
+   - Mark attendance for each class session
+   - Support for: Present, Absent, Late, Excused, Tardy
+   - Quick attendance entry (checkboxes for all students)
+   - QR code check-in system (future enhancement)
+   - Bulk attendance entry for multiple sessions
+
+2. Attendance Analytics
+   - Calculate attendance percentage per student
+   - Overall class attendance statistics
+   - Attendance trends over time (charts/graphs)
+   - Identify students with low attendance automatically
+   - Compare attendance across different courses
+
+3. Automated Alerts
+   - Low attendance warnings (<75%) sent to students
+   - Critical attendance alerts (<50%) sent to students and advisors
+   - Weekly attendance summary reports
+   - Email notifications for attendance issues
+
+4. Attendance Reports
+   - Individual student attendance reports
+   - Class attendance summary (for instructors)
+   - Export attendance data (CSV/PDF)
+   - Attendance history with detailed logs
+   - Semester attendance overview
+
+5. Integration Features
+   - Automatic attendance creation from course schedule
+   - Calendar integration (mark attendance on class dates)
+   - Link to student profiles
+   - Export for administrative purposes
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE AttendanceSession (
+      Session_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Session_Date DATE NOT NULL,
+      Session_Type NVARCHAR(50),  -- 'lecture', 'lab', 'tutorial'
+      Created_By INT,  -- Instructor_ID or TA_ID
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Created_By) REFERENCES Instructor(Instructor_ID),
+      UNIQUE (Course_ID, Session_Date, Session_Type)
+  );
+
+  CREATE TABLE Attendance (
+      Attendance_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Session_ID INT NOT NULL,
+      Student_ID INT NOT NULL,
+      Status NVARCHAR(20) CHECK (Status IN ('present', 'absent', 'late', 'excused', 'tardy')) DEFAULT 'absent',
+      Notes NVARCHAR(500),
+      Marked_By INT,  -- Instructor_ID or TA_ID
+      Marked_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Session_ID) REFERENCES AttendanceSession(Session_ID),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Marked_By) REFERENCES Instructor(Instructor_ID),
+      UNIQUE (Session_ID, Student_ID)
+  );
+
+Files to Create:
+  - src/models/attendance_session.py
+  - src/models/attendance.py
+  - src/repositories/attendance_session.repository.py
+  - src/repositories/attendance.repository.py
+  - src/services/attendance_service.py
+  - src/services/attendance_analytics_service.py
+  - src/controllers/attendance_controller.py
+  - src/templates/attendance.html
+  - src/templates/attendance_analytics.html
+  - src/static/styles/attendance.css
+  - src/static/scripts/attendance.js
+
+API Endpoints:
+  GET    /api/attendance/course/<course_id>/sessions
+  POST   /api/attendance/sessions
+  GET    /api/attendance/sessions/<session_id>
+  GET    /api/attendance/sessions/<session_id>/students
+  POST   /api/attendance/sessions/<session_id>/mark
+  POST   /api/attendance/sessions/<session_id>/bulk-mark
+  GET    /api/attendance/student/<student_id>/course/<course_id>
+  GET    /api/attendance/course/<course_id>/analytics
+  GET    /api/attendance/course/<course_id>/low-attendance-students
+  GET    /api/attendance/course/<course_id>/export
+
+Integration Points:
+  - Schedule table (auto-create sessions from class schedule)
+  - Calendar (display attendance dates)
+  - Message system (send attendance alerts)
+  - Overview dashboard (show attendance statistics for instructors)
+
+Access Control:
+  - Instructors/TAs: Full access to attendance for their courses
+  - Students: Cannot access (redirected with error message)
+
+================================================================================
+FR-IT-3: COURSE CONTENT MANAGEMENT SYSTEM
+================================================================================
+
+Description:
+System for Instructors and TAs to manage course materials, lecture notes,
+syllabus, and resources. Only accessible to Instructors and TAs.
+
+Features:
+1. Course Materials Management
+   - Upload course materials (PDFs, documents, videos, links)
+   - Organize materials by week/topic/module
+   - Create folders and categories
+   - Set material visibility (visible to all students, specific students, or hidden)
+   - Version control for updated materials
+
+2. Syllabus Management
+   - Create and edit course syllabus
+   - Define course objectives and learning outcomes
+   - Set grading policies and weights
+   - Define course schedule and important dates
+   - Publish syllabus to students
+
+3. Lecture Notes Management
+   - Upload lecture slides and notes
+   - Link notes to specific class sessions
+   - Organize by topic or week
+   - Allow students to download (if enabled)
+   - Track download statistics
+
+4. Resource Library
+   - Maintain library of reference materials
+   - Link to external resources (textbooks, websites, videos)
+   - Categorize resources by topic
+   - Recommend resources to specific students
+   - Track resource usage
+
+5. Announcements and Updates
+   - Post course announcements
+   - Send updates to all enrolled students
+   - Schedule announcements for future posting
+   - Archive old announcements
+   - Track announcement read status
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE CourseMaterial (
+      Material_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Material_Name NVARCHAR(255) NOT NULL,
+      Material_Type NVARCHAR(50),  -- 'syllabus', 'lecture', 'assignment', 'resource', 'announcement'
+      File_Path NVARCHAR(500),
+      File_Name NVARCHAR(255),
+      File_Size BIGINT,
+      Category NVARCHAR(100),
+      Week_Number INT,
+      Topic NVARCHAR(255),
+      Is_Visible BIT DEFAULT 1,
+      Created_By INT,  -- Instructor_ID or TA_ID
+      Created_At DATETIME DEFAULT GETDATE(),
+      Updated_At DATETIME,
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Created_By) REFERENCES Instructor(Instructor_ID)
+  );
+
+  CREATE TABLE CourseAnnouncement (
+      Announcement_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Title NVARCHAR(255) NOT NULL,
+      Content NVARCHAR(MAX) NOT NULL,
+      Priority NVARCHAR(20) CHECK (Priority IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'medium',
+      Is_Pinned BIT DEFAULT 0,
+      Scheduled_Date DATETIME,
+      Created_By INT,  -- Instructor_ID or TA_ID
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Created_By) REFERENCES Instructor(Instructor_ID)
+  );
+
+  CREATE TABLE MaterialAccess (
+      Access_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Material_ID INT NOT NULL,
+      Student_ID INT NOT NULL,
+      Accessed_At DATETIME DEFAULT GETDATE(),
+      Download_Count INT DEFAULT 0,
+      FOREIGN KEY (Material_ID) REFERENCES CourseMaterial(Material_ID),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID)
+  );
+
+Files to Create:
+  - src/models/course_material.py
+  - src/models/course_announcement.py
+  - src/models/material_access.py
+  - src/repositories/course_material.repository.py
+  - src/repositories/course_announcement.repository.py
+  - src/repositories/material_access.repository.py
+  - src/services/course_content_service.py
+  - src/controllers/course_content_controller.py
+  - src/templates/course_content.html
+  - src/templates/syllabus_editor.html
+  - src/static/styles/course_content.css
+  - src/static/scripts/course_content.js
+
+API Endpoints:
+  GET    /api/course-content/course/<course_id>
+  POST   /api/course-content/materials
+  PUT    /api/course-content/materials/<material_id>
+  DELETE /api/course-content/materials/<material_id>
+  GET    /api/course-content/course/<course_id>/syllabus
+  POST   /api/course-content/syllabus
+  GET    /api/course-content/course/<course_id>/announcements
+  POST   /api/course-content/announcements
+  PUT    /api/course-content/announcements/<announcement_id>
+  GET    /api/course-content/materials/<material_id>/access-stats
+  POST   /api/course-content/materials/upload
+
+Integration Points:
+  - Course table (link materials to courses)
+  - Enrollment table (determine which students can access materials)
+  - File upload system (handle material uploads)
+  - Notes system (link to lecture notes)
+
+Access Control:
+  - Instructors/TAs: Full access to manage course content
+  - Students: Cannot access management interface (redirected with error message)
+  - Students: Can view published materials through separate student interface
+
+================================================================================
+FR-IT-4: STUDENT PROGRESS MONITORING DASHBOARD
+================================================================================
+
+Description:
+Comprehensive dashboard for Instructors and TAs to monitor student progress,
+performance, and engagement across their courses. Only accessible to Instructors and TAs.
+
+Features:
+1. Student Performance Overview
+   - View all students in course with current grades
+   - Sort and filter students by performance, attendance, or engagement
+   - Identify at-risk students automatically
+   - Compare student performance to class average
+   - Track student progress over time
+
+2. Engagement Metrics
+   - Assignment submission rates per student
+   - Participation scores (if tracked)
+   - Login frequency and activity
+   - Material access statistics
+   - Response time to messages/announcements
+
+3. Intervention Tools
+   - Flag students for additional support
+   - Send personalized messages to struggling students
+   - Schedule office hours appointments
+   - Create study group recommendations
+   - Generate intervention reports
+
+4. Class Analytics
+   - Overall class performance statistics
+   - Grade distribution charts
+   - Assignment completion rates
+   - Attendance trends
+   - Engagement heatmaps
+
+5. Comparative Analysis
+   - Compare performance across different sections
+   - Historical comparison (same course previous semesters)
+   - Identify course difficulty issues
+   - Track improvement after interventions
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE StudentProgress (
+      Progress_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Course_ID INT NOT NULL,
+      Current_Grade DECIMAL(5,2),
+      Attendance_Percentage DECIMAL(5,2),
+      Assignment_Completion_Rate DECIMAL(5,2),
+      Engagement_Score DECIMAL(5,2),
+      Risk_Level NVARCHAR(20) CHECK (Risk_Level IN ('low', 'medium', 'high', 'critical')) DEFAULT 'low',
+      Last_Updated DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      UNIQUE (Student_ID, Course_ID)
+  );
+
+  CREATE TABLE Intervention (
+      Intervention_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Student_ID INT NOT NULL,
+      Course_ID INT NOT NULL,
+      Intervention_Type NVARCHAR(50),  -- 'message', 'office_hours', 'study_group', 'tutoring'
+      Status NVARCHAR(20) CHECK (Status IN ('scheduled', 'completed', 'cancelled')) DEFAULT 'scheduled',
+      Scheduled_Date DATETIME,
+      Notes NVARCHAR(MAX),
+      Created_By INT,  -- Instructor_ID or TA_ID
+      Created_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Student_ID) REFERENCES Student(Student_ID),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Created_By) REFERENCES Instructor(Instructor_ID)
+  );
+
+Files to Create:
+  - src/models/student_progress.py
+  - src/models/intervention.py
+  - src/repositories/student_progress.repository.py
+  - src/repositories/intervention.repository.py
+  - src/services/progress_monitoring_service.py
+  - src/services/intervention_service.py
+  - src/controllers/progress_monitoring_controller.py
+  - src/templates/progress_dashboard.html
+  - src/templates/student_progress_detail.html
+  - src/static/styles/progress_dashboard.css
+  - src/static/scripts/progress_dashboard.js
+
+API Endpoints:
+  GET    /api/progress/course/<course_id>/students
+  GET    /api/progress/student/<student_id>/course/<course_id>
+  GET    /api/progress/course/<course_id>/at-risk-students
+  GET    /api/progress/course/<course_id>/analytics
+  POST   /api/progress/interventions
+  GET    /api/progress/course/<course_id>/interventions
+  GET    /api/progress/course/<course_id>/engagement-metrics
+  GET    /api/progress/course/<course_id>/comparison
+
+Integration Points:
+  - Grade system (get current grades)
+  - Attendance system (get attendance data)
+  - Assignment system (get submission data)
+  - Message system (send intervention messages)
+  - Calendar (schedule office hours)
+
+Access Control:
+  - Instructors/TAs: Full access to progress monitoring for their courses
+  - Students: Cannot access (redirected with error message)
+
+================================================================================
+FR-IT-5: COURSE ANALYTICS AND REPORTING SYSTEM
+================================================================================
+
+Description:
+Advanced analytics and reporting system for Instructors and TAs to analyze
+course performance, student engagement, and generate comprehensive reports.
+Only accessible to Instructors and TAs.
+
+Features:
+1. Course Performance Analytics
+   - Overall course statistics (average grade, completion rate, pass rate)
+   - Grade distribution analysis with visualizations
+   - Assignment performance trends
+   - Exam performance analysis
+   - Identify difficult topics based on assignment scores
+
+2. Student Engagement Analytics
+   - Login frequency and activity patterns
+   - Material access statistics
+   - Participation in discussions/forums
+   - Response time to assignments and messages
+   - Engagement score calculation
+
+3. Attendance Analytics
+   - Overall attendance rates
+   - Attendance correlation with performance
+   - Identify attendance patterns (days/times with low attendance)
+   - Compare attendance across different course sections
+   - Predict attendance for future sessions
+
+4. Automated Reports
+   - Weekly course performance reports
+   - Mid-semester progress reports
+   - End-of-semester comprehensive reports
+   - Custom report generation
+   - Export reports (PDF, CSV, Excel)
+
+5. Predictive Insights
+   - Predict final course grades based on current performance
+   - Identify students likely to drop
+   - Predict assignment completion rates
+   - Suggest course improvements based on data
+   - Compare to historical course data
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE CourseAnalytics (
+      Analytics_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Semester NVARCHAR(50),
+      Academic_Year INT,
+      Total_Enrollments INT,
+      Average_Grade DECIMAL(5,2),
+      Pass_Rate DECIMAL(5,2),
+      Completion_Rate DECIMAL(5,2),
+      Average_Attendance DECIMAL(5,2),
+      Engagement_Score DECIMAL(5,2),
+      Generated_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+  );
+
+  CREATE TABLE AnalyticsReport (
+      Report_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Report_Type NVARCHAR(50),  -- 'weekly', 'midterm', 'final', 'custom'
+      Report_Data NVARCHAR(MAX),  -- JSON data
+      Generated_By INT,  -- Instructor_ID or TA_ID
+      Generated_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Generated_By) REFERENCES Instructor(Instructor_ID)
+  );
+
+Files to Create:
+  - src/models/course_analytics.py
+  - src/models/analytics_report.py
+  - src/repositories/course_analytics.repository.py
+  - src/repositories/analytics_report.repository.py
+  - src/services/analytics_service.py
+  - src/services/report_generation_service.py
+  - src/controllers/analytics_controller.py
+  - src/templates/analytics_dashboard.html
+  - src/templates/analytics_reports.html
+  - src/static/styles/analytics.css
+  - src/static/scripts/analytics.js
+
+API Endpoints:
+  GET    /api/analytics/course/<course_id>
+  GET    /api/analytics/course/<course_id>/performance
+  GET    /api/analytics/course/<course_id>/engagement
+  GET    /api/analytics/course/<course_id>/attendance-stats
+  GET    /api/analytics/course/<course_id>/predictions
+  POST   /api/analytics/generate-report
+  GET    /api/analytics/reports/course/<course_id>
+  GET    /api/analytics/reports/<report_id>
+  GET    /api/analytics/course/<course_id>/export
+
+Integration Points:
+  - Grade system (analyze grade data)
+  - Attendance system (analyze attendance patterns)
+  - Enrollment system (track completion rates)
+  - Assignment system (analyze submission patterns)
+  - Overview dashboard (display key metrics)
+
+Access Control:
+  - Instructors/TAs: Full access to analytics for their courses
+  - Department Heads: Aggregated analytics across all courses
+  - Students: Cannot access (redirected with error message)
+
+================================================================================
+FR-IT-6: COURSE SETTINGS AND CONFIGURATION
+================================================================================
+
+Description:
+Comprehensive course settings and configuration system for Instructors and TAs
+to customize course parameters, policies, and preferences. Only accessible to
+Instructors and TAs.
+
+Features:
+1. Course Information Management
+   - Edit course name, description, and details
+   - Set course code and section number
+   - Define course prerequisites
+   - Set credit hours and course level
+   - Upload course image/banner
+
+2. Grading Policy Configuration
+   - Define grade scale (A, B, C, D, F thresholds)
+   - Set assignment category weights
+   - Configure rounding rules
+   - Set policies for late submissions
+   - Define extra credit rules
+
+3. Course Schedule Management
+   - Set class meeting times and locations
+   - Define course duration (start/end dates)
+   - Set exam dates and important deadlines
+   - Configure office hours schedule
+   - Manage course calendar
+
+4. Student Management
+   - View all enrolled students
+   - Add/drop students manually
+   - Set student groups/teams
+   - Manage student permissions
+   - Export student roster
+
+5. Course Preferences
+   - Enable/disable features (attendance, gradebook, etc.)
+   - Set notification preferences
+   - Configure course visibility
+   - Set enrollment limits
+   - Manage TA assignments
+
+Implementation Requirements:
+
+Database Schema:
+  CREATE TABLE CourseSettings (
+      Settings_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Grade_Scale NVARCHAR(MAX),  -- JSON: {"A": 90, "B": 80, ...}
+      Assignment_Weights NVARCHAR(MAX),  -- JSON: {"homework": 0.3, "exam": 0.4, ...}
+      Late_Submission_Policy NVARCHAR(MAX),
+      Rounding_Rule NVARCHAR(50),  -- 'round_up', 'round_down', 'standard'
+      Max_Enrollment INT,
+      Allow_Late_Enrollment BIT DEFAULT 0,
+      Is_Visible BIT DEFAULT 1,
+      Updated_By INT,  -- Instructor_ID
+      Updated_At DATETIME DEFAULT GETDATE(),
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID),
+      FOREIGN KEY (Updated_By) REFERENCES Instructor(Instructor_ID),
+      UNIQUE (Course_ID)
+  );
+
+  CREATE TABLE CourseSchedule (
+      Schedule_ID INT IDENTITY(1,1) PRIMARY KEY,
+      Course_ID INT NOT NULL,
+      Day_Of_Week NVARCHAR(20),
+      Start_Time TIME,
+      End_Time TIME,
+      Location NVARCHAR(255),
+      Session_Type NVARCHAR(50),  -- 'lecture', 'lab', 'tutorial'
+      Start_Date DATE,
+      End_Date DATE,
+      FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+  );
+
+Files to Create:
+  - src/models/course_settings.py
+  - src/models/course_schedule.py
+  - src/repositories/course_settings.repository.py
+  - src/repositories/course_schedule.repository.py
+  - src/services/course_configuration_service.py
+  - src/controllers/course_settings_controller.py
+  - src/templates/course_settings.html
+  - src/templates/course_configuration.html
+  - src/static/styles/course_settings.css
+  - src/static/scripts/course_settings.js
+
+API Endpoints:
+  GET    /api/course-settings/course/<course_id>
+  PUT    /api/course-settings/course/<course_id>
+  GET    /api/course-settings/course/<course_id>/schedule
+  POST   /api/course-settings/schedule
+  PUT    /api/course-settings/schedule/<schedule_id>
+  DELETE /api/course-settings/schedule/<schedule_id>
+  GET    /api/course-settings/course/<course_id>/students
+  POST   /api/course-settings/students/enroll
+  DELETE /api/course-settings/students/<student_id>/drop
+
+Integration Points:
+  - Course table (update course information)
+  - Enrollment table (manage student enrollment)
+  - Schedule table (manage class schedule)
+  - Grade system (apply grading policies)
+  - Overview dashboard (display course settings summary)
+
+Access Control:
+  - Instructors: Full access to all course settings
+  - TAs: Limited access (view settings, manage some features based on permissions)
+  - Students: Cannot access (redirected with error message)
+
+================================================================================
+IMPLEMENTATION PRIORITY
+================================================================================
+
+Recommended implementation order based on value and dependencies:
+
+1. FR-IT-1: Gradebook Management System (High Priority)
+   - Core functionality for instructors
+   - Essential for academic management
+   - Integrates with existing enrollment system
+   - High daily usage value
+
+2. FR-IT-2: Student Attendance Tracking (High Priority)
+   - Important for course management
+   - Relatively straightforward implementation
+   - High instructor value
+   - Complements gradebook system
+
+3. FR-IT-4: Student Progress Monitoring Dashboard (Medium Priority)
+   - Valuable for identifying at-risk students
+   - Integrates with gradebook and attendance
+   - Helps with proactive intervention
+   - Moderate complexity
+
+4. FR-IT-3: Course Content Management (Medium Priority)
+   - Useful for organizing course materials
+   - Requires file upload infrastructure
+   - Moderate complexity
+   - Enhances course delivery
+
+5. FR-IT-5: Course Analytics and Reporting (Medium Priority)
+   - Advanced analytics feature
+   - Requires data from other systems
+   - Best implemented after other features
+   - High value for course improvement
+
+6. FR-IT-6: Course Settings and Configuration (Lower Priority)
+   - Important but less frequently used
+   - Can be implemented incrementally
+   - Supports other features
+   - Lower complexity
+
+================================================================================
+TECHNICAL CONSIDERATIONS
+================================================================================
+
+Role-Based Access Control:
+- All features use @requires_instructor_or_ta decorator
+- Students attempting to access these pages will be redirected to overview
+- Error messages clearly explain access restrictions
+- API endpoints return 403 Forbidden for unauthorized access
+
+Database Considerations:
+- All new tables follow existing naming conventions
+- Foreign keys maintain referential integrity
+- Indexes on frequently queried columns (Course_ID, Student_ID, etc.)
+- Audit trails for grade modifications and settings changes
+
+Frontend Considerations:
+- Follow existing dark/light theme design system
+- Use existing CSS classes (cr-* prefix)
+- Maintain responsive design
+- Consistent with existing UI patterns
+- Clear visual indicators for instructor/TA-only features
+
+Security Considerations:
+- Verify instructor/TA has permission for specific course
+- Prevent unauthorized grade modifications
+- Secure file uploads for course materials
+- Validate all input data
+- Log all sensitive operations (grade changes, student drops)
+
+Testing Requirements:
+- Unit tests for all new repositories
+- Unit tests for all new services
+- Integration tests for new controllers
+- Role-based access control tests
+- NFR tests for performance-critical features
+
+================================================================================
+INTEGRATION WITH EXISTING SYSTEMS
+================================================================================
+
+Role-Based Access Control:
+- All features use existing role_auth.py decorators
+- Consistent error handling and redirects
+- Flash messages for access denied scenarios
+
+Database Integration:
+- Integrate with existing Course, Student, Enrollment tables
+- Use existing Repository Pattern
+- Maintain data consistency
+
+Frontend Integration:
+- Extend existing sidebar navigation
+- Add new menu items for instructor/TA features
+- Maintain consistent UI/UX
+- Use existing modal and component patterns
+
+Notification Integration:
+- Send alerts when grades are entered
+- Notify students about attendance issues
+- Alert instructors about at-risk students
+- Integration with existing message system
+
+================================================================================
+USER EXPERIENCE CONSIDERATIONS
+================================================================================
+
+For Instructors/TAs:
+- Intuitive interfaces for common tasks (grade entry, attendance marking)
+- Bulk operations for efficiency
+- Quick access to frequently used features
+- Clear visual feedback for actions
+- Export capabilities for reporting
+
+For Students (when viewing their own data):
+- Clear indication of what they can/cannot access
+- Helpful error messages explaining restrictions
+- Suggestions for who to contact if they need access
+- Seamless experience when viewing allowed content
+
+================================================================================
+END OF INSTRUCTOR/TA EXCLUSIVE FEATURES
+================================================================================

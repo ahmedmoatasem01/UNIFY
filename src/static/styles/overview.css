@@ -68,6 +68,10 @@
     transition: all 0.2s ease;
 }
 
+.cr-light-mode .stat-card {
+    background: rgba(255, 255, 255, 0.96);
+}
+
 .stat-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-soft);
@@ -130,6 +134,11 @@
     border: 1px solid var(--border-subtle);
     border-radius: 16px;
     overflow: hidden;
+}
+
+.cr-light-mode .schedule-card,
+.cr-light-mode .notifications-card {
+    background: rgba(255, 255, 255, 0.96);
 }
 
 /* Schedule Styles */
@@ -753,3 +762,169 @@
     }
 }
 
+
+/* Additional Light Mode Support for Overview */
+.cr-light-mode .schedule-item {
+    background: var(--cr-bg-elevated);
+}
+
+.cr-light-mode .schedule-item:hover {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.cr-light-mode .schedule-details h4 {
+    color: var(--cr-text-main);
+}
+
+.cr-light-mode .schedule-details p {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .notification-item {
+    background: var(--cr-bg-elevated);
+}
+
+.cr-light-mode .notification-item.unread {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.cr-light-mode .notification-content h4 {
+    color: var(--cr-text-main);
+}
+
+.cr-light-mode .notification-content p {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .notification-time {
+    color: var(--cr-text-muted);
+}
+
+.cr-light-mode .empty-state {
+    color: var(--cr-text-muted);
+}
+
+/* Academic Dashboard Styles */
+.academic-dashboard-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.dashboard-section {
+    margin-bottom: 24px;
+}
+
+.dashboard-section:last-child {
+    margin-bottom: 0;
+}
+
+/* GPA Display */
+.gpa-display {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.gpa-main {
+    text-align: center;
+    padding: 24px;
+    background: var(--cr-bg-elevated);
+    border-radius: 12px;
+    border: 2px solid var(--accent-soft);
+}
+
+.gpa-value {
+    font-size: 3.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.gpa-label {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.gpa-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.gpa-stat {
+    background: var(--cr-bg-elevated);
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Cohort Comparison */
+.cohort-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Graduation Timeline */
+.graduation-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Course Grades List */
+.course-grades-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.course-grade-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--cr-bg-elevated);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.course-grade-item:hover {
+    transform: translateX(4px);
+    border-left: 4px solid var(--accent);
+}
+
+/* Light Mode Support */
+.cr-light-mode .gpa-main {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.cr-light-mode .gpa-stat {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.cr-light-mode .course-grade-item {
+    background: rgba(255, 255, 255, 0.5);
+}

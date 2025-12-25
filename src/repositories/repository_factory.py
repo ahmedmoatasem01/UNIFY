@@ -32,7 +32,34 @@ ReminderRepository = _import_repository('reminder.repository', 'ReminderReposito
 FocusSessionRepository = _import_repository('focus_session.repository', 'FocusSessionRepository')
 TeachingAssistantRepository = _import_repository('teaching_assistant.repository', 'TeachingAssistantRepository')
 UserSettingsRepository = _import_repository('user_settings.repository', 'UserSettingsRepository')
+KnowledgeBaseRepository = _import_repository('knowledge_base.repository', 'KnowledgeBaseRepository')
+ChatHistoryRepository = _import_repository('chat_history.repository', 'ChatHistoryRepository')
+UserDatabaseConfigRepository = _import_repository('user_database_config.repository', 'UserDatabaseConfigRepository')
+AdvisorConversationRepository = _import_repository('advisor_conversation.repository', 'AdvisorConversationRepository')
+AdvisorMessageRepository = _import_repository('advisor_message.repository', 'AdvisorMessageRepository')
+AdvisorAppointmentRepository = _import_repository('advisor_appointment.repository', 'AdvisorAppointmentRepository')
+NotificationRepository = _import_repository('notification.repository', 'NotificationRepository')
+AssignmentRepository = _import_repository('assignment.repository', 'AssignmentRepository')
+AssignmentSubmissionRepository = _import_repository('assignment_submission.repository', 'AssignmentSubmissionRepository')
+try:
+    GradingSuggestionRepository = _import_repository('grading_suggestion.repository', 'GradingSuggestionRepository')
+except Exception:
+    GradingSuggestionRepository = None
 
+try:
+    StudyPlanRepository = _import_repository('study_plan.repository', 'StudyPlanRepository')
+except Exception:
+    StudyPlanRepository = None
+
+try:
+    StudyTaskRepository = _import_repository('study_task.repository', 'StudyTaskRepository')
+except Exception:
+    StudyTaskRepository = None
+
+try:
+    StudyRecommendationRepository = _import_repository('study_recommendation.repository', 'StudyRecommendationRepository')
+except Exception:
+    StudyRecommendationRepository = None
 
 # Import CourseScheduleSlotRepository
 CourseScheduleSlotRepository = _import_repository('course_schedule_slot.repository', 'CourseScheduleSlotRepository')
@@ -77,5 +104,43 @@ class RepositoryFactory:
             return CourseScheduleSlotRepository()
         elif entity_type == "user_settings" or entity_type == "settings":
             return UserSettingsRepository()
+        elif entity_type == "knowledge_base" or entity_type == "kb":
+            return KnowledgeBaseRepository()
+        elif entity_type == "chat_history" or entity_type == "chat":
+            return ChatHistoryRepository()
+        elif entity_type == "user_database_config" or entity_type == "user_db_config":
+            return UserDatabaseConfigRepository()
+        elif entity_type == "advisor_conversation" or entity_type == "advisor_conv":
+            return AdvisorConversationRepository()
+        elif entity_type == "advisor_message" or entity_type == "advisor_msg":
+            return AdvisorMessageRepository()
+        elif entity_type == "advisor_appointment" or entity_type == "advisor_apt":
+            return AdvisorAppointmentRepository()
+        elif entity_type == "notification":
+            return NotificationRepository()
+        elif entity_type == "assignment":
+            return AssignmentRepository()
+        elif entity_type == "assignment_submission" or entity_type == "assignment_sub":
+            return AssignmentSubmissionRepository()
+        elif entity_type == "grading_suggestion" or entity_type == "grading":
+            if GradingSuggestionRepository:
+                return GradingSuggestionRepository()
+            else:
+                raise ValueError(f"GradingSuggestionRepository not available")
+        elif entity_type == "study_plan" or entity_type == "studyplan":
+            if StudyPlanRepository:
+                return StudyPlanRepository()
+            else:
+                raise ValueError(f"StudyPlanRepository not available")
+        elif entity_type == "study_task" or entity_type == "studytask":
+            if StudyTaskRepository:
+                return StudyTaskRepository()
+            else:
+                raise ValueError(f"StudyTaskRepository not available")
+        elif entity_type == "study_recommendation" or entity_type == "studyrecommendation":
+            if StudyRecommendationRepository:
+                return StudyRecommendationRepository()
+            else:
+                raise ValueError(f"StudyRecommendationRepository not available")
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")

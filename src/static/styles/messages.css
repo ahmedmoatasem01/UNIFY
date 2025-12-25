@@ -578,3 +578,16 @@ select.form-control {
 .chat-messages::-webkit-scrollbar-thumb:hover {
     background: var(--cr-text-muted);
 }
+
+/* ================= LIGHT MODE SUPPORT ================= */
+.cr-light-mode .conversations-panel,
+.cr-light-mode .chat-panel {
+    background: var(--cr-bg-panel);
+}
+.cr-light-mode .message-bubble.sent {
+    background: var(--cr-accent);
+}
+.cr-light-mode .message-bubble.received {
+    background: var(--cr-bg-elevated);
+    color: var(--cr-text-main);
+}

@@ -1,0 +1,84 @@
+<!-- Sidebar Navigation Component with Role-Based Access Control -->
+{% if user_data and user_data.role %}
+    {% set is_student = (user_data.role == 'Student') %}
+    {% set is_instructor = (user_data.role == 'Instructor') %}
+    {% set is_ta = (user_data.role == 'TA') %}
+{% else %}
+    {% set is_student = False %}
+    {% set is_instructor = False %}
+    {% set is_ta = False %}
+{% endif %}
+{% set is_instructor_or_ta = is_instructor or is_ta %}
+
+<nav class="cr-sidebar-nav">
+    <a class="cr-nav-item {% if request.endpoint and 'overview' in request.endpoint %}active{% endif %}" href="/overview">
+        <i class="fa-solid fa-chart-column"></i>
+        <span>Overview</span>
+    </a>
+    <a class="cr-nav-item {% if request.endpoint and 'schedule' in request.endpoint %}active{% endif %}" href="/schedule">
+        <i class="fa-solid fa-calendar-day"></i>
+        <span>Schedule</span>
+    </a>
+    {% if is_student %}
+    <a class="cr-nav-item {% if request.endpoint and 'task' in request.endpoint %}active{% endif %}" href="/tasks">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Tasks</span>
+    </a>
+    <a class="cr-nav-item {% if request.endpoint and 'assignment' in request.endpoint %}active{% endif %}" href="/assignments">
+        <i class="fa-solid fa-file-pen"></i>
+        <span>Assignments</span>
+    </a>
+    {% endif %}
+    {% if is_instructor_or_ta %}
+    <a class="cr-nav-item {% if request.endpoint and 'assignment' in request.endpoint %}active{% endif %}" href="/assignments">
+        <i class="fa-solid fa-file-pen"></i>
+        <span>Assignments</span>
+    </a>
+    {% endif %}
+    <a class="cr-nav-item {% if request.endpoint and 'note' in request.endpoint %}active{% endif %}" href="/notes">
+        <i class="fa-solid fa-note-sticky"></i>
+        <span>Notes &amp; Summaries</span>
+    </a>
+    {% if is_student %}
+    <a class="cr-nav-item {% if request.endpoint and 'reminder' in request.endpoint %}active{% endif %}" href="/reminders">
+        <i class="fa-solid fa-bell"></i>
+        <span>Smart Reminders</span>
+    </a>
+    {% endif %}
+    <a class="cr-nav-item {% if request.endpoint and 'message' in request.endpoint %}active{% endif %}" href="/messages">
+        <i class="fa-solid fa-message"></i>
+        <span>Messages</span>
+    </a>
+    <a class="cr-nav-item {% if request.endpoint and 'ai_assistant' in request.endpoint or request.endpoint and 'ai-assistant' in request.endpoint %}active{% endif %}" href="/ai-assistant/">
+        <i class="fa-solid fa-robot"></i>
+        <span>AI Assistant</span>
+    </a>
+    {% if is_student %}
+    <a class="cr-nav-item {% if request.endpoint and 'advisor' in request.endpoint %}active{% endif %}" href="/api/advisor/chat">
+        <i class="fa-solid fa-user-graduate"></i>
+        <span>Academic Advisor</span>
+    </a>
+    {% endif %}
+    {% if is_instructor_or_ta %}
+    <a class="cr-nav-item {% if request.endpoint and 'appointment' in request.endpoint %}active{% endif %}" href="/appointments/instructor">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span>Student Appointments</span>
+    </a>
+    {% endif %}
+    {% if is_student %}
+    <a class="cr-nav-item {% if request.endpoint and 'transcript' in request.endpoint %}active{% endif %}" href="/transcript">
+        <i class="fa-solid fa-file-lines"></i>
+        <span>Transcript</span>
+    </a>
+    {% endif %}
+    {% if is_student %}
+    <a class="cr-nav-item {% if request.endpoint and 'course_registration' in request.endpoint or request.endpoint and 'course-registration' in request.endpoint %}active{% endif %}" href="/course-registration">
+        <i class="fa-solid fa-book-open"></i>
+        <span>Course Registration</span>
+    </a>
+    {% endif %}
+    <a class="cr-nav-item {% if request.endpoint and 'setting' in request.endpoint %}active{% endif %}" href="/settings">
+        <i class="fa-solid fa-gear"></i>
+        <span>Settings</span>
+    </a>
+</nav>
