@@ -19,52 +19,7 @@
                 <p class="cr-brand-subtitle">Student Assistant</p>
             </div>
         </div>
-        <nav class="cr-sidebar-nav">
-            <a class="cr-nav-item" href="/overview">
-                <i class="fa-solid fa-chart-column"></i>
-                <span>Overview</span>
-            </a>
-            <a class="cr-nav-item" href="/schedule">
-                <i class="fa-solid fa-calendar-day"></i>
-                <span>Schedule</span>
-            </a>
-            <a class="cr-nav-item" href="/tasks">
-                <i class="fa-solid fa-list-check"></i>
-                <span>Tasks</span>
-            </a>
-            <a class="cr-nav-item" href="/notes">
-                <i class="fa-solid fa-note-sticky"></i>
-                <span>Notes &amp; Summaries</span>
-            </a>
-            <a class="cr-nav-item" href="/reminders">
-                <i class="fa-solid fa-bell"></i>
-                <span>Smart Reminders</span>
-            </a>
-            <a class="cr-nav-item" href="/messages">
-                <i class="fa-solid fa-message"></i>
-                <span>Messages</span>
-            </a>
-            <a class="cr-nav-item" href="/ai-assistant/">
-                <i class="fa-solid fa-robot"></i>
-                <span>AI Assistant</span>
-            </a>
-            <a class="cr-nav-item active" href="/api/advisor/chat">
-                <i class="fa-solid fa-user-graduate"></i>
-                <span>Academic Advisor</span>
-            </a>
-            <a class="cr-nav-item" href="/transcript">
-                <i class="fa-solid fa-file-lines"></i>
-                <span>Transcript</span>
-            </a>
-            <a class="cr-nav-item" href="/course-registration">
-                <i class="fa-solid fa-book-open"></i>
-                <span>Course Registration</span>
-            </a>
-            <a class="cr-nav-item" href="/settings">
-                <i class="fa-solid fa-gear"></i>
-                <span>Settings</span>
-            </a>
-        </nav>
+        {% include 'components/sidebar_nav.html' %}
         <div class="cr-sidebar-footer">
             <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -251,10 +206,23 @@
     let currentConversationId = null;
 </script>
 <script src="{{ url_for('static', filename='scripts/advisor_chatbot.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/notifications.js') }}"></script>
 <script>
     // Logout handler
-    function handleLogout() {
-        window.location.href = '/auth/logout';
+    async function handleLogout() {
+        try {
+            const response = await fetch('/auth/logout', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                // Fallback to GET if POST fails
+                window.location.href = '/auth/logout';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Fallback to GET if POST fails
+            window.location.href = '/auth/logout';
+        }
     }
 </script>
 <script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>

@@ -3,7 +3,7 @@ Role-Based Access Control (RBAC) Decorator
 Restricts access to routes based on user roles (Instructor, TA, Student)
 """
 from functools import wraps
-from flask import session, redirect, url_for, jsonify
+from flask import session, redirect, url_for, jsonify, request
 from repositories.repository_factory import RepositoryFactory
 
 

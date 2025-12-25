@@ -19,6 +19,9 @@ from models.teaching_assistant import TeachingAssistant
 from models.advisor_conversation import AdvisorConversation
 from models.advisor_message import AdvisorMessage
 from models.advisor_appointment import AdvisorAppointment
+from models.notification import Notification
+from models.assignment import Assignment
+from models.assignment_submission import AssignmentSubmission
 
 __all__ = [
     'User',
@@ -37,6 +40,9 @@ __all__ = [
     'TeachingAssistant',
     'AdvisorConversation',
     'AdvisorMessage',
-    'AdvisorAppointment'
+    'AdvisorAppointment',
+    'Notification',
+    'Assignment',
+    'AssignmentSubmission'
 ]
 

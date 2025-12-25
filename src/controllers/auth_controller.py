@@ -136,7 +136,7 @@ def register():
     }), 201
 
 
-@auth_bp.route("/logout", methods=["POST"])
+@auth_bp.route("/logout", methods=["POST", "GET"])
 def logout():
     """Handle user logout"""
     # Clear user database context
@@ -149,6 +149,10 @@ def logout():
             print(f"Warning: Could not clear user database context: {e}")
     
     session.clear()
+    
+    # If GET request, redirect directly. If POST, return JSON
+    if request.method == "GET":
+        return redirect(url_for('login_page'))
     return jsonify({"message": "Logout successful"}), 200
 
 

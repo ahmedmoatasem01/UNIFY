@@ -5,6 +5,7 @@ Handles the overview/dashboard page with real database statistics
 from flask import Blueprint, render_template, session, redirect, url_for
 from repositories.repository_factory import RepositoryFactory
 from core.user_helper import get_user_data
+from services.notification_service import get_notification_service
 from datetime import datetime, date, timedelta
 
 overview_bp = Blueprint("overview", __name__, url_prefix="/overview")
@@ -106,31 +107,44 @@ def overview_page():
         except Exception as e:
             print(f"Error fetching today's schedule: {e}")
         
-        # ===== GET NOTIFICATIONS/MESSAGES =====
+        # ===== GET NOTIFICATIONS =====
         try:
-            message_repo = RepositoryFactory.get_repository("message")
-            messages = message_repo.get_by_receiver(student.Student_ID)
+            notification_service = get_notification_service()
+            notification_list = notification_service.get_notifications(user_id, limit=10)
             
-            for msg in messages[:5]:  # Get latest 5 messages
+            for notif in notification_list:
                 time_str = 'Now'
-                if hasattr(msg, 'Sent_Date') and msg.Sent_Date:
+                if notif.Created_At:
                     try:
-                        if isinstance(msg.Sent_Date, str):
-                            time_str = msg.Sent_Date
+                        if isinstance(notif.Created_At, str):
+                            time_str = notif.Created_At
                         else:
-                            time_str = msg.Sent_Date.strftime('%I:%M %p')
+                            # Calculate relative time
+                            time_diff = datetime.now() - notif.Created_At
+                            if time_diff.days > 0:
+                                time_str = f"{time_diff.days}d ago"
+                            elif time_diff.seconds > 3600:
+                                hours = time_diff.seconds // 3600
+                                time_str = f"{hours}h ago"
+                            elif time_diff.seconds > 60:
+                                minutes = time_diff.seconds // 60
+                                time_str = f"{minutes}m ago"
+                            else:
+                                time_str = "Just now"
                     except:
                         time_str = 'Recently'
                 
                 notifications.append({
-                    'title': msg.Subject if hasattr(msg, 'Subject') and msg.Subject else 'Notification',
-                    'message': msg.Content if hasattr(msg, 'Content') and msg.Content else '',
+                    'title': notif.Title,
+                    'message': notif.Message,
                     'time': time_str,
-                    'type': 'message',
-                    'read': False
+                    'type': notif.Type or 'system',
+                    'priority': notif.Priority or 'medium',
+                    'read': bool(notif.Is_Read),
+                    'action_url': notif.Action_URL
                 })
         except Exception as e:
-            print(f"Error fetching messages: {e}")
+            print(f"Error fetching notifications: {e}")
     
     return render_template(
         'overview.html',

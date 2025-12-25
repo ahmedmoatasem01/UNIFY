@@ -9,6 +9,8 @@ from models.advisor_conversation import AdvisorConversation
 from models.advisor_message import AdvisorMessage
 from models.advisor_appointment import AdvisorAppointment
 from datetime import datetime
+from core.user_helper import get_user_data
+from core.role_auth import requires_student
 
 advisor_chatbot_bp = Blueprint('advisor_chatbot', __name__, url_prefix='/api/advisor')
 
@@ -232,7 +234,7 @@ def create_appointment():
             Advisor_ID=advisor_id,
             Scheduled_Date=scheduled_date,
             Reason=reason,
-            Status='scheduled',
+            Status='pending',
             Created_From_Conversation_ID=created_from_conversation_id
         )
         appointment = appointment_repo.create(appointment)
@@ -356,23 +358,25 @@ def get_advisors():
 
 # Frontend route
 @advisor_chatbot_bp.route('/chat', methods=['GET'])
+@requires_student
 def advisor_chatbot_page():
-    """Advisor Chatbot main page"""
+    """Advisor Chatbot main page - STUDENT ONLY"""
     try:
-        if 'user_id' not in session:
-            return redirect(url_for('login_page'))
+        user_id = session.get('user_id')
         
         # Get student_id from session
-        user_id = session.get('user_id')
         student_repo = RepositoryFactory.get_repository('student')
         student = student_repo.get_by_user_id(user_id) if student_repo else None
         
         if not student:
             print(f"[Advisor Chatbot] Student record not found for user_id: {user_id}")
-            return redirect(url_for('login_page'))
+            return redirect(url_for('overview.overview_page'))
+        
+        # Get user data for topbar component
+        user_data = get_user_data(user_id)
         
         print(f"[Advisor Chatbot] Rendering page for student_id: {student.Student_ID}")
-        return render_template('advisor_chatbot.html', student_id=student.Student_ID)
+        return render_template('advisor_chatbot.html', student_id=student.Student_ID, user_data=user_data)
     except Exception as e:
         print(f"[Advisor Chatbot] Error rendering page: {e}")
         import traceback

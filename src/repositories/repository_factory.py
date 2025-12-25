@@ -38,7 +38,13 @@ UserDatabaseConfigRepository = _import_repository('user_database_config.reposito
 AdvisorConversationRepository = _import_repository('advisor_conversation.repository', 'AdvisorConversationRepository')
 AdvisorMessageRepository = _import_repository('advisor_message.repository', 'AdvisorMessageRepository')
 AdvisorAppointmentRepository = _import_repository('advisor_appointment.repository', 'AdvisorAppointmentRepository')
-
+NotificationRepository = _import_repository('notification.repository', 'NotificationRepository')
+AssignmentRepository = _import_repository('assignment.repository', 'AssignmentRepository')
+AssignmentSubmissionRepository = _import_repository('assignment_submission.repository', 'AssignmentSubmissionRepository')
+try:
+    GradingSuggestionRepository = _import_repository('grading_suggestion.repository', 'GradingSuggestionRepository')
+except Exception:
+    GradingSuggestionRepository = None
 
 # Import CourseScheduleSlotRepository
 CourseScheduleSlotRepository = _import_repository('course_schedule_slot.repository', 'CourseScheduleSlotRepository')
@@ -95,5 +101,16 @@ class RepositoryFactory:
             return AdvisorMessageRepository()
         elif entity_type == "advisor_appointment" or entity_type == "advisor_apt":
             return AdvisorAppointmentRepository()
+        elif entity_type == "notification":
+            return NotificationRepository()
+        elif entity_type == "assignment":
+            return AssignmentRepository()
+        elif entity_type == "assignment_submission" or entity_type == "assignment_sub":
+            return AssignmentSubmissionRepository()
+        elif entity_type == "grading_suggestion" or entity_type == "grading":
+            if GradingSuggestionRepository:
+                return GradingSuggestionRepository()
+            else:
+                raise ValueError(f"GradingSuggestionRepository not available")
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")

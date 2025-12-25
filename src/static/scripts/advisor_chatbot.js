@@ -143,7 +143,7 @@ class AdvisorChatbot {
         const reason = document.getElementById('appointmentReason').value;
         
         if (!advisorId || !dateTime) {
-            alert('Please select an advisor and date/time');
+            this.showMessage('Please select an advisor and date/time', true);
             return;
         }
         
@@ -179,11 +179,11 @@ class AdvisorChatbot {
             }
             
             // Show success message
-            alert('Appointment scheduled successfully!');
+            this.showMessage('Appointment scheduled successfully!', false);
             
         } catch (error) {
             console.error('Error creating appointment:', error);
-            alert(`Error: ${error.message}`);
+            this.showMessage(`Error: ${error.message}`, true);
         }
     }
     
@@ -440,27 +440,43 @@ class AdvisorChatbot {
         listContainer.innerHTML = '<div class="advisor-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading appointments...</p></div>';
         
         try {
-            const response = await fetch(`/api/advisor/appointments/student/${this.studentId}?upcoming=true`);
+            const response = await fetch(`/api/advisor/appointments/student/${this.studentId}`);
             if (!response.ok) throw new Error('Failed to load appointments');
             
             const appointments = await response.json();
             
             if (appointments.length === 0) {
-                listContainer.innerHTML = '<div class="advisor-empty-state"><i class="fas fa-calendar-times"></i><p>No upcoming appointments</p></div>';
+                listContainer.innerHTML = '<div class="advisor-empty-state"><i class="fas fa-calendar-times"></i><p>No appointments found</p></div>';
                 return;
             }
             
-            listContainer.innerHTML = appointments.map(apt => `
+            listContainer.innerHTML = appointments.map(apt => {
+                const statusDisplay = apt.Status === 'pending' ? 'Pending Approval' : 
+                                     apt.Status === 'scheduled' ? 'Scheduled' :
+                                     apt.Status === 'rejected' ? 'Rejected' :
+                                     apt.Status === 'completed' ? 'Completed' :
+                                     apt.Status === 'cancelled' ? 'Cancelled' : apt.Status;
+                const instructorResponse = apt.Instructor_Response || apt.instructor_response || null;
+                return `
                 <div class="advisor-appointment-item">
                     <div class="advisor-appointment-header">
                         <div class="advisor-appointment-date">
                             ${new Date(apt.Scheduled_Date).toLocaleString()}
                         </div>
-                        <span class="advisor-appointment-status ${apt.Status}">${apt.Status}</span>
+                        <span class="advisor-appointment-status ${apt.Status}">${statusDisplay}</span>
                     </div>
-                    ${apt.Reason ? `<div class="advisor-appointment-reason">${apt.Reason}</div>` : ''}
+                    ${apt.Reason ? `<div class="advisor-appointment-reason"><strong>Reason:</strong> ${apt.Reason}</div>` : ''}
+                    ${apt.Status === 'rejected' && instructorResponse ? `
+                    <div style="margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <strong style="color: #ef4444; display: block; margin-bottom: 4px;">
+                            <i class="fas fa-info-circle"></i> Instructor's Response:
+                        </strong>
+                        <p style="margin: 0; color: var(--cr-text);">${instructorResponse}</p>
+                    </div>
+                    ` : ''}
                 </div>
-            `).join('');
+            `;
+            }).join('');
             
         } catch (error) {
             console.error('Error loading appointments:', error);
@@ -468,6 +484,27 @@ class AdvisorChatbot {
         }
     }
     
+    showMessage(message, isError = false) {
+        // Create or get message area
+        let messageArea = document.getElementById('advisorMessageArea');
+        if (!messageArea) {
+            messageArea = document.createElement('div');
+            messageArea.id = 'advisorMessageArea';
+            messageArea.style.cssText = 'display: none; margin-bottom: 16px; padding: 12px; border-radius: 8px; position: fixed; top: 80px; right: 20px; z-index: 1001; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
+            document.body.appendChild(messageArea);
+        }
+        
+        messageArea.style.display = 'block';
+        messageArea.style.background = isError ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)';
+        messageArea.style.border = `1px solid ${isError ? '#ef4444' : '#22c55e'}`;
+        messageArea.style.color = isError ? '#ef4444' : '#22c55e';
+        messageArea.innerHTML = `<i class="fas fa-${isError ? 'exclamation-circle' : 'check-circle'}"></i> ${message}`;
+        
+        setTimeout(() => {
+            messageArea.style.display = 'none';
+        }, 5000);
+    }
+
     async loadProgress() {
         const container = document.getElementById('progressContainer');
         container.innerHTML = '<div class="advisor-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading degree progress...</p></div>';
