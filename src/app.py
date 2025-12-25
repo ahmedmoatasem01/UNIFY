@@ -12,6 +12,8 @@ from controllers.course_registration_controller import course_reg_bp
 from controllers.transcript_controller import transcript_bp
 from controllers.overview_controller import overview_bp
 from repositories.repository_factory import RepositoryFactory
+from core.user_helper import get_user_data
+from core.role_auth import requires_student, requires_role
 
 # Conditionally import AI Note controller (requires additional dependencies)
 try:
@@ -39,7 +41,33 @@ except ImportError as e:
     print(f"Warning: Advisor Chatbot controller not available: {e}")
     advisor_chatbot_bp = None
     advisor_chatbot_available = False
-from core.user_helper import get_user_data
+
+# Import Notification controller
+try:
+    from controllers.notification_controller import notification_bp
+    notification_available = True
+except ImportError as e:
+    print(f"Warning: Notification controller not available: {e}")
+    notification_bp = None
+    notification_available = False
+
+# Import Appointment controller
+try:
+    from controllers.appointment_controller import appointment_bp
+    appointment_available = True
+except ImportError as e:
+    print(f"Warning: Appointment controller not available: {e}")
+    appointment_bp = None
+    appointment_available = False
+
+# Import Assignment controller
+try:
+    from controllers.assignment_controller import assignment_bp
+    assignment_available = True
+except ImportError as e:
+    print(f"Warning: Assignment controller not available: {e}")
+    assignment_bp = None
+    assignment_available = False
 import os
 import sys
 
@@ -89,6 +117,12 @@ def create_app(config=None):
         app.register_blueprint(ai_assistant_bp)
     if advisor_chatbot_available and advisor_chatbot_bp:
         app.register_blueprint(advisor_chatbot_bp)
+    if notification_available and notification_bp:
+        app.register_blueprint(notification_bp)
+    if appointment_available and appointment_bp:
+        app.register_blueprint(appointment_bp)
+    if assignment_available and assignment_bp:
+        app.register_blueprint(assignment_bp)
     app.register_blueprint(task_bp)  # Register after routes to ensure app routes take precedence
     
     return app
@@ -147,25 +181,9 @@ def get_default_stats():
     }
 
 
-def get_user_data(user_id):
-    user = get_default_user()
-    if db_available and user_repo:
-        try:
-            db_user = user_repo.get_by_id(user_id)
-            if db_user:
-                user = {
-                    'User_ID': getattr(db_user, 'User_ID', DEFAULT_USER_ID),
-                    'Username': getattr(db_user, 'Username', 'demo_user'),
-                    'Email': getattr(db_user, 'Email', 'demo@example.com'),
-                    'name': getattr(db_user, 'Username', 'Demo User'),
-                    'role': getattr(db_user, 'Role', 'student') if hasattr(db_user, 'Role') else 'student',
-                    'university': getattr(db_user, 'University', 'Zewail City') if hasattr(db_user, 'University') else 'Zewail City',
-                    'major': getattr(db_user, 'Major', 'Computer Science') if hasattr(db_user, 'Major') else 'Computer Science',
-                    'year': getattr(db_user, 'Year', 'Sophomore') if hasattr(db_user, 'Year') else 'Sophomore'
-                }
-        except Exception as e:
-            print(f"Error fetching user from database: {e}")
-    return user
+# NOTE: get_user_data is imported from core.user_helper (line 15) which properly checks roles
+# The duplicate function was removed to ensure correct role detection for RBAC
+# DO NOT re-add a get_user_data function here - use the one from core.user_helper
 
 
 def get_user_stats(user_id):
@@ -275,11 +293,11 @@ def schedule_page():
 
 
 @app.route('/tasks', strict_slashes=False)
+@requires_student
 def tasks_page():
-    """Tasks page - requires authentication"""
-    if 'user_id' not in session:
-        return redirect(url_for('login_page'))
-    user_data = get_user_data(session.get('user_id'))
+    """Tasks page - STUDENT ONLY"""
+    user_id = session.get('user_id')
+    user_data = get_user_data(user_id)
     return render_template('tasks.html', user_data=user_data)
 
 
@@ -302,11 +320,11 @@ def calendar_page():
 
 
 @app.route('/reminders')
+@requires_student
 def reminders_page():
-    """Smart Reminders page - requires authentication"""
-    if 'user_id' not in session:
-        return redirect(url_for('login_page'))
-    user_data = get_user_data(session.get('user_id'))
+    """Smart Reminders page - STUDENT ONLY"""
+    user_id = session.get('user_id')
+    user_data = get_user_data(user_id)
     return render_template('Reminder.html', user_data=user_data)
 
 
@@ -320,11 +338,11 @@ def messages_page():
 
 
 @app.route('/transcript')
+@requires_student
 def transcript_page():
-    """Transcript page - requires authentication"""
-    if 'user_id' not in session:
-        return redirect(url_for('login_page'))
-    user_data = get_user_data(session.get('user_id'))
+    """Transcript page - STUDENT ONLY"""
+    user_id = session.get('user_id')
+    user_data = get_user_data(user_id)
     return render_template('Transcript.html', user_data=user_data)
 
 

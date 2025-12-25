@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Assignment Submissions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .submissions-container {
+            padding: 20px;
+        }
+        .submissions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .assignment-info {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .assignment-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--cr-text-main);
+            margin-bottom: 8px;
+        }
+        .assignment-meta {
+            display: flex;
+            gap: 20px;
+            color: var(--cr-text-muted);
+            font-size: 0.9rem;
+        }
+        .submissions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .submission-card {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .submission-card:hover {
+            border-color: var(--cr-accent);
+        }
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .submission-student {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--cr-text-main);
+        }
+        .submission-date {
+            font-size: 0.9rem;
+            color: var(--cr-text-muted);
+            margin-top: 4px;
+        }
+        .submission-status {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .submission-status.submitted {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--cr-success);
+        }
+        .submission-status.graded {
+            background: var(--cr-accent-soft);
+            color: var(--cr-accent);
+        }
+        .submission-status.late {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--cr-danger);
+        }
+        .submission-status.review_requested {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        .submission-content {
+            margin-top: 12px;
+        }
+        .submission-file {
+            margin-top: 8px;
+        }
+        .submission-file a {
+            color: var(--cr-accent);
+            text-decoration: none;
+        }
+        .submission-file a:hover {
+            text-decoration: underline;
+        }
+        .grade-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--cr-border);
+        }
+        .grade-input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+        }
+        .grade-input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg-elevated);
+            color: var(--cr-text);
+        }
+        .feedback-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg-elevated);
+            color: var(--cr-text);
+            font-family: inherit;
+            resize: vertical;
+            margin-top: 8px;
+        }
+        .cr-btn-primary {
+            background: var(--cr-accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cr-btn-primary:hover {
+            background: var(--cr-accent-dark);
+        }
+        .cr-btn-secondary {
+            background: var(--cr-bg-elevated);
+            color: var(--cr-text);
+            border: 1px solid var(--cr-border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .cr-btn-secondary:hover {
+            background: var(--cr-accent-soft);
+            border-color: var(--cr-accent);
+        }
+        .grade-display {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--cr-accent);
+            margin-top: 8px;
+        }
+        .feedback-display {
+            background: var(--cr-bg-elevated);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            border-left: 4px solid var(--cr-accent);
+        }
+    </style>
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Instructor Portal</p>
+            </div>
+        </div>
+        {% set active_page = 'assignments' %}
+        {% include 'components/sidebar_nav.html' %}
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <main class="cr-main-panel">
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-users"></i> Assignment Submissions</h1>
+                <p>{{ assignment.title }}</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <div class="cr-content submissions-container">
+            <div class="assignment-info">
+                <div class="assignment-title">{{ assignment.title }}</div>
+                <div class="assignment-meta">
+                    <span><i class="fa-solid fa-book"></i> {{ assignment.course_name }}</span>
+                    <span><i class="fa-solid fa-calendar"></i> Due: {{ assignment.due_date[:19].replace('T', ' ') if assignment.due_date else 'No due date' }}</span>
+                    <span><i class="fa-solid fa-star"></i> Max Score: {{ assignment.max_score }}</span>
+                </div>
+            </div>
+
+            {% if submissions %}
+            <div class="submissions-list">
+                {% for submission in submissions %}
+                <div class="submission-card" data-submission-id="{{ submission.submission_id }}">
+                    <div class="submission-header">
+                        <div>
+                            <div class="submission-student">{{ submission.student_name }}</div>
+                            <div class="submission-date">
+                                <i class="fa-solid fa-clock"></i> 
+                                Submitted: {{ submission.submitted_at[:19].replace('T', ' ') if submission.submitted_at else 'Unknown' }}
+                            </div>
+                        </div>
+                        <span class="submission-status {{ submission.status }}">
+                            {% if submission.status == 'review_requested' %}Review Requested
+                            {% else %}{{ submission.status|title|replace('_', ' ') }}{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="submission-content">
+                        {% if submission.file_name %}
+                        <div class="submission-file">
+                            <i class="fa-solid fa-file"></i> 
+                            <a href="{{ submission.file_path }}" target="_blank">{{ submission.file_name }}</a>
+                        </div>
+                        {% endif %}
+                        {% if submission.submission_text %}
+                        <div style="margin-top: 12px; padding: 12px; background: var(--cr-bg-elevated); border-radius: 8px;">
+                            <strong>Text Submission:</strong>
+                            <div style="margin-top: 8px; white-space: pre-wrap;">{{ submission.submission_text }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="grade-section">
+                        {% if submission.review_requested %}
+                        <div style="margin-bottom: 16px; padding: 16px; background: rgba(245, 158, 11, 0.15); border: 2px solid #f59e0b; border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <i class="fa-solid fa-exclamation-triangle" style="color: #f59e0b; font-size: 1.2rem;"></i>
+                                <strong style="color: #f59e0b; font-size: 1.1rem;">Review Requested by Student</strong>
+                            </div>
+                            {% if submission.review_comment %}
+                            <div style="margin-top: 12px; padding: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 6px;">
+                                <strong style="display: block; margin-bottom: 8px; color: var(--cr-text-main);">
+                                    <i class="fa-solid fa-comment"></i> Student's Message:
+                                </strong>
+                                <div style="color: var(--cr-text); white-space: pre-wrap; line-height: 1.6;">{{ submission.review_comment }}</div>
+                            </div>
+                            {% endif %}
+                            <div style="margin-top: 8px; font-size: 0.9rem; color: var(--cr-text-muted);">
+                                <i class="fa-solid fa-info-circle"></i> The student has requested a manual review of their AI-graded assignment.
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if submission.grade is not none %}
+                        <div class="grade-display">
+                            Grade: {{ submission.grade }}/{{ assignment.max_score }}
+                            {% if submission.is_ai_graded %}
+                            <span style="margin-left: 12px; padding: 4px 8px; background: rgba(147, 51, 234, 0.2); color: #9333ea; border-radius: 4px; font-size: 0.85rem;">
+                                <i class="fa-solid fa-robot"></i> AI Graded
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% if submission.feedback %}
+                        <div class="feedback-display">
+                            <strong>Feedback:</strong><br>
+                            {{ submission.feedback }}
+                        </div>
+                        {% endif %}
+                        <button class="cr-btn-secondary" onclick="editGrade({{ submission.submission_id }})" style="margin-top: 12px;">
+                            <i class="fa-solid fa-edit"></i> Edit Grade
+                        </button>
+                        {% else %}
+                        <div class="grade-input-group">
+                            <label style="font-weight: 600;">Grade:</label>
+                            <input type="number" class="grade-input" id="grade_{{ submission.submission_id }}" 
+                                   min="0" max="{{ assignment.max_score }}" step="0.01" 
+                                   placeholder="0-{{ assignment.max_score }}">
+                            <span>/ {{ assignment.max_score }}</span>
+                        </div>
+                        <div style="margin-top: 12px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Feedback:</label>
+                            <textarea class="feedback-textarea" id="feedback_{{ submission.submission_id }}" 
+                                      placeholder="Enter feedback for the student..."></textarea>
+                        </div>
+                        <button class="cr-btn-primary" onclick="submitGrade({{ submission.submission_id }})" style="margin-top: 12px;">
+                            <i class="fa-solid fa-check"></i> Submit Grade
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 60px 20px; color: var(--cr-text-muted);">
+                <i class="fa-solid fa-inbox" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                <h2>No Submissions</h2>
+                <p>No students have submitted this assignment yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/notifications.js') }}"></script>
+<script>
+async function handleLogout() {
+    try {
+        const response = await fetch('/auth/logout', { method: 'POST' });
+        if (response.ok) {
+            window.location.href = '/login';
+        } else {
+            // Fallback to GET if POST fails
+            window.location.href = '/auth/logout';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Fallback to GET if POST fails
+        window.location.href = '/auth/logout';
+    }
+}
+
+function showGradeMessage(submissionId, message, isError = false) {
+    const card = document.querySelector(`[data-submission-id="${submissionId}"]`);
+    if (card) {
+        // Remove existing message if any
+        const existingMsg = card.querySelector('.grade-message');
+        if (existingMsg) existingMsg.remove();
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'grade-message';
+        messageDiv.style.cssText = `
+            margin-top: 8px; 
+            padding: 8px 12px; 
+            border-radius: 4px; 
+            background: ${isError ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)'}; 
+            border: 1px solid ${isError ? '#ef4444' : '#22c55e'}; 
+            color: ${isError ? '#ef4444' : '#22c55e'};
+            font-size: 0.9rem;
+        `;
+        messageDiv.innerHTML = `<i class="fa-solid fa-${isError ? 'exclamation-circle' : 'check-circle'}"></i> ${message}`;
+        
+        const gradeSection = card.querySelector('.grade-section') || card;
+        gradeSection.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 5000);
+    }
+}
+
+async function submitGrade(submissionId) {
+    const gradeInput = document.getElementById(`grade_${submissionId}`);
+    const feedbackInput = document.getElementById(`feedback_${submissionId}`);
+    
+    const grade = parseFloat(gradeInput.value);
+    const feedback = feedbackInput.value.trim();
+    
+    if (isNaN(grade) || grade < 0) {
+        showGradeMessage(submissionId, 'Please enter a valid grade', true);
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/assignments/api/submissions/${submissionId}/grade`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                grade: grade,
+                feedback: feedback
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            showGradeMessage(submissionId, 'Error: ' + (result.error || 'Failed to submit grade'), true);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showGradeMessage(submissionId, 'Error submitting grade. Please try again.', true);
+    }
+}
+
+function editGrade(submissionId) {
+    const card = document.querySelector(`[data-submission-id="${submissionId}"]`);
+    const gradeSection = card.querySelector('.grade-section');
+    
+    // Get current grade and feedback
+    const currentGrade = card.querySelector('.grade-display').textContent.match(/(\d+\.?\d*)/)?.[1];
+    const currentFeedback = card.querySelector('.feedback-display')?.textContent.replace('Feedback:', '').trim() || '';
+    
+    gradeSection.innerHTML = `
+        <div class="grade-input-group">
+            <label style="font-weight: 600;">Grade:</label>
+            <input type="number" class="grade-input" id="edit_grade_${submissionId}" 
+                   min="0" max="{{ assignment.max_score }}" step="0.01" 
+                   value="${currentGrade || ''}" placeholder="0-{{ assignment.max_score }}">
+            <span>/ {{ assignment.max_score }}</span>
+        </div>
+        <div style="margin-top: 12px;">
+            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Feedback:</label>
+            <textarea class="feedback-textarea" id="edit_feedback_${submissionId}" 
+                      placeholder="Enter feedback for the student...">${currentFeedback}</textarea>
+        </div>
+        <button class="cr-btn-primary" onclick="updateGrade(${submissionId})" style="margin-top: 12px;">
+            <i class="fa-solid fa-save"></i> Update Grade
+        </button>
+    `;
+}
+
+async function updateGrade(submissionId) {
+    const gradeInput = document.getElementById(`edit_grade_${submissionId}`);
+    const feedbackInput = document.getElementById(`edit_feedback_${submissionId}`);
+    
+    const grade = parseFloat(gradeInput.value);
+    const feedback = feedbackInput.value.trim();
+    
+    if (isNaN(grade) || grade < 0) {
+        showGradeMessage(submissionId, 'Please enter a valid grade', true);
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/assignments/api/submissions/${submissionId}/grade`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                grade: grade,
+                feedback: feedback
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            showGradeMessage(submissionId, 'Error: ' + (result.error || 'Failed to update grade'), true);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showGradeMessage(submissionId, 'Error updating grade. Please try again.', true);
+    }
+}
+</script>
+</body>
+</html>

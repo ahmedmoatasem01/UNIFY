@@ -588,9 +588,25 @@
     font-weight: 600;
 }
 
+/* Status colors: Green (scheduled/active/completed), Yellow (pending), Red (rejected/cancelled/declined) */
+.advisor-appointment-status.pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.cr-light-mode .advisor-appointment-status.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
 .advisor-appointment-status.scheduled {
-    background: var(--cr-accent-soft);
-    color: var(--cr-accent);
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.cr-light-mode .advisor-appointment-status.scheduled {
+    background: rgba(34, 197, 94, 0.15);
+    color: #16a34a;
 }
 
 .advisor-appointment-status.completed {
@@ -601,6 +617,16 @@
 .cr-light-mode .advisor-appointment-status.completed {
     background: rgba(34, 197, 94, 0.15);
     color: #16a34a;
+}
+
+.advisor-appointment-status.rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--cr-danger);
+}
+
+.cr-light-mode .advisor-appointment-status.rejected {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
 }
 
 .advisor-appointment-status.cancelled {
@@ -1166,9 +1192,14 @@
 }
 
 /* Fix for hardcoded status badge colors in light mode */
+.cr-light-mode .advisor-appointment-status.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
 .cr-light-mode .advisor-appointment-status.scheduled {
-    background: var(--cr-accent-soft);
-    color: var(--cr-accent);
+    background: rgba(34, 197, 94, 0.15);
+    color: #16a34a;
 }
 
 .cr-light-mode .advisor-conversation-status.active {

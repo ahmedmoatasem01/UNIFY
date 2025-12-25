@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Student Appointments</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .appointments-container {
+            padding: 20px;
+        }
+        .appointments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .appointments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .appointment-card {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .appointment-card:hover {
+            border-color: var(--cr-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+        }
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .appointment-student {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--cr-text-main);
+        }
+        .appointment-date {
+            font-size: 0.9rem;
+            color: var(--cr-text-muted);
+        }
+        .appointment-status {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        /* Status colors: Green (scheduled/active/completed), Yellow (pending), Red (rejected/cancelled/declined) */
+        .appointment-status.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        .appointment-status.scheduled {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .appointment-status.completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .appointment-status.rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .appointment-status.cancelled {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .appointment-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        .cr-btn-primary {
+            background: var(--cr-accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cr-btn-primary:hover {
+            background: var(--cr-accent-dark);
+        }
+        .cr-btn-danger {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cr-btn-danger:hover {
+            background: #dc2626;
+        }
+        .cr-btn-secondary {
+            background: var(--cr-bg-elevated);
+            color: var(--cr-text);
+            border: 1px solid var(--cr-border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cr-btn-secondary:hover {
+            background: var(--cr-accent-soft);
+            border-color: var(--cr-accent);
+        }
+        .rejection-form {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--cr-bg-elevated);
+            border-radius: 8px;
+            border: 1px solid var(--cr-border);
+        }
+        .message-area {
+            display: none;
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .appointment-reason {
+            color: var(--cr-text-muted);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Instructor Portal</p>
+            </div>
+        </div>
+        {% set active_page = 'appointments' %}
+        {% include 'components/sidebar_nav.html' %}
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <main class="cr-main-panel">
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-calendar-check"></i> Student Appointments</h1>
+                <p>View and manage appointments with your students</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <div class="cr-content appointments-container">
+            <!-- Message area for feedback -->
+            <div id="messageArea" class="message-area"></div>
+            
+            {% if appointments %}
+            <div class="appointments-list">
+                {% for apt in appointments %}
+                <div class="appointment-card" data-appointment-id="{{ apt.appointment_id }}">
+                    <div class="appointment-header">
+                        <div>
+                            <div class="appointment-student">{{ apt.student_name }}</div>
+                            <div class="appointment-date">
+                                <i class="fa-solid fa-clock"></i> 
+                                {{ apt.scheduled_date[:19].replace('T', ' ') if apt.scheduled_date else 'TBA' }}
+                            </div>
+                        </div>
+                        <span class="appointment-status {{ apt.status }}">
+                            {% if apt.status == 'pending' %}Pending Approval
+                            {% elif apt.status == 'scheduled' %}Scheduled
+                            {% elif apt.status == 'rejected' %}Rejected
+                            {% elif apt.status == 'completed' %}Completed
+                            {% elif apt.status == 'cancelled' %}Cancelled
+                            {% else %}{{ apt.status|title }}{% endif %}
+                        </span>
+                    </div>
+                    {% if apt.reason %}
+                    <div class="appointment-reason">
+                        <strong>Reason:</strong> {{ apt.reason }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if apt.status == 'pending' %}
+                    <div class="appointment-actions">
+                        <button class="cr-btn-primary" onclick="approveAppointment({{ apt.appointment_id }})">
+                            <i class="fa-solid fa-check"></i> Approve
+                        </button>
+                        <button class="cr-btn-danger" onclick="showRejectionForm({{ apt.appointment_id }})">
+                            <i class="fa-solid fa-times"></i> Reject (Busy)
+                        </button>
+                    </div>
+                    <div id="rejectionForm_{{ apt.appointment_id }}" class="rejection-form" style="display: none;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">
+                            Message to Student (Optional):
+                        </label>
+                        <textarea id="rejectionMessage_{{ apt.appointment_id }}" 
+                                  placeholder="I am busy at this time. Please choose another time."
+                                  style="width: 100%; min-height: 80px; padding: 8px; border-radius: 4px; border: 1px solid var(--cr-border); 
+                                  background: var(--cr-bg); color: var(--cr-text); font-family: inherit; resize: vertical;"></textarea>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button class="cr-btn-danger" onclick="rejectAppointment({{ apt.appointment_id }})" style="flex: 1;">
+                                <i class="fa-solid fa-times"></i> Confirm Rejection
+                            </button>
+                            <button class="cr-btn-secondary" onclick="hideRejectionForm({{ apt.appointment_id }})" style="flex: 1;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                    {% elif apt.status == 'rejected' and apt.instructor_response %}
+                    <div style="margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <strong style="color: #ef4444; display: block; margin-bottom: 4px;">
+                            <i class="fa-solid fa-info-circle"></i> Your Response:
+                        </strong>
+                        <p style="margin: 0; color: var(--cr-text);">{{ apt.instructor_response }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 60px 20px; color: var(--cr-text-muted);">
+                <i class="fa-solid fa-calendar-times" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                <h2>No Appointments</h2>
+                <p>You don't have any appointments scheduled with students yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/notifications.js') }}"></script>
+<script>
+async function handleLogout() {
+    try {
+        const response = await fetch('/auth/logout', { method: 'POST' });
+        if (response.ok) {
+            window.location.href = '/login';
+        } else {
+            // Fallback to GET if POST fails
+            window.location.href = '/auth/logout';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Fallback to GET if POST fails
+        window.location.href = '/auth/logout';
+    }
+}
+
+function showMessage(message, isError = false) {
+    const messageArea = document.getElementById('messageArea');
+    if (messageArea) {
+        messageArea.style.display = 'block';
+        messageArea.style.background = isError ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)';
+        messageArea.style.border = `1px solid ${isError ? '#ef4444' : '#22c55e'}`;
+        messageArea.style.color = isError ? '#ef4444' : '#22c55e';
+        messageArea.innerHTML = `<i class="fa-solid fa-${isError ? 'exclamation-circle' : 'check-circle'}"></i> ${message}`;
+        setTimeout(() => {
+            messageArea.style.display = 'none';
+        }, 5000);
+    }
+}
+
+async function approveAppointment(appointmentId) {
+    try {
+        const response = await fetch(`/appointments/api/${appointmentId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            window.location.reload();
+        } else {
+            showMessage('Error: ' + (data.error || 'Failed to approve appointment'), true);
+        }
+    } catch (error) {
+        console.error('Error approving appointment:', error);
+        showMessage('Error approving appointment. Please try again.', true);
+    }
+}
+
+function showRejectionForm(appointmentId) {
+    const form = document.getElementById(`rejectionForm_${appointmentId}`);
+    if (form) {
+        form.style.display = 'block';
+    }
+}
+
+function hideRejectionForm(appointmentId) {
+    const form = document.getElementById(`rejectionForm_${appointmentId}`);
+    const message = document.getElementById(`rejectionMessage_${appointmentId}`);
+    if (form) form.style.display = 'none';
+    if (message) message.value = '';
+}
+
+async function rejectAppointment(appointmentId) {
+    const messageInput = document.getElementById(`rejectionMessage_${appointmentId}`);
+    const rejectionMessage = messageInput ? messageInput.value.trim() : 'I am busy at this time. Please choose another time.';
+    
+    try {
+        const response = await fetch(`/appointments/api/${appointmentId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: rejectionMessage || 'I am busy at this time. Please choose another time.'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            window.location.reload();
+        } else {
+            showMessage('Error: ' + (data.error || 'Failed to reject appointment'), true);
+        }
+    } catch (error) {
+        console.error('Error rejecting appointment:', error);
+        showMessage('Error rejecting appointment. Please try again.', true);
+    }
+}
+</script>
+</body>
+</html>

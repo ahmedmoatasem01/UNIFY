@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Create Assignment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .create-assignment-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .form-section {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--cr-text-main);
+            margin-bottom: 16px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--cr-text-main);
+        }
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--cr-border);
+            border-radius: 8px;
+            background: var(--cr-bg-elevated);
+            color: var(--cr-text);
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .cr-btn-primary {
+            background: var(--cr-accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .cr-btn-primary:hover {
+            background: var(--cr-accent-dark);
+        }
+        .cr-btn-secondary {
+            background: var(--cr-bg-elevated);
+            color: var(--cr-text);
+            border: 1px solid var(--cr-border);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 12px;
+        }
+        .cr-btn-secondary:hover {
+            background: var(--cr-accent-soft);
+            border-color: var(--cr-accent);
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+    </style>
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Instructor Portal</p>
+            </div>
+        </div>
+        {% set active_page = 'assignments' %}
+        {% include 'components/sidebar_nav.html' %}
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <main class="cr-main-panel">
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-plus-circle"></i> Create Assignment</h1>
+                <p>Create a new assignment for your course</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <div class="cr-content create-assignment-container">
+            <!-- Message area for feedback -->
+            <div id="messageArea" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 8px;"></div>
+            
+            <form id="createAssignmentForm">
+                <div class="form-section">
+                    <div class="section-title">Basic Information</div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="course_id">Course *</label>
+                        <select class="form-select" id="course_id" name="course_id" required>
+                            <option value="">Select a course</option>
+                            {% if courses %}
+                            {% for course in courses %}
+                            <option value="{{ course.Course_ID }}">{{ course.Course_Name }}</option>
+                            {% endfor %}
+                            {% else %}
+                            <option value="" disabled>No courses available</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="title">Assignment Title *</label>
+                        <input type="text" class="form-input" id="title" name="title" required placeholder="e.g., Homework 1: Introduction to Databases">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-textarea" id="description" name="description" placeholder="Brief description of the assignment..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="instructions">Instructions</label>
+                        <textarea class="form-textarea" id="instructions" name="instructions" placeholder="Detailed instructions for students..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">Details</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="due_date">Due Date *</label>
+                            <input type="datetime-local" class="form-input" id="due_date" name="due_date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="max_score">Max Score</label>
+                            <input type="number" class="form-input" id="max_score" name="max_score" value="100" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="assignment_type">Assignment Type</label>
+                            <select class="form-select" id="assignment_type" name="assignment_type">
+                                <option value="">Select type</option>
+                                <option value="homework">Homework</option>
+                                <option value="project">Project</option>
+                                <option value="lab">Lab</option>
+                                <option value="quiz">Quiz</option>
+                                <option value="exam">Exam</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="max_file_size_mb">Max File Size (MB)</label>
+                            <input type="number" class="form-input" id="max_file_size_mb" name="max_file_size_mb" value="10" min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="allowed_file_types">Allowed File Types</label>
+                        <input type="text" class="form-input" id="allowed_file_types" name="allowed_file_types" placeholder="e.g., .pdf,.doc,.docx (leave empty for all types)">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">AI Auto-Grading (Optional)</div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="is_auto_graded" name="is_auto_graded">
+                            <label class="form-label" for="is_auto_graded" style="margin: 0;">Enable AI Auto-Grading</label>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--cr-text-muted); margin-top: 8px;">
+                            When enabled, the AI will automatically grade submissions based on the correct answer provided.
+                        </p>
+                    </div>
+
+                    <div class="form-group" id="correct_answer_group" style="display: none;">
+                        <label class="form-label" for="correct_answer">Correct Answer / Solution</label>
+                        <textarea class="form-textarea" id="correct_answer" name="correct_answer" placeholder="Enter the correct answer or solution that will be used for auto-grading..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/assignments/instructor" class="cr-btn-secondary">Cancel</a>
+                    <button type="submit" class="cr-btn-primary">
+                        <i class="fa-solid fa-save"></i> Create Assignment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/notifications.js') }}"></script>
+<script>
+async function handleLogout() {
+    try {
+        const response = await fetch('/auth/logout', { method: 'POST' });
+        if (response.ok) {
+            window.location.href = '/login';
+        } else {
+            // Fallback to GET if POST fails
+            window.location.href = '/auth/logout';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Fallback to GET if POST fails
+        window.location.href = '/auth/logout';
+    }
+}
+
+// Show/hide correct answer field based on auto-grading checkbox
+document.getElementById('is_auto_graded').addEventListener('change', function() {
+    const correctAnswerGroup = document.getElementById('correct_answer_group');
+    if (this.checked) {
+        correctAnswerGroup.style.display = 'block';
+    } else {
+        correctAnswerGroup.style.display = 'none';
+    }
+});
+
+// Form submission
+document.getElementById('createAssignmentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {
+        course_id: parseInt(formData.get('course_id')),
+        title: formData.get('title'),
+        description: formData.get('description') || null,
+        instructions: formData.get('instructions') || null,
+        due_date: formData.get('due_date'),
+        max_score: parseFloat(formData.get('max_score')) || 100,
+        assignment_type: formData.get('assignment_type') || null,
+        allowed_file_types: formData.get('allowed_file_types') || null,
+        max_file_size_mb: parseInt(formData.get('max_file_size_mb')) || 10,
+        is_auto_graded: formData.get('is_auto_graded') === 'on',
+        correct_answer: formData.get('correct_answer') || null
+    };
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+    
+    try {
+        const response = await fetch('/assignments/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Redirect without showing alert (silent success)
+            window.location.href = '/assignments/instructor';
+        } else {
+            const messageArea = document.getElementById('messageArea');
+            if (messageArea) {
+                messageArea.style.display = 'block';
+                messageArea.style.background = 'rgba(239, 68, 68, 0.1)';
+                messageArea.style.border = '1px solid #ef4444';
+                messageArea.style.color = '#ef4444';
+                messageArea.innerHTML = `<i class="fa-solid fa-exclamation-circle"></i> ${result.error || 'Failed to create assignment'}`;
+                messageArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        const messageArea = document.getElementById('messageArea');
+        if (messageArea) {
+            messageArea.style.display = 'block';
+            messageArea.style.background = 'rgba(239, 68, 68, 0.1)';
+            messageArea.style.border = '1px solid #ef4444';
+            messageArea.style.color = '#ef4444';
+            messageArea.innerHTML = '<i class="fa-solid fa-exclamation-circle"></i> Error creating assignment. Please try again.';
+            messageArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+});
+</script>
+</body>
+</html>

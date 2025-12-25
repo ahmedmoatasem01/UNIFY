@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unify | Assignments</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .assignments-container {
+            padding: 20px;
+        }
+        .assignments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .assignments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .assignment-card {
+            background: var(--cr-bg-panel);
+            border: 1px solid var(--cr-border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .assignment-card:hover {
+            border-color: var(--cr-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+        }
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .assignment-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--cr-text-main);
+            margin-bottom: 4px;
+        }
+        .assignment-course {
+            font-size: 0.9rem;
+            color: var(--cr-text-muted);
+        }
+        .assignment-due {
+            font-size: 0.9rem;
+            color: var(--cr-text-muted);
+            margin-top: 8px;
+        }
+        .assignment-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .cr-btn-secondary {
+            background: var(--cr-bg-elevated);
+            color: var(--cr-text);
+            border: 1px solid var(--cr-border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .cr-btn-secondary:hover {
+            background: var(--cr-accent-soft);
+            border-color: var(--cr-accent);
+        }
+        .create-btn {
+            background: var(--cr-accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .create-btn:hover {
+            background: var(--cr-accent-dark);
+        }
+        .assignment-description {
+            color: var(--cr-text-muted);
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--cr-text-muted);
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Instructor Portal</p>
+            </div>
+        </div>
+        {% set active_page = 'assignments' %}
+        {% include 'components/sidebar_nav.html' %}
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <main class="cr-main-panel">
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-file-pen"></i> Assignments</h1>
+                <p>Manage and view assignments</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <div class="cr-content assignments-container">
+            <div class="assignments-header">
+                <h2>My Assignments</h2>
+                <a href="/assignments/create" class="create-btn">
+                    <i class="fa-solid fa-plus"></i> Create Assignment
+                </a>
+            </div>
+
+            {% if assignments %}
+            <div class="assignments-list">
+                {% for assignment in assignments %}
+                <div class="assignment-card">
+                    <div class="assignment-header">
+                        <div style="flex: 1;">
+                            <div class="assignment-title">{{ assignment.title }}</div>
+                            <div class="assignment-course">
+                                <i class="fa-solid fa-book"></i> {{ assignment.get('course_name', 'Unknown Course') }}
+                            </div>
+                            <div class="assignment-due">
+                                <i class="fa-solid fa-calendar"></i> 
+                                Due: {% if assignment.due_date %}{{ assignment.due_date[:19].replace('T', ' ') if assignment.due_date|length > 19 else assignment.due_date }}{% else %}No due date{% endif %}
+                            </div>
+                            {% if assignment.is_auto_graded %}
+                            <div style="margin-top: 8px;">
+                                <span style="padding: 4px 8px; background: rgba(34, 197, 94, 0.2); color: var(--cr-success); border-radius: 4px; font-size: 0.85rem;">
+                                    <i class="fa-solid fa-robot"></i> Auto-Graded
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="assignment-actions">
+                            <a href="/assignments/{{ assignment.assignment_id }}/submissions" class="cr-btn-secondary">
+                                <i class="fa-solid fa-users"></i> View Submissions
+                            </a>
+                            <a href="/assignments/{{ assignment.assignment_id }}/edit" class="cr-btn-secondary">
+                                <i class="fa-solid fa-edit"></i> Edit
+                            </a>
+                        </div>
+                    </div>
+                    {% if assignment.description %}
+                    <div class="assignment-description">
+                        {{ assignment.description[:150] }}{% if assignment.description|length > 150 %}...{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-file-circle-question"></i>
+                <h2>No Assignments</h2>
+                <p>You haven't created any assignments yet.</p>
+                <a href="/assignments/create" class="create-btn" style="margin-top: 20px;">
+                    <i class="fa-solid fa-plus"></i> Create Your First Assignment
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/theme-toggle.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/notifications.js') }}"></script>
+<script>
+async function handleLogout() {
+    try {
+        const response = await fetch('/auth/logout', { method: 'POST' });
+        if (response.ok) {
+            window.location.href = '/login';
+        } else {
+            // Fallback to GET if POST fails
+            window.location.href = '/auth/logout';
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Fallback to GET if POST fails
+        window.location.href = '/auth/logout';
+    }
+}
+</script>
+</body>
+</html>
