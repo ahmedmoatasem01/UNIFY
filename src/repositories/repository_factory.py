@@ -46,6 +46,21 @@ try:
 except Exception:
     GradingSuggestionRepository = None
 
+try:
+    StudyPlanRepository = _import_repository('study_plan.repository', 'StudyPlanRepository')
+except Exception:
+    StudyPlanRepository = None
+
+try:
+    StudyTaskRepository = _import_repository('study_task.repository', 'StudyTaskRepository')
+except Exception:
+    StudyTaskRepository = None
+
+try:
+    StudyRecommendationRepository = _import_repository('study_recommendation.repository', 'StudyRecommendationRepository')
+except Exception:
+    StudyRecommendationRepository = None
+
 # Import CourseScheduleSlotRepository
 CourseScheduleSlotRepository = _import_repository('course_schedule_slot.repository', 'CourseScheduleSlotRepository')
 
@@ -112,5 +127,20 @@ class RepositoryFactory:
                 return GradingSuggestionRepository()
             else:
                 raise ValueError(f"GradingSuggestionRepository not available")
+        elif entity_type == "study_plan" or entity_type == "studyplan":
+            if StudyPlanRepository:
+                return StudyPlanRepository()
+            else:
+                raise ValueError(f"StudyPlanRepository not available")
+        elif entity_type == "study_task" or entity_type == "studytask":
+            if StudyTaskRepository:
+                return StudyTaskRepository()
+            else:
+                raise ValueError(f"StudyTaskRepository not available")
+        elif entity_type == "study_recommendation" or entity_type == "studyrecommendation":
+            if StudyRecommendationRepository:
+                return StudyRecommendationRepository()
+            else:
+                raise ValueError(f"StudyRecommendationRepository not available")
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")

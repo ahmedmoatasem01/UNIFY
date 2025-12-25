@@ -75,7 +75,11 @@ def get_user_data(user_id):
         'role': role,
         'department': department,
         'major': major,
-        'avatar_letter': avatar_letter
+        'avatar_letter': avatar_letter,
+        'is_student': student is not None,
+        'is_instructor': instructor is not None,
+        'is_ta': ta is not None,
+        'is_instructor_or_ta': (instructor is not None) or (ta is not None)
     }
 
 
