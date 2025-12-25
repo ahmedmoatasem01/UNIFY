@@ -35,6 +35,9 @@ UserSettingsRepository = _import_repository('user_settings.repository', 'UserSet
 KnowledgeBaseRepository = _import_repository('knowledge_base.repository', 'KnowledgeBaseRepository')
 ChatHistoryRepository = _import_repository('chat_history.repository', 'ChatHistoryRepository')
 UserDatabaseConfigRepository = _import_repository('user_database_config.repository', 'UserDatabaseConfigRepository')
+DeadlineNotificationRepository = _import_repository('deadline_notification.repository', 'DeadlineNotificationRepository')
+DeadlineAlertScheduleRepository = _import_repository('deadline_alert_schedule.repository', 'DeadlineAlertScheduleRepository')
+DeadlineNotificationPreferenceRepository = _import_repository('deadline_notification_preference.repository', 'DeadlineNotificationPreferenceRepository')
 
 
 # Import CourseScheduleSlotRepository
@@ -86,5 +89,11 @@ class RepositoryFactory:
             return ChatHistoryRepository()
         elif entity_type == "user_database_config" or entity_type == "user_db_config":
             return UserDatabaseConfigRepository()
+        elif entity_type == "deadline_notification" or entity_type == "deadline":
+            return DeadlineNotificationRepository()
+        elif entity_type == "deadline_alert_schedule":
+            return DeadlineAlertScheduleRepository()
+        elif entity_type == "deadline_notification_preference" or entity_type == "deadline_preference":
+            return DeadlineNotificationPreferenceRepository()
         else:
             raise ValueError(f"Unknown repository type: {entity_type}")

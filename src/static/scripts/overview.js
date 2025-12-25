@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeQuickActions();
     initializeProgressAnimation();
     initializePageObservers();
+    initializeDeadlinesWidget();
 });
 
 // ===== STATISTICS =====

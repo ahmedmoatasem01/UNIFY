@@ -1,0 +1,639 @@
+/* Deadline Notifications Styles */
+
+.deadline-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Action Bar */
+.action-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.sync-deadlines-btn,
+.settings-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sync-deadlines-btn {
+    background: var(--cr-accent);
+    color: white;
+}
+
+.sync-deadlines-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+}
+
+.settings-btn {
+    background: var(--cr-bg-panel);
+    color: var(--cr-text-main);
+    border: 1px solid var(--cr-border);
+}
+
+.settings-btn:hover {
+    background: var(--cr-bg-hover);
+}
+
+/* Filters and View Toggle */
+.filters-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--cr-border);
+    border-radius: 8px;
+    background: var(--cr-bg-panel);
+    color: var(--cr-text-main);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    background: var(--cr-bg-hover);
+}
+
+.filter-btn.active {
+    background: var(--cr-accent-soft);
+    border-color: var(--cr-accent);
+    color: var(--cr-accent);
+    font-weight: 600;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--cr-bg-panel);
+    border: 1px solid var(--cr-border);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.view-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--cr-text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.view-btn:hover {
+    background: var(--cr-bg-hover);
+}
+
+.view-btn.active {
+    background: var(--cr-accent);
+    color: white;
+}
+
+/* Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--cr-bg-panel);
+    border: 1px solid var(--cr-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    border-color: var(--cr-accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.urgent {
+    border-left: 4px solid #ef4444;
+}
+
+.stat-card.upcoming {
+    border-left: 4px solid #f59e0b;
+}
+
+.stat-card.completed {
+    border-left: 4px solid #10b981;
+}
+
+.stat-card.total {
+    border-left: 4px solid var(--cr-accent);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.stat-card.urgent .stat-icon {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.stat-card.upcoming .stat-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.stat-card.completed .stat-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.stat-card.total .stat-icon {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--cr-accent);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--cr-text-main);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--cr-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Deadlines List */
+.deadlines-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.deadline-item {
+    background: var(--cr-bg-panel);
+    border: 1px solid var(--cr-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.deadline-item:hover {
+    border-color: var(--cr-accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.deadline-item.urgent {
+    border-left: 4px solid #ef4444;
+}
+
+.deadline-item.high {
+    border-left: 4px solid #f59e0b;
+}
+
+.deadline-item.medium {
+    border-left: 4px solid var(--cr-accent);
+}
+
+.deadline-item.low {
+    border-left: 4px solid #6b7280;
+}
+
+.deadline-item.completed {
+    opacity: 0.6;
+}
+
+.deadline-item.overdue {
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.deadline-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.deadline-item.urgent .deadline-icon {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.deadline-item.high .deadline-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.deadline-item.medium .deadline-icon {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--cr-accent);
+}
+
+.deadline-item.low .deadline-icon {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.deadline-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.deadline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.deadline-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cr-text-main);
+    margin: 0;
+}
+
+.deadline-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.deadline-action-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--cr-border);
+    border-radius: 6px;
+    background: var(--cr-bg);
+    color: var(--cr-text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.deadline-action-btn:hover {
+    background: var(--cr-bg-hover);
+    color: var(--cr-text-main);
+}
+
+.deadline-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.deadline-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--cr-text-secondary);
+}
+
+.deadline-countdown {
+    font-weight: 600;
+    color: var(--cr-accent);
+}
+
+.deadline-item.urgent .deadline-countdown {
+    color: #ef4444;
+}
+
+.deadline-item.overdue .deadline-countdown {
+    color: #ef4444;
+}
+
+.deadline-description {
+    color: var(--cr-text-secondary);
+    font-size: 0.9rem;
+    margin-top: 8px;
+}
+
+.deadline-type-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.deadline-type-badge.task {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--cr-accent);
+}
+
+.deadline-type-badge.assignment {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.deadline-type-badge.exam {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.deadline-type-badge.calendar {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+/* Loading and Empty States */
+.loading-state,
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--cr-text-secondary);
+}
+
+.loading-state i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    color: var(--cr-accent);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    color: var(--cr-text-secondary);
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    margin: 16px 0 8px;
+    color: var(--cr-text-main);
+}
+
+.empty-state p {
+    margin-bottom: 24px;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--cr-bg);
+    border-radius: 16px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--cr-border);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--cr-text-main);
+}
+
+.modal-close {
+    padding: 8px;
+    border: none;
+    background: transparent;
+    color: var(--cr-text-secondary);
+    cursor: pointer;
+    font-size: 1.25rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--cr-bg-hover);
+    color: var(--cr-text-main);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.settings-section {
+    margin-bottom: 32px;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.settings-section h3 {
+    margin: 0 0 8px;
+    color: var(--cr-text-main);
+    font-size: 1.1rem;
+}
+
+.settings-description {
+    margin: 0 0 16px;
+    color: var(--cr-text-secondary);
+    font-size: 0.9rem;
+}
+
+.alert-intervals {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.alert-intervals label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px;
+    border: 1px solid var(--cr-border);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.alert-intervals label:hover {
+    background: var(--cr-bg-hover);
+    border-color: var(--cr-accent);
+}
+
+.alert-intervals input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.setting-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--cr-border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.setting-checkbox:hover {
+    background: var(--cr-bg-hover);
+    border-color: var(--cr-accent);
+}
+
+.setting-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.quiet-hours {
+    display: flex;
+    gap: 16px;
+}
+
+.quiet-hours label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.quiet-hours span {
+    color: var(--cr-text-secondary);
+    font-size: 0.9rem;
+}
+
+.quiet-hours input[type="time"] {
+    padding: 12px;
+    border: 1px solid var(--cr-border);
+    border-radius: 8px;
+    background: var(--cr-bg-panel);
+    color: var(--cr-text-main);
+    font-size: 1rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 24px;
+    border-top: 1px solid var(--cr-border);
+}
+
+/* Calendar View */
+.deadlines-calendar-view {
+    background: var(--cr-bg-panel);
+    border: 1px solid var(--cr-border);
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 500px;
+}
+
+.calendar-container {
+    /* Calendar will be rendered here */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .deadline-container {
+        padding: 16px;
+    }
+
+    .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .deadline-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .deadline-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .quiet-hours {
+        flex-direction: column;
+    }
+}
+

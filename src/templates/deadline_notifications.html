@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unify | Deadline Notifications</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course_registration.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/deadline_notifications.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="cr-body">
+<div class="cr-app-layout">
+    <aside class="cr-sidebar">
+        <div class="cr-sidebar-header">
+            <div class="cr-brand-logo">U</div>
+            <div>
+                <h2 class="cr-brand-title">Unify</h2>
+                <p class="cr-brand-subtitle">Student Assistant</p>
+            </div>
+        </div>
+        <nav class="cr-sidebar-nav">
+            <a class="cr-nav-item" href="/overview">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Overview</span>
+            </a>
+            <a class="cr-nav-item" href="/schedule">
+                <i class="fa-solid fa-calendar-day"></i>
+                <span>Schedule</span>
+            </a>
+            <a class="cr-nav-item" href="/tasks">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a class="cr-nav-item" href="/notes">
+                <i class="fa-solid fa-note-sticky"></i>
+                <span>Notes &amp; Summaries</span>
+            </a>
+            <a class="cr-nav-item" href="/reminders">
+                <i class="fa-solid fa-bell"></i>
+                <span>Smart Reminders</span>
+            </a>
+            <a class="cr-nav-item active" href="/deadline-notifications">
+                <i class="fa-solid fa-clock"></i>
+                <span>Deadline Notifications</span>
+            </a>
+            <a class="cr-nav-item" href="/messages">
+                <i class="fa-solid fa-message"></i>
+                <span>Messages</span>
+            </a>
+            <a class="cr-nav-item" href="/ai-assistant/">
+                <i class="fa-solid fa-robot"></i>
+                <span>AI Assistant</span>
+            </a>
+            <a class="cr-nav-item" href="/transcript">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>Transcript</span>
+            </a>
+            <a class="cr-nav-item" href="/course-registration">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Course Registration</span>
+            </a>
+            <a class="cr-nav-item" href="/settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="cr-sidebar-footer">
+            <button class="cr-btn-ghost cr-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log out</span>
+            </button>
+            <p class="cr-small-text">CSAI 203 · Team 27</p>
+        </div>
+    </aside>
+
+    <main class="cr-main-panel">
+        <!-- Topbar -->
+        <header class="cr-topbar">
+            <div class="cr-topbar-left">
+                <h1><i class="fa-solid fa-clock"></i> Deadline Notifications</h1>
+                <p>Stay on top of your important deadlines</p>
+            </div>
+            {% include 'components/topbar_right.html' %}
+        </header>
+
+        <div class="cr-content">
+            <div class="deadline-container">
+                <!-- Action Bar -->
+                <div class="action-bar">
+                    <button class="cr-btn-primary sync-deadlines-btn" onclick="syncDeadlines()">
+                        <i class="fa-solid fa-sync"></i> Sync Deadlines
+                    </button>
+                    <button class="cr-btn-secondary settings-btn" onclick="openSettings()">
+                        <i class="fa-solid fa-gear"></i> Settings
+                    </button>
+                </div>
+
+                <!-- Filters and View Toggle -->
+                <div class="filters-section">
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+                        <button class="filter-btn" data-filter="urgent">Urgent</button>
+                        <button class="filter-btn" data-filter="overdue">Overdue</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                    </div>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="list">
+                            <i class="fa-solid fa-list"></i> List
+                        </button>
+                        <button class="view-btn" data-view="calendar">
+                            <i class="fa-solid fa-calendar"></i> Calendar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card urgent">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="urgent-count">0</div>
+                            <div class="stat-label">Urgent</div>
+                        </div>
+                    </div>
+                    <div class="stat-card upcoming">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="upcoming-count">0</div>
+                            <div class="stat-label">Upcoming</div>
+                        </div>
+                    </div>
+                    <div class="stat-card completed">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="completed-count">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                    </div>
+                    <div class="stat-card total">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="total-count">0</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- List View -->
+                <div class="deadlines-list-view" id="list-view">
+                    <div class="deadlines-list" id="deadlines-list">
+                        <!-- Deadlines will be loaded here -->
+                        <div class="loading-state">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <p>Loading deadlines...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar View -->
+                <div class="deadlines-calendar-view" id="calendar-view" style="display: none;">
+                    <div class="calendar-container" id="calendar-container">
+                        <!-- Calendar will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="empty-state" style="display: none;">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <h3>No deadlines found</h3>
+                    <p>All caught up! Sync deadlines from your tasks and calendar to get started.</p>
+                    <button class="cr-btn-primary" onclick="syncDeadlines()">
+                        <i class="fa-solid fa-sync"></i> Sync Deadlines
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="settings-modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Deadline Notification Settings</h2>
+            <button class="modal-close" onclick="closeSettings()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="settings-section">
+                <h3>Alert Intervals</h3>
+                <p class="settings-description">Set when you want to be notified before deadlines</p>
+                <div class="alert-intervals">
+                    <label>
+                        <input type="checkbox" id="interval-7d" value="10080">
+                        <span>7 days before</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="interval-3d" value="4320" checked>
+                        <span>3 days before</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="interval-1d" value="1440" checked>
+                        <span>1 day before</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="interval-12h" value="720">
+                        <span>12 hours before</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="interval-1h" value="60" checked>
+                        <span>1 hour before</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="interval-30m" value="30">
+                        <span>30 minutes before</span>
+                    </label>
+                </div>
+            </div>
+            <div class="settings-section">
+                <h3>Notification Channels</h3>
+                <label class="setting-checkbox">
+                    <input type="checkbox" id="in-app-enabled" checked>
+                    <span>In-app notifications</span>
+                </label>
+                <label class="setting-checkbox">
+                    <input type="checkbox" id="email-enabled">
+                    <span>Email notifications</span>
+                </label>
+            </div>
+            <div class="settings-section">
+                <h3>Quiet Hours</h3>
+                <div class="quiet-hours">
+                    <label>
+                        <span>Start:</span>
+                        <input type="time" id="quiet-hours-start" value="22:00">
+                    </label>
+                    <label>
+                        <span>End:</span>
+                        <input type="time" id="quiet-hours-end" value="08:00">
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="cr-btn-secondary" onclick="closeSettings()">Cancel</button>
+            <button class="cr-btn-primary" onclick="saveSettings()">Save Settings</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/deadline_notifications.js') }}"></script>
+<script>
+    // Handle logout
+    function handleLogout() {
+        window.location.href = '/auth/logout';
+    }
+</script>
+</body>
+</html>
+
