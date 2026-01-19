@@ -905,7 +905,7 @@ For issues, questions, or contributions:
 
 <div align="center">
 
-**Made with ❤️ by CSAI 203 - Team 27**
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 [⬆ Back to Top](#-unify---student-assistant-platform)
 
